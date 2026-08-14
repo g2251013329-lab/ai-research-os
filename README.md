@@ -60,7 +60,6 @@ npm run dev                    # http://localhost:5173（/api 代理到 8000）
 | Phase 2 | Dashboard（Today 任务 / 收件箱 / 专注模式 / 时间线） | ✅ 已完成 |
 | Phase 3 | Learning（LLPS 路线图 / 日历 / 打卡 / 学习笔记） | ✅ 已完成 |
 | Phase 4 | Research（项目 / 研究问题 / 假设 / 文献 / 实验 / 笔记 / 写作 / 时间线） | ✅ 已完成 |
-| Phase 4 | Research | ⏳ |
 | Phase 5 | 集成（Zotero/Obsidian/GitHub/小绿鲸） | ⏳ |
 | Phase 6 | AI 层 | ⏳ |
 | Phase 7 | P1 特性 | ⏳ |
