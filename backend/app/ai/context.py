@@ -172,7 +172,13 @@ def build_context(session: Session, obj_type: str, obj_id: int) -> str:
 
 
 def _paper_pdf_text(paper: Paper) -> str:
-    """Extract text from the paper's Zotero PDF attachment (first ~12k chars)."""
+    """Extract text from the paper's Zotero PDF attachment.
+
+    Covers the WHOLE document regardless of length: first pages (abstract /
+    intro), the last pages (discussion / conclusions) and evenly-spaced
+    samples from the middle, each page labeled with its number. Total budget
+    is capped so long documents don't blow up the prompt.
+    """
     if not paper.zotero_key:
         return ""
     zdir = Path(get_user_setting("zotero_path", "~/Zotero")).expanduser()
@@ -206,10 +212,43 @@ def _paper_pdf_text(paper: Paper) -> str:
                 from pypdf import PdfReader
 
                 reader = PdfReader(str(cand))
-                text = ""
-                for page in reader.pages[:12]:
-                    text += (page.extract_text() or "") + "\n"
-                return text[:12000].strip()
+                total = len(reader.pages)
+                return _sample_pages(reader, total)
             except Exception:
                 return ""
     return ""
+
+
+MAX_PDF_CHARS = 24_000
+MAX_PDF_PAGES = 200  # hard safety cap on pages read
+
+
+def _sample_pages(reader, total: int) -> str:
+    """Pick pages covering the whole document, then extract within budget."""
+    if total <= 12:
+        indices = list(range(total))
+    else:
+        n = min(total, MAX_PDF_PAGES)
+        head = [0, 1]
+        tail = [n - 2, n - 1]
+        middle_slots = min(24, max(8, n // 4))
+        step = max(1, (n - 4) / middle_slots)
+        middle = [2 + int(i * step) for i in range(middle_slots)]
+        indices = sorted({i for i in head + tail + middle if 0 <= i < n})
+
+    parts: list[str] = []
+    budget = MAX_PDF_CHARS
+    for i in indices:
+        if budget <= 0:
+            break
+        try:
+            page_text = (reader.pages[i].extract_text() or "").strip()
+        except Exception:
+            continue
+        if not page_text:
+            continue
+        if len(page_text) > budget:
+            page_text = page_text[:budget]
+        parts.append(f"[第{i + 1}页] {page_text}")
+        budget -= len(page_text)
+    return "\n\n".join(parts)

@@ -20,21 +20,33 @@ def _git(args: list[str], cwd: Path) -> str:
     ).stdout
 
 
-def _make_pdf(text: str) -> bytes:
-    """Minimal valid one-page PDF containing `text` (extractable)."""
-    content = f"BT /F1 12 Tf 50 700 Td ({text}) Tj ET"
-    objs = [
+def _make_pdf(pages_text: list[str]) -> bytes:
+    """Minimal valid PDF with one page per entry (text extractable)."""
+    n = len(pages_text)
+    kids = "".join(f"{3 + 2 * i} 0 R " for i in range(n))
+    font_ref = 3 + 2 * n  # font object is appended last
+    objs: list[bytes] = [
         b"<< /Type /Catalog /Pages 2 0 R >>",
-        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
-        b"/Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
-        b"<< /Length "
-        + str(len(content)).encode()
-        + b" >>\nstream\n"
-        + content.encode()
-        + b"\nendstream",
-        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        f"<< /Type /Pages /Kids [{kids}] /Count {n} >>".encode(),
     ]
+    for text in pages_text:
+        content = f"BT /F1 12 Tf 50 700 Td ({text}) Tj ET"
+        page_obj = (
+            f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+            f"/Contents {len(objs) + 2} 0 R "
+            f"/Resources << /Font << /F1 {font_ref} 0 R >> >> >>"
+        ).encode()
+        content_obj = (
+            b"<< /Length "
+            + str(len(content)).encode()
+            + b" >>\nstream\n"
+            + content.encode()
+            + b"\nendstream"
+        )
+        objs.append(page_obj)
+        objs.append(content_obj)
+    objs.append(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>")
+
     out = bytearray(b"%PDF-1.4\n")
     offsets = []
     for i, obj in enumerate(objs, 1):
@@ -60,7 +72,7 @@ def _build_zotero_fixture() -> Path:
     shutil.rmtree(zdir, ignore_errors=True)
     storage = zdir / "storage" / "EFGH5678"
     storage.mkdir(parents=True, exist_ok=True)
-    (storage / "paper.pdf").write_bytes(_make_pdf("FUS phase separation dynamics test"))
+    (storage / "paper.pdf").write_bytes(_make_pdf(["FUS phase separation dynamics test"]))
     db = zdir / "zotero.sqlite"
     conn = sqlite3.connect(db)
     c = conn.cursor()
@@ -168,16 +180,31 @@ def test_zotero_flow():
 
 
 def test_paper_pdf_text_extraction():
-    """The PDF attachment text feeds AI summaries (pypdf)."""
+    """PDF text feeds AI summaries; long docs are sampled across ALL pages."""
     zdir = _build_zotero_fixture()
     client.put("/api/settings", json={"zotero_path": str(zdir)})
     try:
         from app.ai.context import _paper_pdf_text
         from app.models import Paper
 
+        # 1-page paper: full text present
         paper = Paper(zotero_key="ABCD1234")
         text = _paper_pdf_text(paper)
         assert "FUS phase separation dynamics test" in text
+
+        # 20-page paper: first page AND last page (discussion) must be covered
+        pages = [f"CONTENT_PAGE_{i + 1}" for i in range(20)]
+        storage = zdir / "storage" / "EFGH5678"
+        (storage / "paper.pdf").write_bytes(_make_pdf(pages))
+        text20 = _paper_pdf_text(paper)
+        assert "[第1页]" in text20 and "CONTENT_PAGE_1" in text20
+        assert "[第20页]" in text20 and "CONTENT_PAGE_20" in text20, (
+            "last page missing — whole-document sampling failed"
+        )
+        # even-stride sampling covers a good share of the interior
+        sampled = text20.count("[第")
+        assert sampled >= 10, f"only {sampled} of 20 pages sampled"
+        assert "CONTENT_PAGE_2" in text20  # head pages included
     finally:
         _restore_zotero_setting()
 
