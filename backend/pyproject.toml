@@ -1,0 +1,27 @@
+[project]
+name = "ai-research-os-backend"
+version = "0.1.0"
+description = "AI Research OS - local-first personal research operating system (backend)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "sqlmodel>=0.0.22",
+    "pydantic-settings>=2.6.0",
+    "httpx>=0.27.0",
+    "openai>=1.55.0",
+    "keyring>=25.4.0",
+    "python-frontmatter>=1.1.0",
+    "python-multipart>=0.0.12",
+    "pyyaml>=6.0.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

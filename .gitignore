@@ -1,0 +1,28 @@
+# --- Python / backend ---
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+backend/.test-data/
+*.egg-info/
+
+# --- Node / frontend ---
+node_modules/
+frontend/dist/
+npm-debug.log*
+
+# --- Runtime data (never commit user data) ---
+.airos-data/
+.uv-cache/
+.uv-python/
+.npm-cache/
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+secrets.json
+
+# --- macOS ---
+.DS_Store
