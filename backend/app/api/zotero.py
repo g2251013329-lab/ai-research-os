@@ -202,13 +202,18 @@ def _load_items_db(conn: sqlite3.Connection, item_ids: list[int]) -> list[dict]:
 
 def _items_db(collection: str | None, q: str, limit: int) -> list[dict]:
     with _connect() as conn:
+        # real papers + orphan PDFs (attachments not attached to another item)
+        types_sql = ",".join("?" * len(ITEM_TYPES))
         base = (
-            "SELECT i.itemID AS id, i.key FROM items i "
-            "JOIN itemTypes it ON i.itemTypeID = it.itemTypeID "
-            "WHERE it.typeName != 'note' "
-            "AND i.itemID NOT IN (SELECT itemID FROM deletedItems)"
+            f"SELECT i.itemID AS id, i.key FROM items i "
+            f"JOIN itemTypes it ON i.itemTypeID = it.itemTypeID "
+            f"WHERE (it.typeName IN ({types_sql}) "
+            f"  OR (it.typeName = 'attachment' AND i.itemID NOT IN ("
+            f"    SELECT a2.itemID FROM itemAttachments a2 "
+            f"    WHERE a2.parentItemID IS NOT NULL AND a2.parentItemID <> a2.itemID))) "
+            f"AND i.itemID NOT IN (SELECT itemID FROM deletedItems)"
         )
-        params: list[Any] = []
+        params: list[Any] = list(ITEM_TYPES)
         if collection:
             base += " AND i.itemID IN (SELECT itemID FROM collectionItems WHERE collectionID = ?)"
             params.append(collection)
@@ -303,6 +308,16 @@ def _items_api(collection: str | None, q: str, limit: int) -> list[dict]:
     out: list[dict[str, Any]] = []
     for entry in data or []:
         d = entry.get("data", {})
+        item_type = d.get("itemType", "")
+        # only real papers + orphan PDFs (PDFs without a parent entry)
+        if item_type in ITEM_TYPES:
+            keep = True
+        elif item_type == "attachment":
+            keep = not d.get("parentItem")
+        else:
+            keep = False
+        if not keep:
+            continue
         date = d.get("date") or ""
         out.append(
             {
@@ -316,7 +331,7 @@ def _items_api(collection: str | None, q: str, limit: int) -> list[dict]:
                 "abstract": d.get("abstractNote", ""),
                 "authors": _authors_api(d.get("creators")),
                 "tags": [t.get("tag", "") for t in d.get("tags", [])],
-                "type": d.get("itemType", ""),
+                "type": item_type,
             }
         )
     return out

@@ -182,9 +182,13 @@ def test_zotero_flow():
         assert Path(linked_atts[0]["path"]).exists()
         assert "Linked file LLPS paper" in _read_pdf_text(linked_atts[0]["path"])
 
-        # bare attachments appear in the item list (not filtered out)
+        # bare orphan attachments appear in the item list,
+        # but child attachments of real papers are hidden
         all_items = client.get("/api/zotero/items", params={"limit": 20}).json()
         assert any(x["key"] == "SELF01" for x in all_items)
+        assert not any(x["key"] == "EFGH5678" for x in all_items), (
+            "child attachment should be hidden — only real papers + orphan PDFs"
+        )
 
         # import → Paper created with zotero_key + project
         proj = client.post("/api/projects", json={"title": "Zotero test project"}).json()
