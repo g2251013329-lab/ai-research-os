@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -12,6 +13,9 @@ import {
 import BrandMark from '../BrandMark'
 import TopBar from './TopBar'
 import AiContextPanel from './AiContextPanel'
+import SearchPalette from '../search/SearchPalette'
+import CommandPalette from '../commands/CommandPalette'
+import ToastHost from '../ToastHost'
 
 const navItems = [
   { to: '/', key: 'nav.dashboard', icon: LayoutDashboard, end: true },
@@ -24,6 +28,28 @@ const navItems = [
 
 export default function AppLayout() {
   const { t } = useTranslation()
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey
+      if (mod && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setPaletteOpen(false)
+        setSearchOpen((v) => !v)
+      } else if (mod && e.shiftKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault()
+        setSearchOpen(false)
+        setPaletteOpen((v) => !v)
+      } else if (e.key === 'Escape') {
+        setSearchOpen(false)
+        setPaletteOpen(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <div className="flex h-full bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
@@ -70,7 +96,7 @@ export default function AppLayout() {
 
       {/* Workspace */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar />
+        <TopBar onOpenSearch={() => setSearchOpen(true)} />
         <main className="min-h-0 flex-1 overflow-y-auto">
           <Outlet />
         </main>
@@ -78,6 +104,10 @@ export default function AppLayout() {
 
       {/* AI context panel (collapsible; Phase 6 wires real context) */}
       <AiContextPanel />
+
+      <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <ToastHost />
     </div>
   )
 }

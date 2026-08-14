@@ -55,8 +55,8 @@ npm run dev                    # http://localhost:5173（/api 代理到 8000）
 
 | 阶段 | 内容 | 状态 |
 |---|---|---|
-| Phase 0 | 基建：仓库、脚手架、设置页 | 🚧 进行中 |
-| Phase 1 | 核心 UI 壳（三栏/⌘K/命令面板） | ⏳ |
+| Phase 0 | 基建：仓库、脚手架、设置页 | ✅ 已完成 |
+| Phase 1 | 核心 UI 壳（⌘K 全局搜索 / ⌘⇧P 命令面板 / 404） | ✅ 已完成 |
 | Phase 2 | Dashboard | ⏳ |
 | Phase 3 | Learning | ⏳ |
 | Phase 4 | Research | ⏳ |

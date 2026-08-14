@@ -1,10 +1,11 @@
 """User settings API.
 
-Non-secret settings are persisted as JSON in the data directory. The
-DeepSeek API key is stored in the macOS Keychain (via keyring) with a
-fallback to a local, permission-restricted file when the Keychain is
-unavailable (e.g. headless/sandboxed environments). Secrets are never
-returned by the API and never stored in the repository.
+Non-secret settings are persisted as JSON in the data directory (see
+``core.user_settings``). The DeepSeek API key is stored in the macOS
+Keychain (via keyring) with a fallback to a local, permission-restricted
+file when the Keychain is unavailable (e.g. headless/sandboxed
+environments). Secrets are never returned by the API and never stored in
+the repository.
 """
 from __future__ import annotations
 
@@ -16,56 +17,17 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from ..core.config import settings as app_settings
+from ..core.user_settings import (
+    DEFAULTS,
+    PUBLIC_KEYS,
+    load_user_settings,
+    save_user_settings,
+)
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
 KEYRING_SERVICE = "ai-research-os"
 KEYRING_USERNAME = "deepseek-api-key"
-
-PUBLIC_KEYS = (
-    "vault_path",
-    "language",
-    "theme",
-    "accent",
-    "brand_subtitle",
-    "brand_subtitle_font",
-    "brand_subtitle_color",
-    "deepseek_model",
-    "deepseek_base_url",
-)
-
-DEFAULTS: dict[str, Any] = {
-    "vault_path": str(app_settings.vault_path),
-    "language": "zh",
-    "theme": "dark",
-    "accent": "ocean",
-    "brand_subtitle": "LLPS",
-    "brand_subtitle_font": "great-vibes",
-    "brand_subtitle_color": "accent",
-    "deepseek_model": app_settings.deepseek_model,
-    "deepseek_base_url": app_settings.deepseek_base_url,
-}
-
-
-def _settings_file() -> Path:
-    return app_settings.settings_file
-
-
-def _load() -> dict[str, Any]:
-    data = dict(DEFAULTS)
-    f = _settings_file()
-    if f.exists():
-        try:
-            data.update(json.loads(f.read_text("utf-8")))
-        except Exception:
-            pass
-    return data
-
-
-def _save(data: dict[str, Any]) -> None:
-    f = _settings_file()
-    f.parent.mkdir(parents=True, exist_ok=True)
-    f.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
 
 
 def _secret_file() -> Path:
@@ -152,18 +114,18 @@ class DeepSeekKeyIn(BaseModel):
 
 @router.get("")
 def get_settings() -> dict:
-    data = _load()
+    data = load_user_settings()
     return {k: data.get(k) for k in PUBLIC_KEYS}
 
 
 @router.put("")
 def update_settings(update: SettingsUpdate) -> dict:
-    data = _load()
+    data = load_user_settings()
     for k in PUBLIC_KEYS:
         v = getattr(update, k)
         if v is not None:
             data[k] = v
-    _save(data)
+    save_user_settings(data)
     return {k: data.get(k) for k in PUBLIC_KEYS}
 
 
@@ -194,7 +156,7 @@ def test_deepseek_key() -> dict:
         raise HTTPException(status_code=400, detail="No API key configured")
     from openai import OpenAI
 
-    data = _load()
+    data = load_user_settings()
     client = OpenAI(
         api_key=key,
         base_url=data.get("deepseek_base_url") or app_settings.deepseek_base_url,

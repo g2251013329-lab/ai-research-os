@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import AppLayout from './components/layout/AppLayout'
 import Dashboard from './pages/Dashboard'
+import NotFound from './pages/NotFound'
 import PlaceholderPage from './pages/PlaceholderPage'
 import SettingsPage from './pages/SettingsPage'
 import { useSettingsStore } from './store/useSettingsStore'
@@ -43,6 +44,7 @@ export default function App() {
               element={<PlaceholderPage titleKey="nav.leisure" phase="Phase 5" />}
             />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </BrowserRouter>
