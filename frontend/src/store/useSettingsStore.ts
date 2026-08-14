@@ -8,6 +8,8 @@ export interface AppSettings {
   theme: 'light' | 'dark'
   accent: string
   brand_subtitle: string
+  brand_subtitle_font: string
+  brand_subtitle_color: string
   deepseek_model: string
   deepseek_base_url: string
 }

@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@fontsource/great-vibes";
+@import "@fontsource/dancing-script";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

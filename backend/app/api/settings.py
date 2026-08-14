@@ -28,6 +28,8 @@ PUBLIC_KEYS = (
     "theme",
     "accent",
     "brand_subtitle",
+    "brand_subtitle_font",
+    "brand_subtitle_color",
     "deepseek_model",
     "deepseek_base_url",
 )
@@ -38,6 +40,8 @@ DEFAULTS: dict[str, Any] = {
     "theme": "dark",
     "accent": "ocean",
     "brand_subtitle": "LLPS",
+    "brand_subtitle_font": "great-vibes",
+    "brand_subtitle_color": "accent",
     "deepseek_model": app_settings.deepseek_model,
     "deepseek_base_url": app_settings.deepseek_base_url,
 }
@@ -136,6 +140,8 @@ class SettingsUpdate(BaseModel):
     theme: str | None = None
     accent: str | None = None
     brand_subtitle: str | None = None
+    brand_subtitle_font: str | None = None
+    brand_subtitle_color: str | None = None
     deepseek_model: str | None = None
     deepseek_base_url: str | None = None
 

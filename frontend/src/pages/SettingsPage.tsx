@@ -4,6 +4,7 @@ import { Check, KeyRound, Loader2 } from 'lucide-react'
 import { api } from '../api/client'
 import { useSettingsStore } from '../store/useSettingsStore'
 import { ACCENT_THEMES } from '../theme/themes'
+import { SUBTITLE_COLORS, SUBTITLE_FONTS } from '../theme/subtitle'
 
 export default function SettingsPage() {
   const { t } = useTranslation()
@@ -126,6 +127,72 @@ export default function SettingsPage() {
             >
               {t('common.save')}
             </button>
+          </div>
+
+          {/* Script font choice */}
+          <label className="mt-3 block text-[12px] font-medium text-neutral-500 dark:text-neutral-400">
+            {t('settings.brand.font')}
+          </label>
+          <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+            {SUBTITLE_FONTS.map((f) => {
+              const active = (settings?.brand_subtitle_font ?? 'great-vibes') === f.id
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => void update({ brand_subtitle_font: f.id })}
+                  className={`rounded-md border px-2 py-2 text-[15px] leading-none transition-colors ${
+                    active
+                      ? 'border-accent bg-accent-soft text-accent'
+                      : 'border-neutral-200 text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-600'
+                  }`}
+                  style={{ fontFamily: f.family }}
+                >
+                  LLPS
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Subtitle color choice */}
+          <label className="mt-3 block text-[12px] font-medium text-neutral-500 dark:text-neutral-400">
+            {t('settings.brand.color')}
+          </label>
+          <div className="mt-1.5 flex flex-wrap gap-2">
+            {SUBTITLE_COLORS.map((c) => {
+              const active = (settings?.brand_subtitle_color ?? 'accent') === c.id
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => void update({ brand_subtitle_color: c.id })}
+                  className={`flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-[12px] transition-colors ${
+                    active
+                      ? 'border-accent bg-accent-soft'
+                      : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600'
+                  }`}
+                >
+                  <span
+                    className="h-3.5 w-3.5 rounded-full"
+                    style={{
+                      background:
+                        c.value === null
+                          ? 'linear-gradient(135deg, var(--accent), var(--accent-2))'
+                          : c.value,
+                    }}
+                  />
+                  <span
+                    className={
+                      active
+                        ? 'font-medium text-accent'
+                        : 'text-neutral-500 dark:text-neutral-400'
+                    }
+                  >
+                    {t(c.nameKey)}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 

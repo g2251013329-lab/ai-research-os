@@ -35,6 +35,23 @@ export default {
     coral: '珊瑚红',
     mono: '极简黑白',
   },
+  fonts: {
+    greatVibes: 'Great Vibes',
+    dancingScript: 'Dancing Script',
+    snell: 'Snell Roundhand',
+    appleChancery: 'Apple Chancery',
+    brushScript: 'Brush Script',
+    zapfino: 'Zapfino',
+  },
+  colors: {
+    accent: '跟随主题',
+    gold: '鎏金',
+    rose: '蔷薇粉',
+    violet: '罗兰紫',
+    teal: '湖水青',
+    coral: '珊瑚红',
+    sky: '天蓝',
+  },
   language: {
     label: '语言',
     zh: '中文',
@@ -49,6 +66,8 @@ export default {
     brand: {
       label: '品牌副标题',
       desc: '显示在左上角 Logo 下方的文字',
+      font: '花体字体',
+      color: '文字配色',
     },
     language: { label: '界面语言' },
     theme: { label: '主题' },

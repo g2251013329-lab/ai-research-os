@@ -35,6 +35,23 @@ export default {
     coral: 'Coral Red',
     mono: 'Mono',
   },
+  fonts: {
+    greatVibes: 'Great Vibes',
+    dancingScript: 'Dancing Script',
+    snell: 'Snell Roundhand',
+    appleChancery: 'Apple Chancery',
+    brushScript: 'Brush Script',
+    zapfino: 'Zapfino',
+  },
+  colors: {
+    accent: 'Theme',
+    gold: 'Gold',
+    rose: 'Rose',
+    violet: 'Violet',
+    teal: 'Teal',
+    coral: 'Coral',
+    sky: 'Sky',
+  },
   language: {
     label: 'Language',
     zh: '中文',
@@ -49,6 +66,8 @@ export default {
     brand: {
       label: 'Brand Subtitle',
       desc: 'Text shown below the logo in the top-left corner',
+      font: 'Script Font',
+      color: 'Text Color',
     },
     language: { label: 'Language' },
     theme: { label: 'Theme' },

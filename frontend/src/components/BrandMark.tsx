@@ -1,4 +1,5 @@
 import { useSettingsStore } from '../store/useSettingsStore'
+import { SUBTITLE_COLORS, SUBTITLE_FONTS } from '../theme/subtitle'
 
 /**
  * Brand mark: a liquid droplet (LLPS) with an orbiting electron ring.
@@ -41,9 +42,19 @@ export function LogoMark({ size = 26 }: { size?: number }) {
   )
 }
 
-/** Sidebar brand: droplet mark + artistic gradient wordmark. */
+/** Sidebar brand: droplet mark + artistic gradient wordmark + art subtitle. */
 export default function BrandMark() {
-  const subtitle = useSettingsStore((s) => s.settings?.brand_subtitle ?? 'LLPS')
+  const settings = useSettingsStore((s) => s.settings)
+
+  const subtitle = settings?.brand_subtitle?.trim() || 'LLPS'
+  const font =
+    SUBTITLE_FONTS.find((f) => f.id === settings?.brand_subtitle_font) ??
+    SUBTITLE_FONTS[0]
+  const color =
+    SUBTITLE_COLORS.find((c) => c.id === settings?.brand_subtitle_color) ??
+    SUBTITLE_COLORS[0]
+
+  const isAccent = color.value === null
 
   return (
     <div className="flex items-center gap-2.5">
@@ -52,7 +63,13 @@ export default function BrandMark() {
         <div className="gradient-text truncate text-[13.5px] font-bold tracking-tight">
           AI Research OS
         </div>
-        <div className="truncate text-[8.5px] uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">
+        <div
+          className={`truncate text-[13px] leading-tight ${isAccent ? 'gradient-text' : ''}`}
+          style={{
+            fontFamily: font.family,
+            color: isAccent ? undefined : color.value ?? undefined,
+          }}
+        >
           {subtitle}
         </div>
       </div>
