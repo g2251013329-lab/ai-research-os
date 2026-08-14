@@ -20,6 +20,38 @@ def _git(args: list[str], cwd: Path) -> str:
     ).stdout
 
 
+def _make_pdf(text: str) -> bytes:
+    """Minimal valid one-page PDF containing `text` (extractable)."""
+    content = f"BT /F1 12 Tf 50 700 Td ({text}) Tj ET"
+    objs = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+        b"/Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+        b"<< /Length "
+        + str(len(content)).encode()
+        + b" >>\nstream\n"
+        + content.encode()
+        + b"\nendstream",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    out = bytearray(b"%PDF-1.4\n")
+    offsets = []
+    for i, obj in enumerate(objs, 1):
+        offsets.append(len(out))
+        out += f"{i} 0 obj\n".encode() + obj + b"\nendobj\n"
+    xref_pos = len(out)
+    out += f"xref\n0 {len(objs) + 1}\n".encode()
+    out += b"0000000000 65535 f \n"
+    for off in offsets:
+        out += f"{off:010d} 00000 n \n".encode()
+    out += (
+        f"trailer\n<< /Size {len(objs) + 1} /Root 1 0 R >>\n"
+        f"startxref\n{xref_pos}\n%%EOF"
+    ).encode()
+    return bytes(out)
+
+
 def _build_zotero_fixture() -> Path:
     """Minimal zotero.sqlite with one journal article + attachment."""
     zdir = TEST_DIR / "zotero-fixture"
@@ -28,7 +60,7 @@ def _build_zotero_fixture() -> Path:
     shutil.rmtree(zdir, ignore_errors=True)
     storage = zdir / "storage" / "EFGH5678"
     storage.mkdir(parents=True, exist_ok=True)
-    (storage / "paper.pdf").write_bytes(b"%PDF-1.4 fake")
+    (storage / "paper.pdf").write_bytes(_make_pdf("FUS phase separation dynamics test"))
     db = zdir / "zotero.sqlite"
     conn = sqlite3.connect(db)
     c = conn.cursor()
@@ -131,6 +163,21 @@ def test_zotero_flow():
         for p in client.get("/api/papers").json():
             client.delete(f"/api/papers/{p['id']}")
         client.delete(f"/api/projects/{proj['id']}")
+    finally:
+        _restore_zotero_setting()
+
+
+def test_paper_pdf_text_extraction():
+    """The PDF attachment text feeds AI summaries (pypdf)."""
+    zdir = _build_zotero_fixture()
+    client.put("/api/settings", json={"zotero_path": str(zdir)})
+    try:
+        from app.ai.context import _paper_pdf_text
+        from app.models import Paper
+
+        paper = Paper(zotero_key="ABCD1234")
+        text = _paper_pdf_text(paper)
+        assert "FUS phase separation dynamics test" in text
     finally:
         _restore_zotero_setting()
 
