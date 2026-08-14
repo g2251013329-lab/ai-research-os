@@ -63,6 +63,10 @@ export default {
       label: 'Obsidian Vault 路径',
       desc: '笔记将存储为该 vault 中的 Markdown 文件',
     },
+    vaults: {
+      extra: '附加搜索 Vault',
+      extraDesc: '每行一个路径，这些 vault 中的笔记也会出现在 ⌘K 搜索结果里（只读）',
+    },
     brand: {
       label: '品牌副标题',
       desc: '显示在左上角 Logo 下方的文字',

@@ -38,7 +38,7 @@ export default function AppLayout() {
         e.preventDefault()
         setPaletteOpen(false)
         setSearchOpen((v) => !v)
-      } else if (mod && e.shiftKey && e.key.toLowerCase() === 'p') {
+      } else if (mod && e.shiftKey && e.key.toLowerCase() === 'l') {
         e.preventDefault()
         setSearchOpen(false)
         setPaletteOpen((v) => !v)

@@ -13,7 +13,7 @@ export default function TopBar({ onOpenSearch }: { onOpenSearch: () => void }) {
         type="button"
         onClick={onOpenSearch}
         className="flex w-64 items-center gap-2 rounded-md border border-neutral-200 px-2.5 py-1.5 text-[12px] text-neutral-400 transition-colors hover:border-accent hover:text-neutral-500 dark:border-neutral-700 dark:hover:border-neutral-500"
-        title="⌘K"
+        title="⌘K 搜索 · ⌘⇧L 命令面板"
       >
         <Search size={13} />
         <span className="flex-1 text-left">{t('search.title')}</span>

@@ -4,6 +4,7 @@ import { api } from '../api/client'
 
 export interface AppSettings {
   vault_path: string
+  extra_vaults: string[]
   language: 'zh' | 'en'
   theme: 'light' | 'dark'
   accent: string

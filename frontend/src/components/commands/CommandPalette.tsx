@@ -178,6 +178,9 @@ export default function CommandPalette({
           >
             <X size={15} />
           </button>
+          <kbd className="rounded border border-neutral-200 px-1.5 py-0.5 text-[10px] text-neutral-400 dark:border-neutral-700">
+            ⌘⇧L
+          </kbd>
         </div>
 
         <div ref={listRef} className="max-h-[52vh] overflow-y-auto p-1.5">
