@@ -5,11 +5,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Brain,
   Loader2,
+  PanelRightClose,
+  PanelRightOpen,
   Plus,
   Send,
   Sparkles,
   Trash2,
-  X,
 } from 'lucide-react'
 import { api } from '../../api/client'
 import { postSSE } from '../../api/stream'
@@ -62,7 +63,7 @@ export default function AiContextPanel() {
   const queryClient = useQueryClient()
   const location = useLocation()
 
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [ctx, setCtx] = useState('')
   const [manual, setManual] = useState(false)
   const [messages, setMessages] = useState<ChatMsg[]>([])
@@ -206,39 +207,32 @@ export default function AiContextPanel() {
     }
   }
 
-  // collapsed: floating toggle tab (does not occupy workspace)
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="fixed right-3 top-[52px] z-40 flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-500 shadow-md transition-colors hover:border-accent hover:text-accent dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
-        title={t('aiPanel.title')}
-      >
-        <Sparkles size={13} className="text-accent" />
-        {t('aiPanel.title')}
-      </button>
-    )
-  }
-
   return (
-    <aside className="fixed bottom-0 right-0 top-11 z-40 flex w-[340px] max-w-[92vw] flex-col border-l border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-neutral-200 px-2.5 dark:border-neutral-800">
-        <span className="flex items-center gap-1.5 text-[12.5px] font-medium text-neutral-600 dark:text-neutral-300">
-          <Sparkles size={13} className="text-accent" />
-          {t('aiPanel.title')}
-        </span>
+    <aside
+      className={`flex shrink-0 flex-col border-l border-neutral-200 bg-white transition-[width] dark:border-neutral-800 dark:bg-neutral-900 ${
+        open ? 'w-80' : 'w-9'
+      }`}
+    >
+      <div className="flex h-11 items-center justify-between border-b border-neutral-200 px-2 dark:border-neutral-800">
+        {open && (
+          <span className="flex items-center gap-1.5 text-[12px] font-medium text-neutral-600 dark:text-neutral-300">
+            <Sparkles size={13} className="text-accent" />
+            {t('aiPanel.title')}
+          </span>
+        )}
         <button
           type="button"
-          onClick={() => setOpen(false)}
+          onClick={() => setOpen((v) => !v)}
           className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
-          aria-label="collapse"
+          aria-label={open ? 'collapse' : 'expand'}
         >
-          <X size={15} />
+          {open ? <PanelRightClose size={15} /> : <PanelRightOpen size={15} />}
         </button>
       </div>
 
-      {/* context selector */}
+      {open && (
+        <>
+        {/* context selector */}
       <div className="shrink-0 border-b border-neutral-100 p-2.5 dark:border-neutral-800">
         <div className="text-[10.5px] font-semibold uppercase tracking-wide text-neutral-400">
           {t('ai.context')}
@@ -438,6 +432,8 @@ export default function AiContextPanel() {
           </div>
         )}
       </div>
+        </>
+      )}
     </aside>
   )
 }
