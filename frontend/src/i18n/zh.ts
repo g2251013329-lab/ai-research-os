@@ -524,12 +524,18 @@ export default {
   },
   literature: {
     title: '文献',
-    subtitle: '浏览 Zotero 库并管理你的文献',
+    subtitle: '拖入 PDF 或从 Zotero 导入，统一管理你的文献',
     tabs: {
       zotero: 'Zotero 库',
       mine: '我的文献',
     },
     mineEmpty: '还没有文献，把 PDF 拖到上方直接添加',
+    zoteroImport: {
+      title: '从 Zotero 导入',
+      empty: 'Zotero 中没有待导入的文献（已导入的会自动隐藏）',
+      untitled: '未命名条目',
+    },
+    importOne: '导入',
     zoteroOk: 'Zotero 已连接',
     zoteroApi: 'Zotero 已连接（本地 API）',
     zoteroMissing: '未找到 Zotero 库',

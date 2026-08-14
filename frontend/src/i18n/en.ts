@@ -532,12 +532,18 @@ export default {
   },
   literature: {
     title: 'Literature',
-    subtitle: 'Browse your Zotero library and manage your papers',
+    subtitle: 'Drop PDFs or import from Zotero — one place for all your papers',
     tabs: {
       zotero: 'Zotero Library',
       mine: 'My Papers',
     },
     mineEmpty: 'No papers yet — drop a PDF above to add one',
+    zoteroImport: {
+      title: 'Import from Zotero',
+      empty: 'Nothing pending in Zotero (imported items are hidden automatically)',
+      untitled: 'Untitled item',
+    },
+    importOne: 'Import',
     zoteroOk: 'Zotero connected',
     zoteroApi: 'Zotero connected (local API)',
     zoteroMissing: 'Zotero library not found',
