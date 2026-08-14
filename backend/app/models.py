@@ -123,6 +123,7 @@ class Paper(SQLModel, table=True):
     status: str = "unread"  # unread | reading | read
     project_id: int | None = Field(default=None, foreign_key="project.id")
     zotero_key: str = ""  # filled by Zotero integration (Phase 5)
+    local_path: str = ""  # uploaded PDF file path (drag & drop import)
     created_at: datetime = Field(default_factory=utcnow)
     updated_at: datetime = Field(default_factory=utcnow)
 

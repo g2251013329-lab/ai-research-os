@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { BookOpen, ExternalLink, Loader2, Plus, Sparkles, Trash2, X } from 'lucide-react'
-import { api } from '../../api/client'
+import { BookOpen, ExternalLink, FileUp, Loader2, Plus, Sparkles, Trash2, X } from 'lucide-react'
+import { api, uploadFile } from '../../api/client'
+import { useToastStore } from '../../store/useToastStore'
 import AiModal from '../ai/AiModal'
 import type { RQ } from './QuestionsView'
 
@@ -18,6 +19,8 @@ export interface Paper {
   notes: string
   status: string
   project_id: number | null
+  zotero_key: string
+  local_path: string
 }
 
 const PAPER_STATUSES = ['unread', 'reading', 'read']
@@ -38,6 +41,10 @@ export default function PapersView({ projectId }: { projectId: number }) {
   const [saving, setSaving] = useState(false)
   const [aiPaper, setAiPaper] = useState<Paper | null>(null)
   const [editing, setEditing] = useState<Paper | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const toast = useToastStore((s) => s.show)
   const [editForm, setEditForm] = useState({
     title: '',
     authors: '',
@@ -107,6 +114,42 @@ export default function PapersView({ projectId }: { projectId: number }) {
     onSuccess: invalidate,
   })
 
+  const uploadPdf = async (file: File) => {
+    setUploading(true)
+    try {
+      await uploadFile('/api/papers/upload', file, { project_id: String(projectId) })
+      toast(t('quickCreate.uploaded'))
+      invalidate()
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e))
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const openInReader = async (p: Paper) => {
+    try {
+      let path: string | null = p.local_path || null
+      if (!path && p.zotero_key) {
+        const atts = await api<{ path: string }[]>(
+          `/api/zotero/items/${p.zotero_key}/attachments`,
+        )
+        path = atts[0]?.path ?? null
+      }
+      if (!path) {
+        toast(t('literature.noAttachment'))
+        return
+      }
+      await api('/api/system/open-file', {
+        method: 'POST',
+        body: JSON.stringify({ path, app: '小绿鲸英文文献阅读器' }),
+      })
+      toast(t('literature.openedReader'))
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e))
+    }
+  }
+
   const editMutation = useMutation({
     mutationFn: (patch: Partial<Paper>) =>
       api(`/api/papers/${editing?.id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
@@ -166,6 +209,42 @@ export default function PapersView({ projectId }: { projectId: number }) {
         </button>
       </div>
 
+      {/* drag & drop PDF upload */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault()
+          setDragging(true)
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault()
+          setDragging(false)
+          const file = e.dataTransfer.files?.[0]
+          if (file) void uploadPdf(file)
+        }}
+        onClick={() => fileInputRef.current?.click()}
+        className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed px-3 py-2.5 text-[12px] transition-colors ${
+          dragging
+            ? 'border-accent bg-accent-soft text-accent'
+            : 'border-neutral-300 text-neutral-400 hover:border-accent hover:text-accent dark:border-neutral-700'
+        }`}
+      >
+        <FileUp size={14} />
+        {t('research.paper.dropHint')}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,application/pdf"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) void uploadPdf(file)
+            e.target.value = ''
+          }}
+        />
+        {uploading && <Loader2 size={13} className="animate-spin" />}
+      </div>
+
       {(papers ?? []).length === 0 && (
         <p className="rounded-lg border border-dashed border-neutral-300 py-10 text-center text-[12.5px] text-neutral-400 dark:border-neutral-700">
           {t('research.paper.empty')}
@@ -219,6 +298,15 @@ export default function PapersView({ projectId }: { projectId: number }) {
                   </div>
                 )}
               </div>
+              <button
+                type="button"
+                onClick={() => void openInReader(p)}
+                className="flex shrink-0 items-center gap-1 rounded-md border border-neutral-200 px-2 py-1 text-[11.5px] text-neutral-500 transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+                data-tip={t('literature.openReaderTip')}
+              >
+                <ExternalLink size={11} />
+                {t('literature.openReader')}
+              </button>
               <button
                 type="button"
                 onClick={() => setAiPaper(p)}

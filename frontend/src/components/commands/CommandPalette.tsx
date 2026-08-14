@@ -45,6 +45,7 @@ export default function CommandPalette({
   const update = useSettingsStore((s) => s.update)
   const openTaskModal = useUiStore((s) => s.openTaskModal)
   const openFocus = useUiStore((s) => s.openFocus)
+  const openQuickCreate = useUiStore((s) => s.openQuickCreate)
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const listRef = useRef<HTMLDivElement>(null)
@@ -69,6 +70,7 @@ export default function CommandPalette({
     },
     openTaskModal,
     openFocus,
+    openQuickCreate,
     toast,
     t,
   }
@@ -102,9 +104,9 @@ export default function CommandPalette({
       { id: 'add-inbox', titleKey: 'commands.addInbox', groupKey: 'upcoming', icon: Inbox, available: true, run: () => { navigate('/inbox'); onClose() } },
       { id: 'focus-mode', titleKey: 'commands.focusMode', groupKey: 'upcoming', icon: Timer, available: true, run: () => { deps.openFocus(); navigate('/'); onClose() } },
       // Phase 4: now real
-      { id: 'create-experiment', titleKey: 'commands.createExperiment', groupKey: 'upcoming', icon: FlaskConical, available: true, run: () => { navigate('/research'); onClose() } },
-      { id: 'create-question', titleKey: 'commands.createQuestion', groupKey: 'upcoming', icon: HelpCircle, available: true, run: () => { navigate('/research'); onClose() } },
-      { id: 'add-paper', titleKey: 'commands.addPaper', groupKey: 'upcoming', icon: BookOpen, available: true, run: () => { navigate('/research'); onClose() } },
+      { id: 'create-experiment', titleKey: 'commands.createExperiment', groupKey: 'upcoming', icon: FlaskConical, available: true, run: () => { deps.openQuickCreate('experiment'); onClose() } },
+      { id: 'create-question', titleKey: 'commands.createQuestion', groupKey: 'upcoming', icon: HelpCircle, available: true, run: () => { deps.openQuickCreate('question'); onClose() } },
+      { id: 'add-paper', titleKey: 'commands.addPaper', groupKey: 'upcoming', icon: BookOpen, available: true, run: () => { deps.openQuickCreate('paper'); onClose() } },
       // Phase 5: now real
       { id: 'sync-obsidian', titleKey: 'commands.syncObsidian', groupKey: 'apps', icon: Rocket, available: true, run: () => {
         void (async () => {

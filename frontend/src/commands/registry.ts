@@ -18,6 +18,7 @@ export interface CommandDeps {
   launchApp: (app: string) => void
   openTaskModal: () => void
   openFocus: () => void
+  openQuickCreate: (tab: 'project' | 'paper' | 'experiment' | 'question') => void
   toast: (message: string) => void
   t: (key: string) => string
 }

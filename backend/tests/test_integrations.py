@@ -252,6 +252,42 @@ def test_paper_pdf_text_extraction():
         _restore_zotero_setting()
 
 
+def test_pdf_upload_creates_paper(monkeypatch):
+    """Drag & drop PDF: stored locally, DOI extracted, CrossRef enriched."""
+    from app.api.papers import fetch_crossref_metadata
+
+    monkeypatch.setattr(
+        "app.api.papers.fetch_crossref_metadata",
+        lambda doi: {
+            "title": "Uploaded FUS Paper",
+            "authors": "Test Author",
+            "year": "2026",
+            "journal": "Test Journal",
+        },
+    )
+
+    pdf = _make_pdf(["FUS phase separation DOI: 10.1002/advs.76023 in text"])
+    r = client.post(
+        "/api/papers/upload",
+        files={"file": ("my-paper.pdf", pdf, "application/pdf")},
+    )
+    assert r.status_code == 201
+    paper = r.json()
+    assert paper["title"] == "Uploaded FUS Paper"
+    assert paper["doi"] == "10.1002/advs.76023"
+    assert paper["journal"] == "Test Journal"
+    assert Path(paper["local_path"]).exists()
+
+    # non-PDF rejected
+    r2 = client.post(
+        "/api/papers/upload",
+        files={"file": ("note.txt", b"hello", "text/plain")},
+    )
+    assert r2.status_code == 422
+
+    client.delete(f"/api/papers/{paper['id']}")
+
+
 def test_git_sync_flow():
     vault = TEST_DIR / "vault-git"
     remote = TEST_DIR / "vault-git-remote.git"

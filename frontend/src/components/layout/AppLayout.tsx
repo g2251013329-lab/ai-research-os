@@ -16,6 +16,7 @@ import AiContextPanel from './AiContextPanel'
 import SearchPalette from '../search/SearchPalette'
 import CommandPalette from '../commands/CommandPalette'
 import TaskModal from '../dashboard/TaskModal'
+import QuickCreateModal from '../dashboard/QuickCreateModal'
 import FocusOverlay from '../focus/FocusOverlay'
 import TooltipHost from '../TooltipHost'
 import ToastHost from '../ToastHost'
@@ -111,6 +112,7 @@ export default function AppLayout() {
       <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <TaskModal />
+      <QuickCreateModal />
       <FocusOverlay />
       <TooltipHost />
       <ToastHost />

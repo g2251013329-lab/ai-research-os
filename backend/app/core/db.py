@@ -42,6 +42,14 @@ def _migrate(db_engine: object) -> None:
             conn.exec_driver_sql(
                 "ALTER TABLE timelineevent ADD COLUMN project_id INTEGER"
             )
+        paper_cols = {
+            row[1]
+            for row in conn.exec_driver_sql("PRAGMA table_info(paper)").fetchall()
+        }
+        if "local_path" not in paper_cols:
+            conn.exec_driver_sql(
+                "ALTER TABLE paper ADD COLUMN local_path VARCHAR NOT NULL DEFAULT ''"
+            )
         conn.commit()
 
 

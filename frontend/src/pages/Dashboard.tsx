@@ -11,6 +11,7 @@ import {
   HelpCircle,
   Inbox,
   Lightbulb,
+  Sparkles,
   ListTodo,
   Plus,
   SquarePen,
@@ -69,6 +70,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const openTaskModal = useUiStore((s) => s.openTaskModal)
   const openFocus = useUiStore((s) => s.openFocus)
+  const openQuickCreate = useUiStore((s) => s.openQuickCreate)
   const queryClient = useQueryClient()
 
   const { data } = useQuery({
@@ -97,19 +99,9 @@ export default function Dashboard() {
       run: () => navigate('/inbox'),
     },
     {
-      key: 'newExperiment',
-      icon: FlaskConical,
-      run: () => navigate('/research'),
-    },
-    {
-      key: 'newQuestion',
-      icon: HelpCircle,
-      run: () => navigate('/research'),
-    },
-    {
-      key: 'addPaper',
-      icon: BookOpen,
-      run: () => navigate('/research'),
+      key: 'quickCreate',
+      icon: Sparkles,
+      run: () => openQuickCreate('paper'),
     },
     {
       key: 'focusMode',

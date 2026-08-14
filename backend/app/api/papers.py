@@ -4,17 +4,24 @@ Full Zotero integration arrives in Phase 5; zotero_key is reserved here.
 """
 from __future__ import annotations
 
+import re
+import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
+from ..core.config import settings as app_settings
 from ..core.db import get_session
-from ..models import PAPER_STATUSES, Paper, PaperQuestion, ResearchQuestion
+from ..models import PAPER_STATUSES, Paper, PaperQuestion, Project, ResearchQuestion
 from .timeline import add_timeline_event
 
 router = APIRouter(prefix="/api/papers", tags=["papers"])
+
+DOI_RE = re.compile(r"10\.\d{4,9}/[-._;()/:A-Z0-9]+", re.I)
 
 
 class PaperCreate(BaseModel):
@@ -111,6 +118,105 @@ def delete_paper(paper_id: int, session: Session = Depends(get_session)) -> dict
     session.delete(paper)
     session.commit()
     return {"ok": True}
+
+
+# ------------------------------------------------------------ drag & drop PDF
+
+def _extract_doi_from_pdf(path: Path) -> str:
+    """DOI from PDF embedded metadata, then from first pages' text."""
+    try:
+        from pypdf import PdfReader
+
+        reader = PdfReader(str(path))
+        meta = reader.metadata or {}
+        for key in ("/WPS-ARTICLEDOI", "/DOI", "/doi"):
+            val = str(meta.get(key) or "").strip()
+            m = DOI_RE.search(val)
+            if m:
+                return m.group(0)
+        text = ""
+        for page in reader.pages[:3]:
+            text += (page.extract_text() or "") + "\n"
+        m = DOI_RE.search(text)
+        return m.group(0) if m else ""
+    except Exception:
+        return ""
+
+
+def _authors_str(authors: list[dict]) -> str:
+    names = []
+    for a in authors or []:
+        name = " ".join(x for x in (a.get("given"), a.get("family")) if x)
+        if name:
+            names.append(name)
+    return "; ".join(names)
+
+
+def fetch_crossref_metadata(doi: str) -> dict:
+    """Best-effort CrossRef enrichment (works when the network allows)."""
+    try:
+        r = httpx.get(
+            f"https://api.crossref.org/works/{doi}", timeout=6
+        )
+        r.raise_for_status()
+        m = r.json()["message"]
+        year = ""
+        issued = m.get("issued", {}).get("date-parts") or []
+        if issued and issued[0]:
+            year = str(issued[0][0])
+        return {
+            "title": (m.get("title") or [""])[0],
+            "authors": _authors_str(m.get("author") or []),
+            "year": year,
+            "journal": (m.get("container-title") or [""])[0],
+        }
+    except Exception:
+        return {}
+
+
+@router.post("/upload", status_code=201)
+async def upload_paper(
+    file: UploadFile,
+    project_id: int | None = None,
+    session: Session = Depends(get_session),
+) -> Paper:
+    """Upload a PDF directly: store it locally, extract DOI & best-effort
+    CrossRef metadata, and create a Paper record."""
+    filename = file.filename or "paper.pdf"
+    if not filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=422, detail="仅支持 PDF 文件")
+    if project_id is not None and not session.get(Project, project_id):
+        raise HTTPException(status_code=422, detail="project not found")
+
+    papers_dir = app_settings.data_dir / "papers"
+    papers_dir.mkdir(parents=True, exist_ok=True)
+    dest = papers_dir / f"paper-{uuid.uuid4().hex}.pdf"
+    dest.write_bytes(await file.read())
+
+    title_from_name = Path(filename).stem.strip() or "未命名文献"
+    doi = _extract_doi_from_pdf(dest)
+    meta = fetch_crossref_metadata(doi) if doi else {}
+
+    paper = Paper(
+        title=meta.get("title") or title_from_name,
+        authors=meta.get("authors", ""),
+        year=meta.get("year", ""),
+        journal=meta.get("journal", ""),
+        doi=doi,
+        url=f"https://doi.org/{doi}" if doi else "",
+        project_id=project_id,
+        local_path=str(dest),
+    )
+    session.add(paper)
+    session.commit()
+    session.refresh(paper)
+    add_timeline_event(
+        session,
+        "paper.added",
+        f"上传文献：{paper.title[:60]}",
+        project_id=project_id,
+    )
+    return paper
 
 
 # ------------------------------------------------------------ question links
