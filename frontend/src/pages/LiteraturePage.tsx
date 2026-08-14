@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Sparkles } from 'lucide-react'
 import { api } from '../api/client'
+import DiscoverSection from '../components/literature/DiscoverSection'
 import MyPapersList from '../components/literature/MyPapersList'
 import ZoteroImport from '../components/literature/ZoteroImport'
 
@@ -73,6 +74,7 @@ export default function LiteraturePage() {
       )}
 
       <div className="mt-4 space-y-3">
+        <DiscoverSection />
         {connected && <ZoteroImport />}
         <MyPapersList />
       </div>

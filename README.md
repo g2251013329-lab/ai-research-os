@@ -61,6 +61,6 @@ npm run dev                    # http://localhost:5173（/api 代理到 8000）
 | Phase 3 | Learning（LLPS 路线图 / 日历 / 打卡 / 学习笔记） | ✅ 已完成 |
 | Phase 4 | Research（项目 / 研究问题 / 假设 / 文献 / 实验 / 笔记 / 写作 / 时间线） | ✅ 已完成 |
 | Phase 5 | 集成（Zotero 只读+本地 API 回退 / 文献导入 / 小绿鲸打开 / vault Git 同步） | ✅ 已完成 |
-| Phase 6 | AI 层 | ⏳ |
-| Phase 7 | P1 特性 | ⏳ |
+| Phase 6 | AI 层 | ✅ 已完成 |
+| Phase 7 | P1 特性（跨源搜索 / AI 文献发现 / 论文对比 / 知识图谱 / 统计 / 闪卡） | ✅ 已完成 |
 | Phase 8 | 测试与优化 | ⏳ |

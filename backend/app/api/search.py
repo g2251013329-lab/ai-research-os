@@ -1,19 +1,26 @@
-"""Global search API.
-
-Searches the configured Obsidian vault(s) — filename, relative path, YAML
-frontmatter title, and note body content. Future phases plug in literature /
-projects / questions / experiments / notes / learning / leisure / inbox
-sources with the same result schema.
-"""
+"""Global search API (PRD §19): vault Markdown + all app entities."""
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
 
 import frontmatter
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy import or_
+from sqlmodel import Session, select
 
+from ..core.db import get_session
 from ..core.user_settings import get_user_setting
+from ..models import (
+    Experiment,
+    Hypothesis,
+    InboxItem,
+    LearningConcept,
+    Paper,
+    Project,
+    ResearchQuestion,
+    Task,
+)
 
 router = APIRouter(prefix="/api/search", tags=["search"])
 
@@ -33,14 +40,84 @@ RESULT_TYPES = (
 
 
 @router.get("")
-def search(q: str = "", limit: int = 20) -> dict:
+def search(
+    q: str = "",
+    limit: int = 20,
+    session: Session = Depends(get_session),
+) -> dict:
     query = q.strip()
     if not query:
         return {"query": query, "results": []}
     results: list[dict[str, Any]] = []
     results.extend(_search_vaults(query, limit))
-    # Future sources append here (literature, projects, ...).
+    results.extend(_search_db(session, query, limit))
     return {"query": query, "results": results[:limit]}
+
+
+def _search_db(session: Session, q: str, limit: int) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    like = f"%{q}%"
+
+    def add(result_type: str, id_str: str, title: str, subtitle: str, url: str) -> None:
+        if len(out) >= limit:
+            return
+        out.append(
+            {
+                "type": result_type,
+                "id": id_str,
+                "title": title,
+                "subtitle": subtitle,
+                "url": url,
+            }
+        )
+
+    # literature
+    for p in session.exec(
+        select(Paper)
+        .where(or_(Paper.title.ilike(like), Paper.authors.ilike(like)))
+        .limit(limit)
+    ).all():
+        add(
+            "literature", f"paper:{p.id}", p.title,
+            f"{p.authors} {p.year} {p.journal}".strip(), "/literature",
+        )
+    # projects
+    for p in session.exec(
+        select(Project).where(or_(Project.title.ilike(like), Project.description.ilike(like))).limit(limit)
+    ).all():
+        add("project", f"project:{p.id}", p.title, p.description or "", f"/research/projects/{p.id}")
+    # questions
+    for rq in session.exec(
+        select(ResearchQuestion).where(or_(ResearchQuestion.title.ilike(like), ResearchQuestion.description.ilike(like))).limit(limit)
+    ).all():
+        add("question", f"question:{rq.id}", rq.title, rq.description or "", f"/research/projects/{rq.project_id}")
+    # hypotheses
+    for h in session.exec(
+        select(Hypothesis).where(Hypothesis.description.ilike(like)).limit(limit)
+    ).all():
+        add("hypothesis", f"hypothesis:{h.id}", h.description[:80], h.evidence or "", "/research")
+    # experiments
+    for e in session.exec(
+        select(Experiment).where(Experiment.title.ilike(like)).limit(limit)
+    ).all():
+        add("experiment", f"experiment:{e.id}", e.title, e.objective or "", f"/research/projects/{e.project_id}")
+    # tasks
+    for task in session.exec(
+        select(Task).where(or_(Task.title.ilike(like), Task.description.ilike(like))).limit(limit)
+    ).all():
+        add("note", f"task:{task.id}", task.title, f"任务 · {task.kind}", "/")
+    # inbox
+    for item in session.exec(
+        select(InboxItem).where(InboxItem.text.ilike(like)).limit(limit)
+    ).all():
+        add("inbox", f"inbox:{item.id}", item.text[:80], f"收件箱 · {item.kind}", "/inbox")
+    # learning concepts
+    for c in session.exec(
+        select(LearningConcept).where(LearningConcept.title.ilike(like)).limit(limit)
+    ).all():
+        add("learning", f"concept:{c.id}", c.title, c.description or "", "/learning")
+
+    return out
 
 
 def _configured_vaults() -> list[Path]:

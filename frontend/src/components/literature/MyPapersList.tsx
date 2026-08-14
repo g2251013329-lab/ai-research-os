@@ -6,6 +6,7 @@ import {
   FileUp,
   Loader2,
   Pencil,
+  Scale,
   Sparkles,
   Trash2,
   X,
@@ -44,6 +45,8 @@ export default function MyPapersList() {
   const [uploading, setUploading] = useState(false)
   const [aiPaper, setAiPaper] = useState<Paper | null>(null)
   const [editing, setEditing] = useState<Paper | null>(null)
+  const [compareFrom, setCompareFrom] = useState<Paper | null>(null)
+  const [compareWith, setCompareWith] = useState<Paper | null>(null)
   const [editForm, setEditForm] = useState({
     title: '',
     authors: '',
@@ -250,6 +253,14 @@ export default function MyPapersList() {
             </button>
             <button
               type="button"
+              onClick={() => setCompareFrom(p)}
+              className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
+              data-tip={t('literature.compare')}
+            >
+              <Scale size={13} />
+            </button>
+            <button
+              type="button"
               onClick={() => setAiPaper(p)}
               className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
               data-tip={t('ai.summarizePaper')}
@@ -380,6 +391,64 @@ export default function MyPapersList() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* compare: pick second paper */}
+      {compareFrom && !compareWith && (
+        <div
+          className="fixed inset-0 z-[85] flex items-center justify-center bg-black/40 backdrop-blur-[2px]"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setCompareFrom(null)
+          }}
+        >
+          <div className="w-[480px] max-w-[92vw] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex items-center justify-between">
+              <h2 className="truncate text-[14px] font-semibold" data-tip={compareFrom.title}>
+                {t('literature.comparePick')}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setCompareFrom(null)}
+                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <div className="mt-3 max-h-[50vh] space-y-1 overflow-y-auto">
+              {(papers ?? [])
+                .filter((x) => x.id !== compareFrom.id)
+                .map((x) => (
+                  <button
+                    key={x.id}
+                    type="button"
+                    onClick={() => setCompareWith(x)}
+                    className="w-full truncate rounded-md px-2.5 py-2 text-left text-[13px] transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    data-tip={x.title}
+                  >
+                    {x.title}
+                  </button>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* compare result */}
+      {compareFrom && compareWith && (
+        <AiModal
+          title={t('literature.compare')}
+          fetcher={async () => {
+            const r = await api<{ comparison: string }>('/api/ai/compare-papers', {
+              method: 'POST',
+              body: JSON.stringify({ paper_ids: [compareFrom.id, compareWith.id] }),
+            })
+            return r.comparison
+          }}
+          onClose={() => {
+            setCompareFrom(null)
+            setCompareWith(null)
+          }}
+        />
       )}
     </div>
   )

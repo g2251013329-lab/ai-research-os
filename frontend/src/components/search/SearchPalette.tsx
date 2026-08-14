@@ -117,8 +117,13 @@ export default function SearchPalette({
       } catch (e) {
         toast(e instanceof Error ? e.message : String(e))
       }
+      onClose()
+      return
     }
-    onClose()
+    if (r.url) {
+      window.location.href = r.url
+      onClose()
+    }
   }
 
   const onKeyDown = (e: React.KeyboardEvent) => {

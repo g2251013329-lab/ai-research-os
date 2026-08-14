@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { api } from '../../api/client'
 import AiModal from '../ai/AiModal'
+import FlashcardsModal from './FlashcardsModal'
 
 export interface Concept {
   id: number
@@ -52,6 +53,7 @@ export default function RoadmapView() {
     { id: 'simplify', label: t('learning.ai.simplify') },
     { id: 'examples', label: t('learning.ai.examples') },
     { id: 'quiz', label: t('learning.ai.quiz') },
+    { id: 'flashcards', label: t('learning.ai.flashcards') },
   ]
 
   const invalidate = () => {
@@ -268,17 +270,21 @@ export default function RoadmapView() {
               ✕
             </button>
           </div>
-          <AiModal
-            title={`${t('learning.ai.explain')}: ${aiNode.title}`}
-            fetcher={async () => {
-              const r = await api<{ answer: string }>('/api/ai/learning-assist', {
-                method: 'POST',
-                body: JSON.stringify({ concept_id: aiNode.id, mode: aiMode }),
-              })
-              return r.answer
-            }}
-            onClose={() => setAiNode(null)}
-          />
+          {aiMode === 'flashcards' ? (
+            <FlashcardsModal concept={aiNode} onClose={() => setAiNode(null)} />
+          ) : (
+            <AiModal
+              title={`${t('learning.ai.explain')}: ${aiNode.title}`}
+              fetcher={async () => {
+                const r = await api<{ answer: string }>('/api/ai/learning-assist', {
+                  method: 'POST',
+                  body: JSON.stringify({ concept_id: aiNode.id, mode: aiMode }),
+                })
+                return r.answer
+              }}
+              onClose={() => setAiNode(null)}
+            />
+          )}
         </>
       )}
     </div>

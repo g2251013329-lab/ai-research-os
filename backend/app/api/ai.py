@@ -1,10 +1,12 @@
 """AI endpoints: context-aware chat (SSE), paper summary, inbox classify,
-experiment next-step, writing assist, learning assist."""
+experiment next-step, writing assist, learning assist, literature discovery,
+paper comparison."""
 from __future__ import annotations
 
 import json
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -185,6 +187,10 @@ def learning_assist(
         "simplify": "用最简单的语言（比喻）解释这个概念，像给大一学生讲。",
         "examples": "给出 2-3 个与液-液相分离研究相关的具体例子说明这个概念。",
         "quiz": "出 3 道选择题检验理解（含答案与解析，答案放在最后）。",
+        "flashcards": (
+            "生成 5 张学习闪卡，只输出 JSON："
+            '{"cards": [{"q": "问题", "a": "答案"}]}，不要输出其他文字。'
+        ),
     }
     mode_prompt = modes.get(body.mode, modes["explain"])
     prompt = (
@@ -192,3 +198,146 @@ def learning_assist(
         f"如涉及术语，用中文解释。不要编造事实。"
     )
     return {"answer": ai.complete(prompt)}
+
+
+# ------------------------------------------------------------ discovery
+
+class DiscoverIn(BaseModel):
+    query: str
+    limit: int = 8
+
+
+def _discover_sources(query: str) -> list[dict[str, Any]]:
+    """Aggregate candidates from Europe PMC + Semantic Scholar (best effort)."""
+    out: list[dict[str, Any]] = []
+    try:
+        r = httpx.get(
+            "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            params={"query": query, "format": "json", "pageSize": 15, "sort": "CITED desc"},
+            timeout=12,
+        )
+        r.raise_for_status()
+        for hit in r.json().get("resultList", {}).get("result", [])[:15]:
+            out.append(
+                {
+                    "title": hit.get("title") or "",
+                    "authors": (hit.get("authorString") or "")[:150],
+                    "year": str(hit.get("pubYear") or ""),
+                    "journal": hit.get("journalTitle") or "",
+                    "doi": hit.get("doi") or "",
+                    "url": f"https://europepmc.org/article/{hit.get('source', 'MED')}/{hit.get('id', '')}",
+                    "source": "Europe PMC",
+                }
+            )
+    except Exception:
+        pass
+    try:
+        r = httpx.get(
+            "https://api.semanticscholar.org/graph/v1/paper/search",
+            params={
+                "query": query,
+                "limit": 15,
+                "fields": "title,authors,year,externalIds,journal",
+            },
+            timeout=12,
+        )
+        r.raise_for_status()
+        for hit in r.json().get("data", [])[:15]:
+            doi = (hit.get("externalIds") or {}).get("DOI") or ""
+            out.append(
+                {
+                    "title": hit.get("title") or "",
+                    "authors": "; ".join(
+                        a.get("name", "") for a in hit.get("authors", [])[:6]
+                    ),
+                    "year": str(hit.get("year") or ""),
+                    "journal": ((hit.get("journal") or {}).get("name") or ""),
+                    "doi": doi,
+                    "url": f"https://doi.org/{doi}" if doi else "",
+                    "source": "Semantic Scholar",
+                }
+            )
+    except Exception:
+        pass
+    return out
+
+
+def _ai_rank(query: str, items: list[dict]) -> list[dict] | None:
+    """AI selects the most relevant items with one-line reasons (best effort)."""
+    if not items or not ai.is_configured():
+        return None
+    compact = [
+        {
+            "i": idx,
+            "title": item.get("title", ""),
+            "year": item.get("year", ""),
+            "journal": item.get("journal", ""),
+        }
+        for idx, item in enumerate(items)
+    ]
+    prompt = (
+        f"用户研究主题：{query}\n候选文献 JSON：{json.dumps(compact, ensure_ascii=False)}\n"
+        f"请选出最相关的 {min(8, len(items))} 篇并按相关性排序，只输出 JSON："
+        '{"picks": [{"i": 索引, "reason": "一句话理由（中文）"}]}'
+    )
+    try:
+        raw = ai.complete(prompt, temperature=0.2, max_tokens=1200)
+        picks = json.loads(raw[raw.find("{") : raw.rfind("}") + 1])["picks"]
+        ranked = []
+        for pick in picks:
+            item = items[pick["i"]]
+            ranked.append({**item, "reason": pick.get("reason", "")})
+        return ranked[:8]
+    except Exception:
+        return None
+
+
+@router.post("/discover")
+def discover(body: DiscoverIn) -> dict:
+    query = body.query.strip()
+    if not query:
+        raise HTTPException(status_code=422, detail="query must not be empty")
+    merged: dict[str, dict] = {}
+    for item in _discover_sources(query):
+        key = (item.get("doi") or "").lower() or item["title"].lower()
+        if key and key not in merged:
+            merged[key] = item
+    items = list(merged.values())[:15]
+    ranked = _ai_rank(query, items)
+    return {
+        "query": query,
+        "results": ranked if ranked else items[: body.limit],
+        "ai_ranked": bool(ranked),
+    }
+
+
+# ------------------------------------------------------------ comparison
+
+class CompareIn(BaseModel):
+    paper_ids: list[int]
+
+
+@router.post("/compare-papers")
+def compare_papers(body: CompareIn, session: Session = Depends(get_session)) -> dict:
+    if len(body.paper_ids) < 2:
+        raise HTTPException(status_code=422, detail="至少选择两篇文献")
+    papers = []
+    for pid in body.paper_ids[:3]:
+        p = session.get(Paper, pid)
+        if p:
+            papers.append(p)
+    if len(papers) < 2:
+        raise HTTPException(status_code=404, detail="Paper not found")
+    parts = []
+    for i, p in enumerate(papers, 1):
+        context = build_context(session, "paper", p.id)
+        if len(context) > 10_000:
+            context = context[:10_000] + "\n…（正文过长，已截断）"
+        parts.append(f"【文献{i}】\n{context}")
+    prompt = (
+        "请对比以下文献：\n1. 研究问题异同\n2. 方法异同\n3. 主要发现异同\n"
+        "4. 结论/立场差异\n5. 对 LLPS / 异常凝聚体研究方向的启示\n"
+        "用表格 + 要点，中文回答，不要编造上下文之外的信息。\n\n"
+        + "\n\n".join(parts)
+    )
+    return {"comparison": ai.complete(prompt, max_tokens=3000)}

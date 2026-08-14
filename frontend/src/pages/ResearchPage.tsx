@@ -8,12 +8,15 @@ import {
   FlaskConical,
   FolderKanban,
   HelpCircle,
+  LayoutGrid,
   Lightbulb,
   Loader2,
+  Network,
   Plus,
   X,
 } from 'lucide-react'
 import { api } from '../api/client'
+import GraphView from '../components/research/GraphView'
 
 interface Project {
   id: number
@@ -39,6 +42,21 @@ export default function ResearchPage() {
   const [title, setTitle] = useState('')
   const [desc, setDesc] = useState('')
   const [saving, setSaving] = useState(false)
+  const [view, setView] = useState<'list' | 'graph'>('list')
+
+  const { data: stats } = useQuery({
+    queryKey: ['stats'],
+    queryFn: () =>
+      api<{
+        papers: { total: number; read: number }
+        experiments: { total: number; completed: number }
+        questions: { total: number; resolved: number }
+        hypotheses: { total: number; supported: number }
+        tasks: { done_7d: number }
+        focus: { minutes_7d: number }
+        concepts: { total: number; mastered: number }
+      }>('/api/stats'),
+  })
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
@@ -96,13 +114,68 @@ export default function ResearchPage() {
         </button>
       </div>
 
-      {isLoading && <p className="mt-8 text-center text-[13px] text-neutral-400">…</p>}
+      {/* stats strip */}
+      {stats && (
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+          {[
+            ['papers', `${stats.papers.read}/${stats.papers.total}`],
+            ['experiments', `${stats.experiments.completed}/${stats.experiments.total}`],
+            ['questions', `${stats.questions.resolved}/${stats.questions.total}`],
+            ['hypotheses', `${stats.hypotheses.supported}/${stats.hypotheses.total}`],
+            ['tasks', `${stats.tasks.done_7d}`],
+            ['focus', `${stats.focus.minutes_7d}′`],
+            ['concepts', `${stats.concepts.mastered}/${stats.concepts.total}`],
+          ].map(([key, value]) => (
+            <div key={key} className="rounded-md border border-neutral-200 bg-white px-2.5 py-2 text-center dark:border-neutral-800 dark:bg-neutral-900">
+              <div className="text-[14px] font-semibold leading-none">{value}</div>
+              <div className="mt-1 text-[10.5px] text-neutral-400">{t(`research.statsKeys.${key}`)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* view toggle */}
+      <div className="mt-4 flex gap-1">
+        <button
+          type="button"
+          onClick={() => setView('list')}
+          className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[12px] transition-colors ${
+            view === 'list'
+              ? 'border-accent bg-accent-soft font-medium text-accent'
+              : 'border-neutral-200 text-neutral-500 hover:border-neutral-300 dark:border-neutral-700 dark:text-neutral-400'
+          }`}
+        >
+          <LayoutGrid size={13} />
+          {t('research.viewList')}
+        </button>
+        <button
+          type="button"
+          onClick={() => setView('graph')}
+          className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[12px] transition-colors ${
+            view === 'graph'
+              ? 'border-accent bg-accent-soft font-medium text-accent'
+              : 'border-neutral-200 text-neutral-500 hover:border-neutral-300 dark:border-neutral-700 dark:text-neutral-400'
+          }`}
+        >
+          <Network size={13} />
+          {t('research.viewGraph')}
+        </button>
+      </div>
+
+      {view === 'graph' && (
+        <div className="mt-3">
+          <GraphView onOpenProject={(id) => navigate(`/research/projects/${id}`)} />
+        </div>
+      )}
+
+      {view === 'list' && isLoading && <p className="mt-8 text-center text-[13px] text-neutral-400">…</p>}
       {(projects ?? []).length === 0 && !isLoading && (
         <div className="mt-8 rounded-lg border border-dashed border-neutral-300 p-12 text-center dark:border-neutral-700">
           <p className="text-[13px] text-neutral-400">{t('research.empty')}</p>
         </div>
       )}
 
+      {view === 'list' && (
       <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {(projects ?? []).map((p) => (
           <button
@@ -149,6 +222,7 @@ export default function ResearchPage() {
           </button>
         ))}
       </div>
+      )}
 
       {creating && (
         <div

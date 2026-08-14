@@ -53,6 +53,41 @@ class LinkQuestionIn(BaseModel):
     question_id: int
 
 
+class DiscoveryCreate(BaseModel):
+    """Paper created from AI literature discovery (not from Zotero)."""
+
+    title: str
+    authors: str = ""
+    year: str = ""
+    journal: str = ""
+    doi: str = ""
+    url: str = ""
+    abstract: str = ""
+
+
+@router.post("/from-discovery", status_code=201)
+def create_from_discovery(
+    body: DiscoveryCreate, session: Session = Depends(get_session)
+) -> dict:
+    title = body.title.strip()
+    if not title:
+        raise HTTPException(status_code=422, detail="title must not be empty")
+    doi = (body.doi or "").strip().lower()
+    existing = None
+    if doi:
+        existing = session.exec(select(Paper).where(Paper.doi.ilike(doi))).first()
+    if not existing:
+        existing = session.exec(select(Paper).where(Paper.title == title)).first()
+    if existing:
+        return {"paper": existing.model_dump(mode="json"), "created": False}
+    paper = Paper(**body.model_dump())
+    session.add(paper)
+    session.commit()
+    session.refresh(paper)
+    add_timeline_event(session, "paper.added", f"文献发现导入：{title[:60]}")
+    return {"paper": paper.model_dump(mode="json"), "created": True}
+
+
 @router.get("")
 def list_papers(
     project_id: int | None = None,
