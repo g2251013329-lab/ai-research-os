@@ -19,17 +19,11 @@ interface Paper {
   zotero_key: string
 }
 
-interface Project {
-  id: number
-  title: string
-}
-
 export default function ZoteroImport() {
   const { t } = useTranslation()
   const toast = useToastStore((s) => s.show)
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(true)
-  const [projectId, setProjectId] = useState<number | ''>('')
   const [importing, setImporting] = useState<string | null>(null)
 
   const { data: items } = useQuery({
@@ -40,11 +34,6 @@ export default function ZoteroImport() {
   const { data: papers } = useQuery({
     queryKey: ['papers', 'all'],
     queryFn: () => api<Paper[]>('/api/papers'),
-  })
-
-  const { data: projects } = useQuery({
-    queryKey: ['projects'],
-    queryFn: () => api<Project[]>('/api/projects'),
   })
 
   const importedKeys = new Set(
@@ -63,10 +52,7 @@ export default function ZoteroImport() {
     try {
       const r = await api<{ created: number; skipped: number }>('/api/zotero/import', {
         method: 'POST',
-        body: JSON.stringify({
-          keys: [item.key],
-          project_id: projectId || null,
-        }),
+        body: JSON.stringify({ keys: [item.key] }),
       })
       toast(
         r.created > 0
@@ -111,21 +97,6 @@ export default function ZoteroImport() {
         {t('literature.zoteroImport.title')}
         <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[10.5px] text-accent">
           {pending.length}
-        </span>
-        <span className="ml-auto flex items-center gap-2">
-          <select
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value ? Number(e.target.value) : '')}
-            onClick={(e) => e.stopPropagation()}
-            className="rounded border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
-          >
-            <option value="">{t('literature.noProject')}</option>
-            {(projects ?? []).map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title}
-              </option>
-            ))}
-          </select>
         </span>
       </button>
 
