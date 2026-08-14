@@ -443,6 +443,7 @@ export default {
     },
     paper: {
       new: 'Add Paper',
+      edit: 'Edit',
       empty: 'No papers yet',
       titlePlaceholder: 'Paper title',
       authors: 'Authors',

@@ -435,6 +435,7 @@ export default {
     },
     paper: {
       new: '添加文献',
+      edit: '编辑',
       empty: '还没有文献',
       titlePlaceholder: '论文标题',
       authors: '作者',
