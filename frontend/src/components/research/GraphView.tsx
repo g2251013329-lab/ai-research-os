@@ -57,13 +57,16 @@ export default function GraphView({ onOpenProject }: { onOpenProject: (id: numbe
         .attr('height', height)
         .attr('viewBox', `0 0 ${width} ${height}`)
 
+      // zoomable layer: everything goes inside this <g>
+      const zoomG = svg.append('g')
+
       const simulation = d3
         .forceSimulation(data.nodes as never)
         .force('link', d3.forceLink(data.edges as never).id((d: any) => d.id).distance(95))
         .force('charge', d3.forceManyBody().strength(-240))
         .force('center', d3.forceCenter(width / 2, height / 2))
 
-      const link = svg
+      const link = zoomG
         .append('g')
         .selectAll('line')
         .data(data.edges)
@@ -72,7 +75,7 @@ export default function GraphView({ onOpenProject }: { onOpenProject: (id: numbe
         .attr('stroke-opacity', 0.45)
         .attr('stroke-width', 1)
 
-      const node = svg
+      const node = zoomG
         .append('g')
         .selectAll('g')
         .data(data.nodes)
@@ -130,6 +133,38 @@ export default function GraphView({ onOpenProject }: { onOpenProject: (id: numbe
           .attr('y2', (d: any) => d.target?.y ?? 0)
         node.attr('transform', (d: any) => `translate(${d.x ?? 0},${d.y ?? 0})`)
       })
+
+      // ---- zoom & pan ----
+      const zoom = d3
+        .zoom<SVGSVGElement, unknown>()
+        .scaleExtent([0.15, 6])
+        .on('zoom', (event: any) => {
+          zoomG.attr('transform', event.transform.toString())
+        })
+      svg.call(zoom)
+
+      // zoom controls (+ / − / reset)
+      const controls = document.createElement('div')
+      controls.className =
+        'absolute right-2 top-2 z-10 flex gap-1 rounded-md border border-neutral-200 bg-white/90 p-0.5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90'
+      const mk = (label: string, fn: () => void) => {
+        const b = document.createElement('button')
+        b.textContent = label
+        b.className =
+          'h-6 w-6 rounded text-[12px] leading-none text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-accent dark:text-neutral-300 dark:hover:bg-neutral-800'
+        b.addEventListener('click', fn)
+        controls.appendChild(b)
+      }
+      mk('＋', () => {
+        svg.transition().duration(180).call(zoom.scaleBy, 1.35)
+      })
+      mk('－', () => {
+        svg.transition().duration(180).call(zoom.scaleBy, 1 / 1.35)
+      })
+      mk('⟳', () => {
+        svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity)
+      })
+      el.appendChild(controls)
     })()
 
     return () => {
@@ -153,7 +188,7 @@ export default function GraphView({ onOpenProject }: { onOpenProject: (id: numbe
       </div>
       <div
         ref={ref}
-        className="mt-2 rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+        className="relative mt-2 rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
       />
     </div>
   )

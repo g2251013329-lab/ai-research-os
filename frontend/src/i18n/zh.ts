@@ -594,6 +594,8 @@ export default {
     refresh: '刷新状态',
     done: '操作完成',
     notRepo: '该 vault 还不是 git 仓库',
+    showAll: '显示全部（{{n}} 项）',
+    collapse: '收起',
   },
   graph: {
     hint: '点击蓝色项目节点可打开项目 · 可拖拽布局',

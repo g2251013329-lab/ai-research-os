@@ -603,6 +603,8 @@ export default {
     refresh: 'Refresh',
     done: 'Done',
     notRepo: 'This vault is not a git repository yet',
+    showAll: 'Show all ({{n}} items)',
+    collapse: 'Collapse',
   },
   graph: {
     hint: 'Click a blue project node to open it · drag to rearrange',

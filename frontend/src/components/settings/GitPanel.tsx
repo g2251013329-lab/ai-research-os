@@ -22,6 +22,7 @@ export default function GitPanel() {
   const toast = useToastStore((s) => s.show)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
+  const [showAll, setShowAll] = useState(false)
 
   const { data: status, refetch } = useQuery({
     queryKey: ['git', 'status'],
@@ -71,7 +72,7 @@ export default function GitPanel() {
 
       {status?.repo && (
         <>
-          <div className="mt-3 grid grid-cols-4 gap-2 text-center text-[11.5px]">
+          <div className="mt-3 grid grid-cols-2 gap-2 text-center text-[11.5px] sm:grid-cols-4">
             <div className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
               <div className="font-mono text-[13px] font-semibold">{status.branch}</div>
               <div className="text-neutral-400">{t('git.branch')}</div>
@@ -95,12 +96,29 @@ export default function GitPanel() {
             </p>
           )}
           {status.dirty_count ? (
-            <div className="mt-2 max-h-28 space-y-0.5 overflow-y-auto rounded-md bg-neutral-50 p-2 text-[11px] font-mono text-neutral-500 dark:bg-neutral-800/60">
-              {(status.dirty ?? []).map((line) => (
-                <div key={line} className="truncate" data-tip={line}>
-                  {line}
-                </div>
-              ))}
+            <div className="mt-2">
+              <div
+                className={`space-y-0.5 overflow-y-auto rounded-md bg-neutral-50 p-2 text-[11px] font-mono text-neutral-500 dark:bg-neutral-800/60 ${
+                  showAll ? 'max-h-80' : 'max-h-24'
+                }`}
+              >
+                {(status.dirty ?? []).map((line) => (
+                  <div key={line} className="truncate" data-tip={line}>
+                    {line}
+                  </div>
+                ))}
+              </div>
+              {(status.dirty?.length ?? 0) > 5 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAll((v) => !v)}
+                  className="mt-1 text-[11px] text-accent transition-colors hover:underline"
+                >
+                  {showAll
+                    ? t('git.collapse')
+                    : t('git.showAll', { n: status.dirty?.length ?? 0 })}
+                </button>
+              )}
             </div>
           ) : (
             <p className="mt-2 flex items-center gap-1 text-[11.5px] text-emerald-600 dark:text-emerald-400">
