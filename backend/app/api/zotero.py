@@ -203,12 +203,12 @@ def _load_items_db(conn: sqlite3.Connection, item_ids: list[int]) -> list[dict]:
 def _items_db(collection: str | None, q: str, limit: int) -> list[dict]:
     with _connect() as conn:
         base = (
-            f"SELECT i.itemID AS id, i.key FROM items i "
-            f"JOIN itemTypes it ON i.itemTypeID = it.itemTypeID "
-            f"WHERE it.typeName IN ({','.join('?' * len(ITEM_TYPES))}) "
-            f"AND i.itemID NOT IN (SELECT itemID FROM deletedItems)"
+            "SELECT i.itemID AS id, i.key FROM items i "
+            "JOIN itemTypes it ON i.itemTypeID = it.itemTypeID "
+            "WHERE it.typeName != 'note' "
+            "AND i.itemID NOT IN (SELECT itemID FROM deletedItems)"
         )
-        params: list[Any] = list(ITEM_TYPES)
+        params: list[Any] = []
         if collection:
             base += " AND i.itemID IN (SELECT itemID FROM collectionItems WHERE collectionID = ?)"
             params.append(collection)
@@ -235,26 +235,51 @@ def _collections_db() -> list[dict]:
 
 
 def _attachments_db(key: str) -> list[dict]:
+    paths = _attachment_paths_db(key)
+    return [{"path": str(p), "filename": p.name} for p in paths]
+
+
+def _attachment_paths_db(key: str) -> list[Path]:
     with _connect() as conn:
         row = conn.execute(
             "SELECT itemID FROM items WHERE key = ?", (key,)
         ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Item not found")
-        atts = conn.execute(
-            "SELECT a.itemID, a.path, i.key AS attachment_key "
+        item_id = row["itemID"]
+        # children attachments + the item itself (when it IS an attachment)
+        rows = conn.execute(
+            "SELECT a.path, i.key AS attachment_key "
             "FROM itemAttachments a JOIN items i ON a.itemID = i.itemID "
-            "WHERE a.parentItemID = ?",
-            (row["itemID"],),
+            "WHERE a.parentItemID = ? OR a.itemID = ?",
+            (item_id, item_id),
         ).fetchall()
     storage = _zotero_dir() / "storage"
-    out: list[dict] = []
-    for a in atts:
-        rel = (a["path"] or "").replace("storage:", "")
-        candidate = storage / (a["attachment_key"] or "") / rel
-        if candidate.exists() and candidate.suffix.lower() in (".pdf",):
-            out.append({"path": str(candidate), "filename": candidate.name})
+    out: list[Path] = []
+    for a in rows:
+        candidate = _resolve_attachment_path(a["path"], a["attachment_key"], storage)
+        if candidate and candidate.suffix.lower() in (".pdf",):
+            out.append(candidate)
     return out
+
+
+def _resolve_attachment_path(
+    path: str, attachment_key: str, storage: Path
+) -> Path | None:
+    """Resolve a Zotero attachment path.
+
+    - ``storage:file.pdf`` → storage/<attachment key>/file.pdf (imported file)
+    - absolute path → used as-is (linked file)
+    - relative path without storage: prefix → storage/<attachment key>/<path>
+    """
+    rel = (path or "").replace("storage:", "")
+    if not rel:
+        return None
+    if rel.startswith("/"):
+        candidate = Path(rel)
+    else:
+        candidate = storage / (attachment_key or "") / rel
+    return candidate if candidate.exists() else None
 
 
 # ---------------------------------------------------------------- API path
@@ -311,18 +336,63 @@ def _collections_api() -> list[dict]:
 
 
 def _attachments_api(key: str) -> list[dict]:
-    data = _api_get(f"/users/0/items/{key}/children")
+    paths = _attachment_paths_api(key)
+    return [{"path": str(p), "filename": p.name} for p in paths]
+
+
+def _attachment_paths_api(key: str) -> list[Path]:
     storage = _zotero_dir() / "storage"
-    out: list[dict] = []
+    out: list[Path] = []
+    # children attachments
+    try:
+        data = _api_get(f"/users/0/items/{key}/children")
+    except HTTPException:
+        data = []
     for entry in data or []:
         d = entry.get("data", {})
         filename = d.get("filename") or ""
+        link_mode = d.get("linkMode") or ""
         if not filename.lower().endswith(".pdf"):
             continue
-        candidate = storage / entry.get("key", "") / filename
-        if candidate.exists():
-            out.append({"path": str(candidate), "filename": filename})
+        candidate: Path | None = None
+        if link_mode == "linked_file" and (d.get("path") or "").startswith("/"):
+            candidate = Path(d["path"])
+        else:
+            candidate = storage / entry.get("key", "") / filename
+        if candidate and candidate.exists():
+            out.append(candidate)
+    if out:
+        return out
+    # the item itself may BE an attachment (PDF imported without a parent entry)
+    try:
+        item = _api_get(f"/users/0/items/{key}")
+        d = item.get("data", item) if isinstance(item, dict) else {}
+    except HTTPException:
+        return out
+    if d.get("itemType") == "attachment" and (d.get("contentType") or "").lower() == "application/pdf":
+        filename = d.get("filename") or ""
+        if filename:
+            if (d.get("linkMode") or "") == "linked_file" and (d.get("path") or "").startswith("/"):
+                candidate = Path(d["path"])
+            else:
+                candidate = storage / key / filename
+            if candidate and candidate.exists():
+                out.append(candidate)
     return out
+
+
+def resolve_pdf_paths(key: str) -> list[Path]:
+    """Mode-aware attachment resolution (used by the attachments API and AI)."""
+    mode = _reader_mode()
+    if mode == "api":
+        return _attachment_paths_api(key)
+    if mode == "db":
+        return _attachment_paths_db(key)
+    # none / error: last resort — try the local API directly
+    try:
+        return _attachment_paths_api(key)
+    except HTTPException:
+        return []
 
 
 # ---------------------------------------------------------------- endpoints

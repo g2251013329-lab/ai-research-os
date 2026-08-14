@@ -73,6 +73,9 @@ def _build_zotero_fixture() -> Path:
     storage = zdir / "storage" / "EFGH5678"
     storage.mkdir(parents=True, exist_ok=True)
     (storage / "paper.pdf").write_bytes(_make_pdf(["FUS phase separation dynamics test"]))
+    self_storage = zdir / "storage" / "SELF01"
+    self_storage.mkdir(parents=True, exist_ok=True)
+    (self_storage / "self.pdf").write_bytes(_make_pdf(["Self attachment paper"]))
     db = zdir / "zotero.sqlite"
     conn = sqlite3.connect(db)
     c = conn.cursor()
@@ -100,6 +103,10 @@ def _build_zotero_fixture() -> Path:
     c.execute("INSERT INTO itemTypes VALUES (2,'attachment')")
     c.execute("INSERT INTO items VALUES (1,1,'ABCD1234','2026-01-01 00:00:00')")
     c.execute("INSERT INTO items VALUES (2,2,'EFGH5678','2026-01-01 00:00:00')")
+    # self-attachment: PDF imported directly without a parent entry
+    c.execute("INSERT INTO items VALUES (3,2,'SELF01','2026-01-02 00:00:00')")
+    # linked file attachment (absolute path)
+    c.execute("INSERT INTO items VALUES (4,2,'LINK01','2026-01-02 00:00:00')")
     for fid, val in [
         (1, "Phase Separation of FUS"),
         (2, "2015-06-01"),
@@ -115,6 +122,17 @@ def _build_zotero_fixture() -> Path:
     c.execute("INSERT INTO collectionItems VALUES (1,1)")
     c.execute(
         "INSERT INTO itemAttachments VALUES (2,1,'storage:paper.pdf','application/pdf')"
+    )
+    # self-attachment row: itemID == parentItemID == 3
+    c.execute(
+        "INSERT INTO itemAttachments VALUES (3,3,'storage:self.pdf','application/pdf')"
+    )
+    # linked file: absolute path (no storage: prefix)
+    linked = (TEST_DIR / "linked-paper.pdf").resolve()
+    linked.write_bytes(_make_pdf(["Linked file LLPS paper"]))
+    c.execute(
+        "INSERT INTO itemAttachments VALUES (4,4,?, 'application/pdf')",
+        (str(linked),),
     )
     c.execute("INSERT INTO tags VALUES (1,'phase-separation')")
     c.execute("INSERT INTO itemTags VALUES (1,1)")
@@ -138,8 +156,8 @@ def test_zotero_flow():
         assert any(c["name"] == "LLPS Papers" for c in cols)
 
         items = client.get("/api/zotero/items").json()
-        assert len(items) == 1
-        item = items[0]
+        assert any(i["key"] == "ABCD1234" for i in items)
+        item = next(i for i in items if i["key"] == "ABCD1234")
         assert item["title"] == "Phase Separation of FUS"
         assert item["authors"] == "Patel A."
         assert item["tags"] == ["phase-separation"]
@@ -153,6 +171,20 @@ def test_zotero_flow():
         atts = client.get(f"/api/zotero/items/{item['key']}/attachments").json()
         assert len(atts) == 1
         assert Path(atts[0]["path"]).exists()
+
+        # self-attachment: the item itself is the PDF
+        self_atts = client.get("/api/zotero/items/SELF01/attachments").json()
+        assert len(self_atts) == 1 and self_atts[0]["filename"] == "self.pdf"
+
+        # linked file (absolute path)
+        linked_atts = client.get("/api/zotero/items/LINK01/attachments").json()
+        assert len(linked_atts) == 1
+        assert Path(linked_atts[0]["path"]).exists()
+        assert "Linked file LLPS paper" in _read_pdf_text(linked_atts[0]["path"])
+
+        # bare attachments appear in the item list (not filtered out)
+        all_items = client.get("/api/zotero/items", params={"limit": 20}).json()
+        assert any(x["key"] == "SELF01" for x in all_items)
 
         # import → Paper created with zotero_key + project
         proj = client.post("/api/projects", json={"title": "Zotero test project"}).json()
@@ -177,6 +209,13 @@ def test_zotero_flow():
         client.delete(f"/api/projects/{proj['id']}")
     finally:
         _restore_zotero_setting()
+
+
+def _read_pdf_text(path: str) -> str:
+    from pypdf import PdfReader
+
+    reader = PdfReader(path)
+    return "\n".join((p.extract_text() or "") for p in reader.pages)
 
 
 def test_paper_pdf_text_extraction():

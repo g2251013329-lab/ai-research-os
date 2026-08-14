@@ -1,53 +1,28 @@
-"""PDF text extraction for AI summaries (shared by paper & zotero contexts)."""
-from __future__ import annotations
+"""PDF text extraction for AI summaries (shared by paper & zotero contexts).
 
-from pathlib import Path
+Attachment resolution is delegated to the Zotero API module, which handles
+both direct-sqlite (Zotero closed) and local-API (Zotero running) modes,
+self-attachments and linked files.
+"""
+from __future__ import annotations
 
 MAX_PDF_CHARS = 24_000
 MAX_PDF_PAGES = 200  # hard safety cap on pages read
 
 
 def pdf_text_for_zotero_key(key: str, zotero_path: str) -> str:
-    """Resolve a Zotero item's PDF attachment and extract sampled text.
+    """Resolve a Zotero item's PDF attachment and extract sampled text."""
+    from ..api.zotero import resolve_pdf_paths
 
-    Covers the WHOLE document regardless of length: first pages (abstract /
-    intro), the last pages (discussion / conclusions) and evenly-spaced
-    samples from the middle, each page labeled with its number.
-    """
-    zdir = Path(zotero_path).expanduser()
-    storage = zdir / "storage"
-    candidates: list[Path] = []
-    try:
-        import sqlite3
+    paths = resolve_pdf_paths(key)
+    for cand in paths:
+        try:
+            from pypdf import PdfReader
 
-        db = zdir / "zotero.sqlite"
-        if db.exists():
-            conn = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=2)
-            conn.row_factory = sqlite3.Row
-            parent = conn.execute(
-                "SELECT itemID FROM items WHERE key = ?", (key,)
-            ).fetchone()
-            if parent:
-                rows = conn.execute(
-                    "SELECT a.path, i.key AS ak FROM itemAttachments a "
-                    "JOIN items i ON a.itemID = i.itemID WHERE a.parentItemID = ?",
-                    (parent["itemID"],),
-                ).fetchall()
-                for r in rows:
-                    rel = (r["path"] or "").replace("storage:", "")
-                    candidates.append(storage / (r["ak"] or "") / rel)
-            conn.close()
-    except Exception:
-        return ""
-    for cand in candidates:
-        if cand.exists() and cand.suffix.lower() == ".pdf":
-            try:
-                from pypdf import PdfReader
-
-                reader = PdfReader(str(cand))
-                return _sample_pages(reader, len(reader.pages))
-            except Exception:
-                return ""
+            reader = PdfReader(str(cand))
+            return _sample_pages(reader, len(reader.pages))
+        except Exception:
+            continue
     return ""
 
 

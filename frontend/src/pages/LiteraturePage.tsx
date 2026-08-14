@@ -269,6 +269,11 @@ export default function LiteraturePage() {
                   />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[13.5px] font-medium" data-tip={item.title}>
+                      {item.type === 'attachment' && (
+                        <span className="mr-1 rounded bg-amber-50 px-1.5 py-px text-[10px] text-amber-600 dark:bg-amber-950/60 dark:text-amber-300">
+                          📎 PDF
+                        </span>
+                      )}
                       {item.title}
                     </div>
                     <div className="mt-0.5 truncate text-[11.5px] text-neutral-400" data-tip={item.authors}>
