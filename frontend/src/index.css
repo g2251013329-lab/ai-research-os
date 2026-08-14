@@ -2,6 +2,39 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ---------- Accent theme system ----------
+   Each accent theme defines --accent / --accent-2 (gradient pair).
+   Tailwind utilities (bg-accent, text-accent, from-accent, ...) are
+   generated from these via @theme below, so they adapt at runtime. */
+:root {
+  --accent: #3b82f6;
+  --accent-2: #6366f1;
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 82%, #000);
+}
+
+.dark {
+  --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 72%, #000);
+}
+
+[data-accent="ocean"] { --accent: #3b82f6; --accent-2: #6366f1; }
+[data-accent="mint"] { --accent: #10b981; --accent-2: #14b8a6; }
+[data-accent="sakura"] { --accent: #ec4899; --accent-2: #d946ef; }
+[data-accent="grape"] { --accent: #8b5cf6; --accent-2: #a855f7; }
+[data-accent="sunset"] { --accent: #f59e0b; --accent-2: #f97316; }
+[data-accent="cyan"] { --accent: #06b6d4; --accent-2: #0ea5e9; }
+[data-accent="coral"] { --accent: #f43f5e; --accent-2: #fb7185; }
+[data-accent="mono"] { --accent: #525252; --accent-2: #a3a3a3; }
+
+@theme {
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-dark: var(--accent-dark);
+}
+
+/* ---------- Base ---------- */
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI",
     "Helvetica Neue", sans-serif;
@@ -16,4 +49,12 @@ body,
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Brand wordmark ---------- */
+.gradient-text {
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

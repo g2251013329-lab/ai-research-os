@@ -15,7 +15,7 @@ export default function AiContextPanel() {
       <div className="flex h-11 items-center justify-between border-b border-neutral-200 px-2 dark:border-neutral-800">
         {open && (
           <span className="flex items-center gap-1.5 text-[12px] font-medium text-neutral-600 dark:text-neutral-300">
-            <Sparkles size={13} className="text-blue-500" />
+            <Sparkles size={13} className="text-accent" />
             {t('aiPanel.title')}
           </span>
         )}

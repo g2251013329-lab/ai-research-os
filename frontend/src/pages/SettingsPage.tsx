@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, KeyRound, Loader2 } from 'lucide-react'
 import { api } from '../api/client'
 import { useSettingsStore } from '../store/useSettingsStore'
+import { ACCENT_THEMES } from '../theme/themes'
 
 export default function SettingsPage() {
   const { t } = useTranslation()
@@ -82,20 +83,20 @@ export default function SettingsPage() {
             <input
               value={vaultPath}
               onChange={(e) => setVaultPath(e.target.value)}
-              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-blue-500 dark:border-neutral-700 dark:bg-neutral-950"
+              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
               placeholder="/Users/mathew/ai-research-vault"
             />
             <button
               type="button"
               onClick={() => void saveVault()}
-              className="rounded-md bg-blue-600 px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-blue-700"
+              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               {t('common.save')}
             </button>
           </div>
         </div>
 
-        {/* Language & theme */}
+        {/* Language, theme & accent */}
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
             <label className="block text-[13px] font-medium">
@@ -106,7 +107,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 void update({ language: e.target.value as 'zh' | 'en' })
               }
-              className="mt-2 w-full rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-blue-500 dark:border-neutral-700 dark:bg-neutral-950"
+              className="mt-2 w-full rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
             >
               <option value="zh">{t('language.zh')}</option>
               <option value="en">{t('language.en')}</option>
@@ -119,11 +120,49 @@ export default function SettingsPage() {
               onChange={(e) =>
                 void update({ theme: e.target.value as 'light' | 'dark' })
               }
-              className="mt-2 w-full rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-blue-500 dark:border-neutral-700 dark:bg-neutral-950"
+              className="mt-2 w-full rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
             >
               <option value="light">{t('theme.light')}</option>
               <option value="dark">{t('theme.dark')}</option>
             </select>
+          </div>
+        </div>
+
+        {/* Accent themes */}
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <label className="block text-[13px] font-medium">{t('themes.label')}</label>
+          <div className="mt-3 grid grid-cols-4 gap-2">
+            {ACCENT_THEMES.map((th) => {
+              const active = (settings?.accent ?? 'ocean') === th.id
+              return (
+                <button
+                  key={th.id}
+                  type="button"
+                  onClick={() => void update({ accent: th.id })}
+                  className={`flex flex-col items-center gap-1.5 rounded-lg border p-2.5 transition-colors ${
+                    active
+                      ? 'border-accent bg-accent-soft'
+                      : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600'
+                  }`}
+                >
+                  <span
+                    className="h-6 w-6 rounded-full shadow-sm"
+                    style={{
+                      background: `linear-gradient(135deg, ${th.from}, ${th.to})`,
+                    }}
+                  />
+                  <span
+                    className={`text-[11px] ${
+                      active
+                        ? 'font-medium text-accent'
+                        : 'text-neutral-500 dark:text-neutral-400'
+                    }`}
+                  >
+                    {t(th.nameKey)}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -134,19 +173,19 @@ export default function SettingsPage() {
             <input
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
-              className="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-blue-500 dark:border-neutral-700 dark:bg-neutral-950"
+              className="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
               placeholder={t('settings.ai.baseUrl')}
             />
             <input
               value={model}
               onChange={(e) => setModel(e.target.value)}
-              className="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-blue-500 dark:border-neutral-700 dark:bg-neutral-950"
+              className="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
               placeholder={t('settings.ai.model')}
             />
             <button
               type="button"
               onClick={() => void saveAi()}
-              className="rounded-md bg-blue-600 px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-blue-700"
+              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               {t('common.save')}
             </button>
@@ -173,14 +212,14 @@ export default function SettingsPage() {
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-blue-500 dark:border-neutral-700 dark:bg-neutral-950"
+              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
               placeholder={t('settings.key.placeholder')}
             />
             <button
               type="button"
               onClick={() => void saveKey()}
               disabled={savingKey || !apiKey.trim()}
-              className="rounded-md bg-blue-600 px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
             >
               {savingKey ? <Loader2 size={13} className="animate-spin" /> : t('settings.key.save')}
             </button>

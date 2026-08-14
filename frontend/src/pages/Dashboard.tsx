@@ -15,7 +15,7 @@ export default function Dashboard() {
         <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-500 dark:text-neutral-400">
           {t('dashboard.welcomeDesc')}
         </p>
-        <p className="mt-4 inline-block rounded-md bg-blue-50 px-2.5 py-1 text-[12px] text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+        <p className="mt-4 inline-block rounded-md bg-accent-soft px-2.5 py-1 text-[12px] text-accent">
           {t('dashboard.comingSoon')}
         </p>
       </div>

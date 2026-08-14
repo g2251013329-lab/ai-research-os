@@ -6,6 +6,7 @@ export interface AppSettings {
   vault_path: string
   language: 'zh' | 'en'
   theme: 'light' | 'dark'
+  accent: string
   deepseek_model: string
   deepseek_base_url: string
 }
@@ -19,8 +20,9 @@ interface SettingsState {
   refreshKeyStatus: () => Promise<void>
 }
 
-function applyTheme(theme: 'light' | 'dark') {
+function applyAppearance(theme: 'light' | 'dark', accent: string) {
   document.documentElement.classList.toggle('dark', theme === 'dark')
+  document.documentElement.dataset.accent = accent
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
@@ -32,7 +34,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     try {
       const settings = await api<AppSettings>('/api/settings')
       localStorage.setItem('airos.lang', settings.language)
-      applyTheme(settings.theme)
+      applyAppearance(settings.theme, settings.accent)
       set({ settings, loading: false })
       void get().refreshKeyStatus()
     } finally {
@@ -46,7 +48,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     })
     localStorage.setItem('airos.lang', settings.language)
     void i18n.changeLanguage(settings.language)
-    applyTheme(settings.theme)
+    applyAppearance(settings.theme, settings.accent)
     set({ settings })
   },
   refreshKeyStatus: async () => {

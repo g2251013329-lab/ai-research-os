@@ -22,12 +22,20 @@ router = APIRouter(prefix="/api/settings", tags=["settings"])
 KEYRING_SERVICE = "ai-research-os"
 KEYRING_USERNAME = "deepseek-api-key"
 
-PUBLIC_KEYS = ("vault_path", "language", "theme", "deepseek_model", "deepseek_base_url")
+PUBLIC_KEYS = (
+    "vault_path",
+    "language",
+    "theme",
+    "accent",
+    "deepseek_model",
+    "deepseek_base_url",
+)
 
 DEFAULTS: dict[str, Any] = {
     "vault_path": str(app_settings.vault_path),
     "language": "zh",
     "theme": "dark",
+    "accent": "ocean",
     "deepseek_model": app_settings.deepseek_model,
     "deepseek_base_url": app_settings.deepseek_base_url,
 }
@@ -124,6 +132,7 @@ class SettingsUpdate(BaseModel):
     vault_path: str | None = None
     language: str | None = None
     theme: str | None = None
+    accent: str | None = None
     deepseek_model: str | None = None
     deepseek_base_url: str | None = None
 

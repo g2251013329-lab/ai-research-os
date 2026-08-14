@@ -24,6 +24,17 @@ export default {
     light: '浅色',
     dark: '深色',
   },
+  themes: {
+    label: '配色主题',
+    ocean: '深海蓝',
+    mint: '薄荷绿',
+    sakura: '樱花粉',
+    grape: '葡萄紫',
+    sunset: '琥珀暖阳',
+    cyan: '湖光青',
+    coral: '珊瑚红',
+    mono: '极简黑白',
+  },
   language: {
     label: '语言',
     zh: '中文',

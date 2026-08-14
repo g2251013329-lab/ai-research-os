@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Settings,
 } from 'lucide-react'
+import BrandMark from '../BrandMark'
 import TopBar from './TopBar'
 import AiContextPanel from './AiContextPanel'
 
@@ -29,10 +30,7 @@ export default function AppLayout() {
       {/* Sidebar */}
       <aside className="flex w-52 shrink-0 flex-col border-r border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
-          <div className="text-sm font-semibold tracking-wide">{t('app.title')}</div>
-          <div className="text-[11px] text-neutral-500 dark:text-neutral-400">
-            {t('app.subtitle')}
-          </div>
+          <BrandMark />
         </div>
         <nav className="flex-1 space-y-0.5 overflow-y-auto p-2">
           {navItems.map(({ to, key, icon: Icon, end }) => (
@@ -43,7 +41,7 @@ export default function AppLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${
                   isActive
-                    ? 'bg-blue-50 font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
+                    ? 'bg-accent-soft font-medium text-accent'
                     : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100'
                 }`
               }
@@ -59,7 +57,7 @@ export default function AppLayout() {
             className={({ isActive }) =>
               `flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${
                 isActive
-                  ? 'bg-blue-50 font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
+                  ? 'bg-accent-soft font-medium text-accent'
                   : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
               }`
             }

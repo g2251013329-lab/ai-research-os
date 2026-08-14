@@ -24,6 +24,17 @@ export default {
     light: 'Light',
     dark: 'Dark',
   },
+  themes: {
+    label: 'Accent Theme',
+    ocean: 'Ocean Blue',
+    mint: 'Fresh Mint',
+    sakura: 'Sakura Pink',
+    grape: 'Grape Purple',
+    sunset: 'Amber Sunset',
+    cyan: 'Lagoon Cyan',
+    coral: 'Coral Red',
+    mono: 'Mono',
+  },
   language: {
     label: 'Language',
     zh: '中文',
