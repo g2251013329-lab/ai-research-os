@@ -151,12 +151,13 @@ def build_context(session: Session, obj_type: str, obj_id: int) -> str:
         parts.append(
             f"## 文献：{p.title}\n"
             f"{p.authors} {p.year} {p.journal}\n"
-            f"DOI: {p.doi or '无'} 链接: {p.url or '无'}\n"
-            f"摘要: {p.abstract or '无'}"
+            f"DOI: {p.doi or '无'} 链接: {p.url or '无'}"
         )
+        if p.abstract:
+            parts.append(f"摘要: {p.abstract}")
         pdf_text = _paper_pdf_text(p)
         if pdf_text:
-            parts.append(f"## PDF 正文摘录（前 {len(pdf_text)} 字符）\n{pdf_text}")
+            parts.append(f"## PDF 正文摘录（全文采样，带页码）\n{pdf_text}")
 
     elif obj_type == "zotero":
         # Zotero library item (not yet imported as a Paper)
@@ -168,14 +169,15 @@ def build_context(session: Session, obj_type: str, obj_id: int) -> str:
         parts.append(
             f"## Zotero 文献：{item.get('title', '')}\n"
             f"{item.get('authors', '')} {item.get('year', '')} {item.get('journal', '')}\n"
-            f"DOI: {item.get('doi', '') or '无'}\n"
-            f"摘要: {item.get('abstract', '') or '无'}"
+            f"DOI: {item.get('doi', '') or '无'}"
         )
+        if item.get("abstract"):
+            parts.append(f"摘要: {item['abstract']}")
         pdf_text = pdf_text_for_zotero_key(
             str(obj_id), get_user_setting("zotero_path", "~/Zotero")
         )
         if pdf_text:
-            parts.append(f"## PDF 正文摘录\n{pdf_text}")
+            parts.append(f"## PDF 正文摘录（全文采样，带页码）\n{pdf_text}")
 
     elif obj_type == "concept":
         c = session.get(LearningConcept, obj_id)

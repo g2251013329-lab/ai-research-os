@@ -104,9 +104,12 @@ def summarize_paper(
         raise HTTPException(status_code=404, detail="Paper not found")
     context = build_context(session, "paper", paper.id)
     prompt = (
-        f"请用中文总结这篇文献：\n1. 研究问题（1-2 句）\n2. 方法概要（2-3 句）\n"
-        f"3. 主要发现（3-5 点）\n4. 与 LLPS / 异常凝聚体研究的关联（如有）\n"
-        f"5. 局限性（如有）。\n不要编造上下文之外的信息。\n\n【上下文】\n{context}"
+        "请用中文总结这篇文献：\n1. 研究问题（1-2 句）\n2. 方法概要（2-3 句）\n"
+        "3. 主要发现（3-5 点）\n4. 与 LLPS / 异常凝聚体研究的关联（如有）\n"
+        "5. 局限性（如有）。\n"
+        "注意：若上下文中提供了 PDF 正文摘录，请直接基于正文总结；"
+        "即使没有正式摘要也无需提及'摘要缺失'，除非上下文完全没有正文内容。\n"
+        "不要编造上下文之外的信息。\n\n【上下文】\n" + context
     )
     return {"summary": ai.complete(prompt)}
 
