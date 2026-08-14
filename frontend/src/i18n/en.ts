@@ -199,6 +199,9 @@ export default {
     context: 'Context',
     noContext: 'No context (general chat)',
     autoDetected: 'Auto-detected',
+    groupProjects: 'Projects',
+    groupPapers: 'My papers (imported)',
+    groupZotero: 'Zotero items (not imported)',
     chatHint:
       'Pick a context on the left (or it auto-links on project pages), then ask. Answers use the project\'s questions, hypotheses, experiments and notes.',
     chatPlaceholder: 'Ask… (Enter to send)',

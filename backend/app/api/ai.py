@@ -17,13 +17,13 @@ from ..ai.context import build_context
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 
-OBJ_TYPES = ("project", "question", "experiment", "paper", "concept")
+OBJ_TYPES = ("project", "question", "experiment", "paper", "concept", "zotero")
 
 
 class ChatIn(BaseModel):
     message: str
     object_type: str | None = None
-    object_id: int | None = None
+    object_id: int | str | None = None
 
 
 class PaperSummaryIn(BaseModel):

@@ -17,6 +17,7 @@ from ..models import (
     ResearchQuestion,
 )
 from .memory import memory_context
+from .pdf import pdf_text_for_zotero_key
 
 
 def _vault() -> Path:
@@ -157,6 +158,25 @@ def build_context(session: Session, obj_type: str, obj_id: int) -> str:
         if pdf_text:
             parts.append(f"## PDF 正文摘录（前 {len(pdf_text)} 字符）\n{pdf_text}")
 
+    elif obj_type == "zotero":
+        # Zotero library item (not yet imported as a Paper)
+        from ..api.zotero import get_item_by_key
+
+        item = get_item_by_key(str(obj_id))
+        if not item:
+            return parts[0] + "\n\n（未找到该 Zotero 条目）"
+        parts.append(
+            f"## Zotero 文献：{item.get('title', '')}\n"
+            f"{item.get('authors', '')} {item.get('year', '')} {item.get('journal', '')}\n"
+            f"DOI: {item.get('doi', '') or '无'}\n"
+            f"摘要: {item.get('abstract', '') or '无'}"
+        )
+        pdf_text = pdf_text_for_zotero_key(
+            str(obj_id), get_user_setting("zotero_path", "~/Zotero")
+        )
+        if pdf_text:
+            parts.append(f"## PDF 正文摘录\n{pdf_text}")
+
     elif obj_type == "concept":
         c = session.get(LearningConcept, obj_id)
         if not c:
@@ -172,83 +192,9 @@ def build_context(session: Session, obj_type: str, obj_id: int) -> str:
 
 
 def _paper_pdf_text(paper: Paper) -> str:
-    """Extract text from the paper's Zotero PDF attachment.
-
-    Covers the WHOLE document regardless of length: first pages (abstract /
-    intro), the last pages (discussion / conclusions) and evenly-spaced
-    samples from the middle, each page labeled with its number. Total budget
-    is capped so long documents don't blow up the prompt.
-    """
+    """PDF text for an imported paper (via its Zotero key)."""
     if not paper.zotero_key:
         return ""
-    zdir = Path(get_user_setting("zotero_path", "~/Zotero")).expanduser()
-    storage = zdir / "storage"
-    candidates: list[Path] = []
-    try:
-        import sqlite3
-
-        db = zdir / "zotero.sqlite"
-        if db.exists():
-            conn = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=2)
-            conn.row_factory = sqlite3.Row
-            parent = conn.execute(
-                "SELECT itemID FROM items WHERE key = ?", (paper.zotero_key,)
-            ).fetchone()
-            if parent:
-                rows = conn.execute(
-                    "SELECT a.path, i.key AS ak FROM itemAttachments a "
-                    "JOIN items i ON a.itemID = i.itemID WHERE a.parentItemID = ?",
-                    (parent["itemID"],),
-                ).fetchall()
-                for r in rows:
-                    rel = (r["path"] or "").replace("storage:", "")
-                    candidates.append(storage / (r["ak"] or "") / rel)
-            conn.close()
-    except Exception:
-        return ""
-    for cand in candidates:
-        if cand.exists() and cand.suffix.lower() == ".pdf":
-            try:
-                from pypdf import PdfReader
-
-                reader = PdfReader(str(cand))
-                total = len(reader.pages)
-                return _sample_pages(reader, total)
-            except Exception:
-                return ""
-    return ""
-
-
-MAX_PDF_CHARS = 24_000
-MAX_PDF_PAGES = 200  # hard safety cap on pages read
-
-
-def _sample_pages(reader, total: int) -> str:
-    """Pick pages covering the whole document, then extract within budget."""
-    if total <= 12:
-        indices = list(range(total))
-    else:
-        n = min(total, MAX_PDF_PAGES)
-        head = [0, 1]
-        tail = [n - 2, n - 1]
-        middle_slots = min(24, max(8, n // 4))
-        step = max(1, (n - 4) / middle_slots)
-        middle = [2 + int(i * step) for i in range(middle_slots)]
-        indices = sorted({i for i in head + tail + middle if 0 <= i < n})
-
-    parts: list[str] = []
-    budget = MAX_PDF_CHARS
-    for i in indices:
-        if budget <= 0:
-            break
-        try:
-            page_text = (reader.pages[i].extract_text() or "").strip()
-        except Exception:
-            continue
-        if not page_text:
-            continue
-        if len(page_text) > budget:
-            page_text = page_text[:budget]
-        parts.append(f"[第{i + 1}页] {page_text}")
-        budget -= len(page_text)
-    return "\n\n".join(parts)
+    return pdf_text_for_zotero_key(
+        paper.zotero_key, get_user_setting("zotero_path", "~/Zotero")
+    )

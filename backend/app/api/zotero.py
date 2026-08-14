@@ -369,6 +369,39 @@ def attachments(key: str) -> list[dict]:
     raise HTTPException(status_code=404, detail="Zotero database not found")
 
 
+def get_item_by_key(key: str) -> dict | None:
+    """Public helper: single item by key (used by AI context builder)."""
+    mode = _reader_mode()
+    if mode == "none" or mode == "error":
+        return None
+    if mode == "api":
+        try:
+            data = _api_get(f"/users/0/items/{key}")
+            entry = data if isinstance(data, dict) else (data[0] if data else {})
+            d = entry.get("data", {})
+            date = d.get("date") or ""
+            return {
+                "key": entry.get("key", key),
+                "title": d.get("title", ""),
+                "authors": _authors_api(d.get("creators")),
+                "year": date[:4],
+                "journal": d.get("publicationTitle", ""),
+                "doi": d.get("DOI", ""),
+                "url": d.get("url", ""),
+                "abstract": d.get("abstractNote", ""),
+            }
+        except HTTPException:
+            return None
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT itemID FROM items WHERE key = ?", (key,)
+        ).fetchone()
+        if not row:
+            return None
+        items = _load_items_db(conn, [row["itemID"]])
+    return items[0] if items else None
+
+
 class ImportIn(BaseModel):
     keys: list[str]
     project_id: int | None = None
