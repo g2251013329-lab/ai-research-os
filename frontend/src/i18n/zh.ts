@@ -529,6 +529,7 @@ export default {
       zotero: 'Zotero 库',
       mine: '我的文献',
     },
+    mineEmpty: '还没有文献，把 PDF 拖到上方直接添加',
     zoteroOk: 'Zotero 已连接',
     zoteroApi: 'Zotero 已连接（本地 API）',
     zoteroMissing: '未找到 Zotero 库',

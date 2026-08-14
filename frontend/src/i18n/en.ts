@@ -537,6 +537,7 @@ export default {
       zotero: 'Zotero Library',
       mine: 'My Papers',
     },
+    mineEmpty: 'No papers yet — drop a PDF above to add one',
     zoteroOk: 'Zotero connected',
     zoteroApi: 'Zotero connected (local API)',
     zoteroMissing: 'Zotero library not found',

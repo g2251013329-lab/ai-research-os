@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { api } from '../api/client'
 import { useToastStore } from '../store/useToastStore'
-import PapersView from '../components/research/PapersView'
+import MyPapersList from '../components/literature/MyPapersList'
 
 interface ZoteroItem {
   key: string
@@ -212,7 +212,7 @@ export default function LiteraturePage() {
 
       {tab === 'mine' && (
         <div className="mt-4">
-          <PapersView projectId={null} />
+          <MyPapersList />
         </div>
       )}
 
