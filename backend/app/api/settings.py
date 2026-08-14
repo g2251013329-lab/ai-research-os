@@ -99,6 +99,7 @@ def delete_secret() -> None:
 class SettingsUpdate(BaseModel):
     vault_path: str | None = None
     extra_vaults: list[str] | None = None
+    zotero_path: str | None = None
     language: str | None = None
     theme: str | None = None
     accent: str | None = None

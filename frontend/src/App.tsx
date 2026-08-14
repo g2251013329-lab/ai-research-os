@@ -5,6 +5,7 @@ import AppLayout from './components/layout/AppLayout'
 import Dashboard from './pages/Dashboard'
 import InboxPage from './pages/InboxPage'
 import LearningPage from './pages/LearningPage'
+import LiteraturePage from './pages/LiteraturePage'
 import NotFound from './pages/NotFound'
 import PlaceholderPage from './pages/PlaceholderPage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
@@ -30,10 +31,7 @@ export default function App() {
             <Route path="/learning" element={<LearningPage />} />
             <Route path="/research" element={<ResearchPage />} />
             <Route path="/research/projects/:id" element={<ProjectDetailPage />} />
-            <Route
-              path="/literature"
-              element={<PlaceholderPage titleKey="nav.literature" phase="Phase 5" />}
-            />
+            <Route path="/literature" element={<LiteraturePage />} />
             <Route path="/inbox" element={<InboxPage />} />
             <Route
               path="/leisure"

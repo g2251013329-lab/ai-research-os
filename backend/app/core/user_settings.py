@@ -14,6 +14,7 @@ from .config import settings as app_settings
 PUBLIC_KEYS = (
     "vault_path",
     "extra_vaults",
+    "zotero_path",
     "language",
     "theme",
     "accent",
@@ -27,6 +28,7 @@ PUBLIC_KEYS = (
 DEFAULTS: dict[str, Any] = {
     "vault_path": str(app_settings.vault_path),
     "extra_vaults": [],
+    "zotero_path": "~/Zotero",
     "language": "zh",
     "theme": "dark",
     "accent": "ocean",

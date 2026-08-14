@@ -5,12 +5,14 @@ import { api } from '../api/client'
 import { useSettingsStore } from '../store/useSettingsStore'
 import { ACCENT_THEMES } from '../theme/themes'
 import { SUBTITLE_COLORS, SUBTITLE_FONTS } from '../theme/subtitle'
+import GitPanel from '../components/settings/GitPanel'
 
 export default function SettingsPage() {
   const { t } = useTranslation()
   const { settings, update, refreshKeyStatus, keyConfigured } = useSettingsStore()
 
   const [vaultPath, setVaultPath] = useState(settings?.vault_path ?? '')
+  const [zoteroPath, setZoteroPath] = useState(settings?.zotero_path ?? '~/Zotero')
   const [brandSubtitle, setBrandSubtitle] = useState(
     settings?.brand_subtitle ?? 'LLPS',
   )
@@ -34,6 +36,11 @@ export default function SettingsPage() {
 
   const saveVault = async () => {
     await update({ vault_path: vaultPath.trim() || settings?.vault_path })
+    flashSaved()
+  }
+
+  const saveZotero = async () => {
+    await update({ zotero_path: zoteroPath.trim() || '~/Zotero' })
     flashSaved()
   }
 
@@ -112,6 +119,29 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => void saveVault()}
+              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+            >
+              {t('common.save')}
+            </button>
+          </div>
+        </div>
+
+        {/* Zotero path */}
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <label className="block text-[13px] font-medium">{t('settings.zotero.label')}</label>
+          <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
+            {t('settings.zotero.desc')}
+          </p>
+          <div className="mt-2 flex gap-2">
+            <input
+              value={zoteroPath}
+              onChange={(e) => setZoteroPath(e.target.value)}
+              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              placeholder="~/Zotero"
+            />
+            <button
+              type="button"
+              onClick={() => void saveZotero()}
               className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               {t('common.save')}
@@ -385,6 +415,9 @@ export default function SettingsPage() {
             </p>
           )}
         </div>
+
+        {/* Git sync */}
+        <GitPanel />
 
         {savedFlash && (
           <p className="flex items-center gap-1 text-[12px] text-emerald-600 dark:text-emerald-400">

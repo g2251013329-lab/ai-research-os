@@ -14,6 +14,7 @@ from .api import (
     dashboard,
     experiments,
     focus,
+    git,
     health,
     hypotheses,
     inbox,
@@ -27,6 +28,7 @@ from .api import (
     system,
     tasks,
     timeline,
+    zotero,
 )
 from .core.config import settings as app_settings
 from .core.db import Session, engine, init_db
@@ -71,6 +73,8 @@ app.include_router(hypotheses.router)
 app.include_router(papers.router)
 app.include_router(experiments.router)
 app.include_router(research.router)
+app.include_router(zotero.router)
+app.include_router(git.router)
 
 # Serve the built frontend when it exists (production mode).
 _frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
