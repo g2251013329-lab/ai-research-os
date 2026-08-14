@@ -80,7 +80,9 @@ export default function NotesView() {
           <div key={note.path} className="flex items-center gap-3 px-4 py-3">
             <FileText size={15} className="shrink-0 text-neutral-400" />
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[13.5px]">{note.title}</div>
+              <div title={note.title} className="truncate text-[13.5px]">
+                {note.title}
+              </div>
               <div className="truncate text-[11px] text-neutral-400">
                 {note.relative}
                 {note.created && ` · ${note.created}`}

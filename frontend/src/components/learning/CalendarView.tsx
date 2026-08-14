@@ -158,6 +158,7 @@ export default function CalendarView() {
                 {ev?.tasks.map((task) => (
                   <span
                     key={`t${task.id}`}
+                    title={task.title}
                     className="mt-0.5 w-full truncate rounded bg-blue-50 px-1 text-[10px] text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
                   >
                     {task.title}
@@ -166,6 +167,7 @@ export default function CalendarView() {
                 {ev?.sessions.map((s) => (
                   <span
                     key={`s${s.id}`}
+                    title={s.topic}
                     className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-emerald-50 px-1 text-[10px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                   >
                     <CheckCircle2 size={9} /> {s.topic}
@@ -174,6 +176,7 @@ export default function CalendarView() {
                 {ev?.focus.map((f) => (
                   <span
                     key={`f${f.id}`}
+                    title={`${t('learning.calendar.focus')} ${f.duration_min}′`}
                     className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-amber-50 px-1 text-[10px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
                   >
                     <Timer size={9} /> {f.duration_min}′
@@ -197,7 +200,9 @@ export default function CalendarView() {
           <div className="mt-2 space-y-2">
             {selected.tasks.map((task) => (
               <div key={task.id} className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
-                <div className="truncate text-[12px]">{task.title}</div>
+                <div title={task.title} className="truncate text-[12px]">
+                  {task.title}
+                </div>
                 <input
                   type="date"
                   value={task.due_date ?? ''}

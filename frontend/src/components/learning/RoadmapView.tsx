@@ -108,7 +108,9 @@ export default function RoadmapView() {
           >
             {t(`learning.statuses.${node.status}`)}
           </span>
-          <span className="flex-1 truncate text-[13px]">{node.title}</span>
+          <span title={node.title} className="flex-1 truncate text-[13px]">
+            {node.title}
+          </span>
 
           <select
             value={node.status}

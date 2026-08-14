@@ -226,7 +226,7 @@ export default function CommandPalette({
                           : 'text-neutral-400'
                       }`}
                     />
-                    <span className="flex-1 truncate text-[13px]">
+                    <span title={t(c.titleKey)} className="flex-1 truncate text-[13px]">
                       {t(c.titleKey)}
                     </span>
                     {!c.available && c.phase && (

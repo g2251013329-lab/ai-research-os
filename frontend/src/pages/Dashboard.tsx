@@ -196,6 +196,7 @@ export default function Dashboard() {
                   </button>
                   <div className="min-w-0 flex-1">
                     <div
+                      title={task.title}
                       className={`truncate text-[13.5px] ${
                         task.status === 'done'
                           ? 'text-neutral-400 line-through'
@@ -323,7 +324,9 @@ export default function Dashboard() {
             return (
               <div key={ev.created_at + ev.title} className="flex items-center gap-3 px-4 py-2.5">
                 <Icon size={14} className="shrink-0 text-neutral-400" />
-                <div className="min-w-0 flex-1 truncate text-[13px]">{ev.title}</div>
+                <div className="min-w-0 flex-1 truncate text-[13px]" title={ev.title}>
+                  {ev.title}
+                </div>
                 <span className="shrink-0 text-[11px] text-neutral-400">
                   {relativeTime(ev.created_at)}
                 </span>

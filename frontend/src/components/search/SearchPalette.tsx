@@ -217,8 +217,10 @@ export default function SearchPalette({
                       }`}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-medium">{r.title}</div>
-                      <div className="truncate text-[11.5px] text-neutral-400">
+                      <div title={r.title} className="truncate text-[13px] font-medium">
+                        {r.title}
+                      </div>
+                      <div title={r.subtitle} className="truncate text-[11.5px] text-neutral-400">
                         {r.subtitle}
                       </div>
                     </div>

@@ -124,7 +124,9 @@ export default function LearningPage() {
                 <div key={s.id} className="flex items-center gap-3 px-4 py-3">
                   <CheckCircle2 size={14} className="shrink-0 text-emerald-500" />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[13.5px]">{s.topic}</div>
+                    <div title={s.topic} className="truncate text-[13.5px]">
+                      {s.topic}
+                    </div>
                     <div className="text-[11px] text-neutral-400">{s.session_date}</div>
                   </div>
                   <span className="shrink-0 text-[12px] text-neutral-400">{s.duration_min}′</span>

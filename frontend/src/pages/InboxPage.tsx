@@ -171,6 +171,7 @@ export default function InboxPage() {
             </button>
             <div className="min-w-0 flex-1">
               <div
+                title={item.text}
                 className={`text-[13.5px] leading-snug ${
                   item.status === 'done' ? 'text-neutral-400 line-through' : ''
                 }`}
