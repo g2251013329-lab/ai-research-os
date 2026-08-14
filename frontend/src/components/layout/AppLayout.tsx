@@ -17,6 +17,7 @@ import SearchPalette from '../search/SearchPalette'
 import CommandPalette from '../commands/CommandPalette'
 import TaskModal from '../dashboard/TaskModal'
 import FocusOverlay from '../focus/FocusOverlay'
+import TooltipHost from '../TooltipHost'
 import ToastHost from '../ToastHost'
 
 const navItems = [
@@ -111,6 +112,7 @@ export default function AppLayout() {
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <TaskModal />
       <FocusOverlay />
+      <TooltipHost />
       <ToastHost />
     </div>
   )

@@ -158,7 +158,7 @@ export default function CalendarView() {
                 {ev?.tasks.map((task) => (
                   <span
                     key={`t${task.id}`}
-                    title={task.title}
+                    data-tip={task.title}
                     className="mt-0.5 w-full truncate rounded bg-blue-50 px-1 text-[10px] text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
                   >
                     {task.title}
@@ -167,7 +167,7 @@ export default function CalendarView() {
                 {ev?.sessions.map((s) => (
                   <span
                     key={`s${s.id}`}
-                    title={s.topic}
+                    data-tip={s.topic}
                     className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-emerald-50 px-1 text-[10px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                   >
                     <CheckCircle2 size={9} /> {s.topic}
@@ -176,7 +176,7 @@ export default function CalendarView() {
                 {ev?.focus.map((f) => (
                   <span
                     key={`f${f.id}`}
-                    title={`${t('learning.calendar.focus')} ${f.duration_min}′`}
+                    data-tip={`${t('learning.calendar.focus')} ${f.duration_min}′`}
                     className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-amber-50 px-1 text-[10px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
                   >
                     <Timer size={9} /> {f.duration_min}′
@@ -200,7 +200,7 @@ export default function CalendarView() {
           <div className="mt-2 space-y-2">
             {selected.tasks.map((task) => (
               <div key={task.id} className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
-                <div title={task.title} className="truncate text-[12px]">
+                <div data-tip={task.title} className="truncate text-[12px]">
                   {task.title}
                 </div>
                 <input
@@ -211,7 +211,7 @@ export default function CalendarView() {
                     rescheduleMutation.mutate({ id: task.id, due: e.target.value })
                   }
                   className="mt-1 w-full rounded border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
-                  title={t('learning.calendar.reschedule')}
+                  data-tip={t('learning.calendar.reschedule')}
                 />
               </div>
             ))}

@@ -165,13 +165,13 @@ export default function InboxPage() {
                   ? 'text-accent'
                   : 'text-neutral-300 dark:text-neutral-600'
               }`}
-              title={t('inbox.toggleDone')}
+              data-tip={t('inbox.toggleDone')}
             >
               {item.status === 'done' ? <Check size={17} /> : <Circle size={17} />}
             </button>
             <div className="min-w-0 flex-1">
               <div
-                title={item.text}
+                data-tip={item.text}
                 className={`text-[13.5px] leading-snug ${
                   item.status === 'done' ? 'text-neutral-400 line-through' : ''
                 }`}
@@ -192,7 +192,7 @@ export default function InboxPage() {
               type="button"
               onClick={() => deleteMutation.mutate(item.id)}
               className="mt-0.5 rounded p-1 text-neutral-300 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-neutral-600 dark:hover:bg-red-950/40"
-              title={t('inbox.delete')}
+              data-tip={t('inbox.delete')}
             >
               <Trash2 size={14} />
             </button>

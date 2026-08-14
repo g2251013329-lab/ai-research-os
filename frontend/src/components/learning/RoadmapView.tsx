@@ -108,7 +108,7 @@ export default function RoadmapView() {
           >
             {t(`learning.statuses.${node.status}`)}
           </span>
-          <span title={node.title} className="flex-1 truncate text-[13px]">
+          <span data-tip={node.title} className="flex-1 truncate text-[13px]">
             {node.title}
           </span>
 
@@ -116,7 +116,7 @@ export default function RoadmapView() {
             value={node.status}
             onChange={(e) => statusMutation.mutate({ id: node.id, status: e.target.value })}
             className="rounded border border-transparent bg-transparent px-1 py-0.5 text-[11px] text-neutral-400 outline-none hover:border-neutral-200 dark:hover:border-neutral-700"
-            title={t('learning.roadmap.changeStatus')}
+            data-tip={t('learning.roadmap.changeStatus')}
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -132,7 +132,7 @@ export default function RoadmapView() {
               setNewTitle('')
             }}
             className="rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-neutral-600"
-            title={t('learning.roadmap.addChild')}
+            data-tip={t('learning.roadmap.addChild')}
           >
             <Plus size={13} />
           </button>
@@ -141,7 +141,7 @@ export default function RoadmapView() {
               type="button"
               onClick={() => deleteMutation.mutate(node.id)}
               className="rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100 dark:text-neutral-600"
-              title={t('learning.roadmap.delete')}
+              data-tip={t('learning.roadmap.delete')}
             >
               <Trash2 size={13} />
             </button>
