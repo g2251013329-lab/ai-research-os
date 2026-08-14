@@ -178,6 +178,8 @@ export default {
   focus: {
     title: '专注模式',
     noTask: '不关联任务（自由专注）',
+    custom: '自定义任务名…',
+    customPlaceholder: '输入本次专注的任务名称',
     currentTask: '当前专注',
     start: '开始',
     pause: '暂停',
@@ -319,6 +321,10 @@ export default {
     noDescription: '暂无简介',
     hypothesesShort: '假设',
     back: '返回项目列表',
+    deleteProject: '删除项目',
+    deleteConfirmTitle: '确认删除该项目？',
+    deleteWarning: '将同时删除该项目下的研究问题、假设与实验记录；关联文献会保留但解除项目关联；时间线事件保留为历史记录。此操作不可撤销。',
+    deleteConfirm: '确认删除',
     projectStatus: {
       active: '进行中',
       paused: '已暂停',

@@ -5,10 +5,19 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import delete
 from sqlmodel import Session, select
 
 from ..core.db import get_session
-from ..models import PROJECT_STATUSES, Project
+from ..models import (
+    PROJECT_STATUSES,
+    Experiment,
+    Hypothesis,
+    Paper,
+    PaperQuestion,
+    Project,
+    ResearchQuestion,
+)
 from .timeline import add_timeline_event
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
@@ -72,9 +81,45 @@ def update_project(
 
 @router.delete("/{project_id}")
 def delete_project(project_id: int, session: Session = Depends(get_session)) -> dict:
+    """Delete a project and its children (questions, hypotheses, experiments).
+
+    Papers linked to the project are kept but unlinked (project_id → NULL);
+    timeline events are preserved as history.
+    """
     project = session.get(Project, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    question_ids = [
+        q.id
+        for q in session.exec(
+            select(ResearchQuestion).where(ResearchQuestion.project_id == project_id)
+        ).all()
+    ]
+    if question_ids:
+        # FK-safe order: experiments reference questions & hypotheses
+        session.exec(
+            delete(Experiment).where(Experiment.project_id == project_id)
+        )
+        session.exec(
+            delete(Hypothesis).where(Hypothesis.question_id.in_(question_ids))
+        )
+        session.exec(
+            delete(PaperQuestion).where(PaperQuestion.question_id.in_(question_ids))
+        )
+        session.exec(
+            delete(ResearchQuestion).where(ResearchQuestion.project_id == project_id)
+        )
+    else:
+        session.exec(delete(Experiment).where(Experiment.project_id == project_id))
+
+    # keep papers, just unlink them from this project
+    for p in session.exec(
+        select(Paper).where(Paper.project_id == project_id)
+    ).all():
+        p.project_id = None
+        session.add(p)
+
     session.delete(project)
     session.commit()
     return {"ok": True}

@@ -119,3 +119,43 @@ def test_full_research_loop():
     assert {"project.created", "rq.created", "hypothesis.created", "experiment.created"} <= types
 
     _cleanup()
+
+
+def test_project_delete_cascades():
+    _cleanup()
+    p = client.post("/api/projects", json={"title": "to delete"}).json()
+    q = client.post(
+        "/api/questions", json={"project_id": p["id"], "title": "q"}
+    ).json()
+    h = client.post(
+        "/api/hypotheses", json={"question_id": q["id"], "description": "h"}
+    ).json()
+    e = client.post(
+        "/api/experiments",
+        json={
+            "project_id": p["id"],
+            "question_id": q["id"],
+            "hypothesis_id": h["id"],
+            "title": "exp",
+        },
+    ).json()
+    paper = client.post(
+        "/api/papers", json={"title": "keep me", "project_id": p["id"]}
+    ).json()
+
+    r = client.delete(f"/api/projects/{p['id']}")
+    assert r.status_code == 200
+
+    assert client.get("/api/questions", params={"project_id": p["id"]}).json() == []
+    assert client.get("/api/hypotheses", params={"question_id": q["id"]}).json() == []
+    assert client.get("/api/experiments", params={"project_id": p["id"]}).json() == []
+
+    # paper kept but unlinked
+    papers = client.get("/api/papers").json()
+    assert any(
+        x["id"] == paper["id"] and x["project_id"] is None for x in papers
+    )
+
+    # deleted project gone
+    assert all(x["id"] != p["id"] for x in client.get("/api/projects").json())
+    _cleanup()

@@ -9,9 +9,12 @@ import { useUiStore } from '../../store/useUiStore'
 interface Task {
   id: number
   title: string
+  status: string
 }
 
 const PRESETS = [25, 50, 90]
+
+const CUSTOM = -1
 
 export default function FocusOverlay() {
   const { t } = useTranslation()
@@ -22,12 +25,14 @@ export default function FocusOverlay() {
 
   const { data: tasks } = useQuery({
     queryKey: ['tasks', 'active'],
-    queryFn: () => api<Task[]>('/api/tasks?limit=30'),
+    queryFn: () => api<Task[]>('/api/tasks?limit=50'),
     enabled: open,
+    select: (all) => all.filter((task) => task.status !== 'done'),
   })
 
   const [minutes, setMinutes] = useState(25)
   const [taskId, setTaskId] = useState<number | null>(null)
+  const [customTitle, setCustomTitle] = useState('')
   const [remaining, setRemaining] = useState<number | null>(null) // seconds
   const [running, setRunning] = useState(false)
 
@@ -35,6 +40,7 @@ export default function FocusOverlay() {
     if (open) {
       setMinutes(25)
       setTaskId(null)
+      setCustomTitle('')
       setRemaining(null)
       setRunning(false)
     }
@@ -58,7 +64,10 @@ export default function FocusOverlay() {
   }, [running])
 
   const finish = async () => {
-    const taskTitle = tasks?.find((t2) => t2.id === taskId)?.title ?? ''
+    const taskTitle =
+      taskId === CUSTOM
+        ? customTitle.trim()
+        : (tasks?.find((t2) => t2.id === taskId)?.title ?? '')
     try {
       await api('/api/focus/sessions', {
         method: 'POST',
@@ -105,17 +114,30 @@ export default function FocusOverlay() {
 
         {/* task picker */}
         <select
-          value={taskId ?? ''}
-          onChange={(e) => setTaskId(e.target.value ? Number(e.target.value) : null)}
+          value={taskId === CUSTOM ? 'custom' : taskId ?? ''}
+          onChange={(e) => {
+            const v = e.target.value
+            setTaskId(v === 'custom' ? CUSTOM : v ? Number(v) : null)
+          }}
           className={`mt-4 w-full ${field}`}
         >
           <option value="">{t('focus.noTask')}</option>
           {(tasks ?? []).map((task) => (
-            <option key={task.id} value={task.id}>
-              {task.title}
+            <option key={task.id} value={task.id} data-tip={task.title}>
+              {task.title.length > 30 ? task.title.slice(0, 30) + '…' : task.title}
             </option>
           ))}
+          <option value="custom">{t('focus.custom')}</option>
         </select>
+        {taskId === CUSTOM && (
+          <input
+            autoFocus
+            value={customTitle}
+            onChange={(e) => setCustomTitle(e.target.value)}
+            placeholder={t('focus.customPlaceholder')}
+            className={`mt-2 w-full ${field}`}
+          />
+        )}
 
         {/* duration presets */}
         {remaining === null && (

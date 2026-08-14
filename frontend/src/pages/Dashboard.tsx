@@ -18,7 +18,6 @@ import {
   TriangleAlert,
 } from 'lucide-react'
 import { api } from '../api/client'
-import { useToastStore } from '../store/useToastStore'
 import { useUiStore } from '../store/useUiStore'
 import { relativeTime, todayLabel } from '../utils/time'
 
@@ -68,7 +67,6 @@ const EVENT_ICONS: Record<string, typeof ListTodo> = {
 export default function Dashboard() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const toast = useToastStore((s) => s.show)
   const openTaskModal = useUiStore((s) => s.openTaskModal)
   const openFocus = useUiStore((s) => s.openFocus)
   const queryClient = useQueryClient()
@@ -101,17 +99,17 @@ export default function Dashboard() {
     {
       key: 'newExperiment',
       icon: FlaskConical,
-      run: () => toast(t('dashboard.comingPhase', { phase: 'Phase 4' })),
+      run: () => navigate('/research'),
     },
     {
       key: 'newQuestion',
       icon: HelpCircle,
-      run: () => toast(t('dashboard.comingPhase', { phase: 'Phase 4' })),
+      run: () => navigate('/research'),
     },
     {
       key: 'addPaper',
       icon: BookOpen,
-      run: () => toast(t('dashboard.comingPhase', { phase: 'Phase 4' })),
+      run: () => navigate('/research'),
     },
     {
       key: 'focusMode',

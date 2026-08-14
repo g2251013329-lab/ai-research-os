@@ -179,6 +179,8 @@ export default {
   focus: {
     title: 'Focus Mode',
     noTask: 'No linked task (free focus)',
+    custom: 'Custom task name…',
+    customPlaceholder: 'Type the task you are focusing on',
     currentTask: 'Focus session',
     start: 'Start',
     pause: 'Pause',
@@ -321,6 +323,11 @@ export default {
     noDescription: 'No description',
     hypothesesShort: 'Hyps',
     back: 'Back to projects',
+    deleteProject: 'Delete project',
+    deleteConfirmTitle: 'Delete this project?',
+    deleteWarning:
+      'Its research questions, hypotheses and experiments will be deleted. Linked papers are kept but unlinked from the project. Timeline events remain as history. This cannot be undone.',
+    deleteConfirm: 'Delete',
     projectStatus: {
       active: 'Active',
       paused: 'Paused',
