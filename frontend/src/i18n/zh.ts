@@ -550,6 +550,7 @@ export default {
       title: 'AI 文献发现',
       placeholder: '输入研究主题，如：FUS phase separation ALS',
       search: '搜索',
+      scholar: '在 Google Scholar 搜索',
       aiRanked: '已由 AI 按相关性排序（附理由）',
       empty: '没有找到结果，换个关键词试试',
     },

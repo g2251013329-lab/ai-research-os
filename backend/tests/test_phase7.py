@@ -119,11 +119,22 @@ def test_discover_and_compare(monkeypatch):
         ]
     }
 
+    fake_scholar_html = """
+    <div class="gs_ri">
+      <h3 class="gs_rt"><a href="https://scholar.example/fus">Scholar FUS condensate paper</a></h3>
+      <div class="gs_a">John Doe - 2021 - Journal of Phase Separation</div>
+      <div class="gs_rs">abstract snippet</div>
+    </div>
+    <div class="gs_li">ignored</div>
+    """
+
     import httpx
 
     class FakeResp:
-        def __init__(self, payload):
+        def __init__(self, payload, text=None):
             self._payload = payload
+            self._text = text
+            self.status_code = 200
 
         def raise_for_status(self):
             return None
@@ -131,10 +142,16 @@ def test_discover_and_compare(monkeypatch):
         def json(self):
             return self._payload
 
+        @property
+        def text(self):
+            return self._text or ""
+
     calls = {"n": 0}
 
     def fake_get(url, **kwargs):
         calls["n"] += 1
+        if "scholar.google.com" in url:
+            return FakeResp(None, text=fake_scholar_html)
         if "europepmc" in url:
             return FakeResp(fake_epmc)
         return FakeResp(fake_s2)
@@ -146,8 +163,12 @@ def test_discover_and_compare(monkeypatch):
     assert r.status_code == 200
     data = r.json()
     assert data["ai_ranked"] is False
-    assert len(data["results"]) == 2
-    assert calls["n"] == 2
+    sources = {x["source"] for x in data["results"]}
+    assert sources == {"Europe PMC", "Semantic Scholar", "Google Scholar"}, sources
+    scholar = next(x for x in data["results"] if x["source"] == "Google Scholar")
+    assert scholar["title"] == "Scholar FUS condensate paper"
+    assert scholar["year"] == "2021"
+    assert calls["n"] == 3
 
     # compare needs papers in db
     p1 = client.post("/api/papers", json={"title": "Compare A", "abstract": "FUS"}).json()

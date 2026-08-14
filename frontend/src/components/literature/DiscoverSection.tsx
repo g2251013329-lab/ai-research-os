@@ -104,6 +104,14 @@ export default function DiscoverSection() {
               {loading ? <Loader2 size={13} className="animate-spin" /> : <Search size={13} />}
               {t('literature.discover.search')}
             </button>
+            <a
+              href={`https://scholar.google.com/scholar?q=${encodeURIComponent(query.trim() || '')}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex shrink-0 items-center gap-1 rounded-md border border-neutral-300 px-3 py-1.5 text-[12.5px] text-neutral-600 transition-colors hover:border-accent hover:text-accent dark:border-neutral-700 dark:text-neutral-300"
+            >
+              {t('literature.discover.scholar')} ↗
+            </a>
           </div>
 
           {aiRanked && (

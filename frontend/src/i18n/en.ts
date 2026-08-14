@@ -558,6 +558,7 @@ export default {
       title: 'AI Literature Discovery',
       placeholder: 'Topic, e.g. FUS phase separation ALS',
       search: 'Search',
+      scholar: 'Search on Google Scholar',
       aiRanked: 'Ranked by AI relevance (with reasons)',
       empty: 'No results — try different keywords',
     },

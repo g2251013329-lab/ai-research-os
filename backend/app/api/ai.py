@@ -3,7 +3,9 @@ experiment next-step, writing assist, learning assist, literature discovery,
 paper comparison."""
 from __future__ import annotations
 
+import html as html_mod
 import json
+import re
 from typing import Any
 
 import httpx
@@ -207,8 +209,64 @@ class DiscoverIn(BaseModel):
     limit: int = 8
 
 
+def _scholar_search(query: str) -> list[dict[str, Any]]:
+    """Best-effort Google Scholar results (no official API; scraping may be
+    rate-limited — failures are silently skipped)."""
+    out: list[dict[str, Any]] = []
+    try:
+        r = httpx.get(
+            "https://scholar.google.com/scholar",
+            params={"q": query, "hl": "en", "num": 10},
+            headers={
+                "User-Agent": (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+                )
+            },
+            timeout=12,
+        )
+        r.raise_for_status()
+        page = r.text
+    except Exception:
+        return out
+
+    for chunk in re.split(r'<div class="gs_ri">', page)[1:]:
+        chunk = re.split(r'<div class="gs_li', chunk)[0]
+        m_title = re.search(r"<h3[^>]*>\s*<a[^>]*>(.*?)</a>", chunk, re.S)
+        m_href = re.search(r'<a[^>]*href="([^"]+)"', chunk)
+        m_meta = re.search(r'<div class="gs_a">(.*?)</div>', chunk, re.S)
+        if not m_title:
+            continue
+        title = html_mod.unescape(re.sub(r"<[^>]+>", "", m_title.group(1))).strip()
+        if not title:
+            continue
+        url = m_href.group(1) if m_href else ""
+        meta = ""
+        if m_meta:
+            meta = html_mod.unescape(re.sub(r"<[^>]+>", "", m_meta.group(1))).strip()
+        year = ""
+        ym = re.search(r"\b(19|20)\d{2}\b", meta)
+        if ym:
+            year = ym.group(0)
+        parts = [p.strip() for p in meta.split(" - ")]
+        authors = parts[0] if parts else ""
+        journal = parts[-1] if len(parts) >= 3 else ""
+        out.append(
+            {
+                "title": title,
+                "authors": authors[:150],
+                "year": year,
+                "journal": journal,
+                "doi": "",
+                "url": url,
+                "source": "Google Scholar",
+            }
+        )
+    return out
+
+
 def _discover_sources(query: str) -> list[dict[str, Any]]:
-    """Aggregate candidates from Europe PMC + Semantic Scholar (best effort)."""
+    """Aggregate candidates from Europe PMC, Semantic Scholar, Google Scholar."""
     out: list[dict[str, Any]] = []
     try:
         r = httpx.get(
@@ -241,6 +299,19 @@ def _discover_sources(query: str) -> list[dict[str, Any]]:
             },
             timeout=12,
         )
+        if r.status_code == 429:  # rate limited — retry once after a pause
+            import time
+
+            time.sleep(1)
+            r = httpx.get(
+                "https://api.semanticscholar.org/graph/v1/paper/search",
+                params={
+                    "query": query,
+                    "limit": 15,
+                    "fields": "title,authors,year,externalIds,journal",
+                },
+                timeout=12,
+            )
         r.raise_for_status()
         for hit in r.json().get("data", [])[:15]:
             doi = (hit.get("externalIds") or {}).get("DOI") or ""
@@ -259,6 +330,7 @@ def _discover_sources(query: str) -> list[dict[str, Any]]:
             )
     except Exception:
         pass
+    out.extend(_scholar_search(query))
     return out
 
 
@@ -302,7 +374,7 @@ def discover(body: DiscoverIn) -> dict:
         key = (item.get("doi") or "").lower() or item["title"].lower()
         if key and key not in merged:
             merged[key] = item
-    items = list(merged.values())[:15]
+    items = list(merged.values())[:30]
     ranked = _ai_rank(query, items)
     return {
         "query": query,
