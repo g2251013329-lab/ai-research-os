@@ -10,6 +10,7 @@ import {
   FolderKanban,
   HelpCircle,
   Inbox,
+  Lightbulb,
   ListTodo,
   Plus,
   SquarePen,
@@ -230,16 +231,22 @@ export default function Dashboard() {
         <div className="col-span-3 space-y-4 lg:col-span-1">
           {/* research overview */}
           <section className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-            <h2 className="flex items-center gap-1.5 text-[13px] font-semibold">
+            <button
+              type="button"
+              onClick={() => navigate('/research')}
+              className="flex items-center gap-1.5 text-[13px] font-semibold transition-colors hover:text-accent"
+            >
               <FlaskConical size={14} className="text-accent" />
               {t('dashboard.researchOverview')}
-            </h2>
+              <ChevronRight size={12} className="text-neutral-300" />
+            </button>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {[
                 ['projects', FolderKanban],
                 ['papers', BookOpen],
                 ['experiments', FlaskConical],
                 ['open_questions', HelpCircle],
+                ['active_hypotheses', Lightbulb],
               ].map(([key, Icon]) => (
                 <div
                   key={key as string}
@@ -254,9 +261,13 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-            <p className="mt-2.5 text-[11px] text-neutral-400">
-              {t('dashboard.phase4Note')}
-            </p>
+            <button
+              type="button"
+              onClick={() => navigate('/research')}
+              className="mt-2.5 text-[11px] text-accent transition-colors hover:underline"
+            >
+              {t('dashboard.openResearch')} →
+            </button>
           </section>
 
           {/* learning overview */}

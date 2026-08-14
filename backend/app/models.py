@@ -44,9 +44,10 @@ class FocusSession(SQLModel, table=True):
 
 class TimelineEvent(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    event_type: str  # task.created | task.completed | inbox.added | focus.completed
+    event_type: str  # task.* | inbox.* | focus.* | learning.* | project.* | rq.* ...
     title: str
     detail: str = ""
+    project_id: int | None = None  # scopes research events to a project
     created_at: datetime = Field(default_factory=utcnow)
 
 
@@ -75,11 +76,100 @@ class StudySession(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utcnow)
 
 
+# ---------------------------------------------------------------- research
+
+class Project(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    title: str
+    description: str = ""
+    status: str = "active"  # active | paused | completed | archived
+    color: str = "ocean"
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+class ResearchQuestion(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    project_id: int = Field(foreign_key="project.id")
+    title: str
+    description: str = ""
+    status: str = "open"  # open | exploring | testing | supported | rejected | resolved
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+class Hypothesis(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    question_id: int = Field(foreign_key="researchquestion.id")
+    description: str
+    evidence: str = ""
+    supporting: str = ""  # supporting papers / observations
+    contradicting: str = ""
+    status: str = "proposed"  # proposed | testing | supported | weakly_supported | rejected
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+class Paper(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    title: str
+    authors: str = ""
+    year: str = ""
+    journal: str = ""
+    doi: str = ""
+    url: str = ""
+    abstract: str = ""
+    notes: str = ""
+    status: str = "unread"  # unread | reading | read
+    project_id: int | None = Field(default=None, foreign_key="project.id")
+    zotero_key: str = ""  # filled by Zotero integration (Phase 5)
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+class PaperQuestion(SQLModel, table=True):
+    """Junction: a paper can support multiple research questions."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    paper_id: int = Field(foreign_key="paper.id")
+    question_id: int = Field(foreign_key="researchquestion.id")
+
+
+class Experiment(SQLModel, table=True):
+    """Structured experiment record (PRD §13, 13 fields)."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    project_id: int = Field(foreign_key="project.id")
+    question_id: int | None = Field(default=None, foreign_key="researchquestion.id")
+    hypothesis_id: int | None = Field(default=None, foreign_key="hypothesis.id")
+    title: str
+    objective: str = ""
+    hypothesis_text: str = ""
+    materials: str = ""
+    protocol: str = ""
+    variables: str = ""
+    procedure: str = ""
+    raw_data: str = ""
+    results: str = ""
+    figures: str = ""
+    interpretation: str = ""
+    problems: str = ""
+    next_step: str = ""
+    status: str = "planned"  # planned | running | completed | abandoned
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
 TASK_KINDS = ("general", "learning", "research", "experiment")
 TASK_STATUSES = ("todo", "doing", "done")
 TASK_PRIORITIES = ("low", "medium", "high")
 CONCEPT_STATUSES = ("not_started", "learning", "practiced", "understood", "mastered")
 SESSION_STATUSES = ("completed", "partial", "skipped")
+PROJECT_STATUSES = ("active", "paused", "completed", "archived")
+QUESTION_STATUSES = ("open", "exploring", "testing", "supported", "rejected", "resolved")
+HYPOTHESIS_STATUSES = ("proposed", "testing", "supported", "weakly_supported", "rejected")
+PAPER_STATUSES = ("unread", "reading", "read")
+EXPERIMENT_STATUSES = ("planned", "running", "completed", "abandoned")
 INBOX_KINDS = (
     "paper",
     "idea",

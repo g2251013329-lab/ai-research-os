@@ -96,8 +96,6 @@ export default function CommandPalette({
       { id: 'open-xiaolvjing', titleKey: 'commands.openXiaolvjing', groupKey: 'apps', icon: BookOpen, available: true, run: () => deps.launchApp('小绿鲸英文文献阅读器') },
       // upcoming
       { id: 'create-note', titleKey: 'commands.createNote', groupKey: 'upcoming', icon: SquarePen, available: false, phase: 'Phase 4', run: () => toast(t('palette.soon', { phase: 'Phase 4' })) },
-      { id: 'create-experiment', titleKey: 'commands.createExperiment', groupKey: 'upcoming', icon: FlaskConical, available: false, phase: 'Phase 4', run: () => toast(t('palette.soon', { phase: 'Phase 4' })) },
-      { id: 'create-question', titleKey: 'commands.createQuestion', groupKey: 'upcoming', icon: HelpCircle, available: false, phase: 'Phase 4', run: () => toast(t('palette.soon', { phase: 'Phase 4' })) },
       { id: 'sync-obsidian', titleKey: 'commands.syncObsidian', groupKey: 'upcoming', icon: Rocket, available: false, phase: 'Phase 5', run: () => toast(t('palette.soon', { phase: 'Phase 5' })) },
       { id: 'commit-changes', titleKey: 'commands.commitChanges', groupKey: 'upcoming', icon: PenLine, available: false, phase: 'Phase 5', run: () => toast(t('palette.soon', { phase: 'Phase 5' })) },
       { id: 'palette-info', titleKey: 'commands.paletteInfo', groupKey: 'upcoming', icon: Palette, available: false, phase: 'Phase 4', run: () => toast(t('palette.soon', { phase: 'Phase 4' })) },
@@ -105,6 +103,10 @@ export default function CommandPalette({
       { id: 'create-task', titleKey: 'commands.createTask', groupKey: 'upcoming', icon: ListTodo, available: true, run: () => { deps.openTaskModal(); navigate('/'); onClose() } },
       { id: 'add-inbox', titleKey: 'commands.addInbox', groupKey: 'upcoming', icon: Inbox, available: true, run: () => { navigate('/inbox'); onClose() } },
       { id: 'focus-mode', titleKey: 'commands.focusMode', groupKey: 'upcoming', icon: Timer, available: true, run: () => { deps.openFocus(); navigate('/'); onClose() } },
+      // Phase 4: now real
+      { id: 'create-experiment', titleKey: 'commands.createExperiment', groupKey: 'upcoming', icon: FlaskConical, available: true, run: () => { navigate('/research'); onClose() } },
+      { id: 'create-question', titleKey: 'commands.createQuestion', groupKey: 'upcoming', icon: HelpCircle, available: true, run: () => { navigate('/research'); onClose() } },
+      { id: 'add-paper', titleKey: 'commands.addPaper', groupKey: 'upcoming', icon: BookOpen, available: true, run: () => { navigate('/research'); onClose() } },
     ]
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings?.theme, settings?.language, navigate, onClose])

@@ -7,6 +7,8 @@ import InboxPage from './pages/InboxPage'
 import LearningPage from './pages/LearningPage'
 import NotFound from './pages/NotFound'
 import PlaceholderPage from './pages/PlaceholderPage'
+import ProjectDetailPage from './pages/ProjectDetailPage'
+import ResearchPage from './pages/ResearchPage'
 import SettingsPage from './pages/SettingsPage'
 import { useSettingsStore } from './store/useSettingsStore'
 
@@ -26,13 +28,11 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/learning" element={<LearningPage />} />
-            <Route
-              path="/research"
-              element={<PlaceholderPage titleKey="nav.research" phase="Phase 4" />}
-            />
+            <Route path="/research" element={<ResearchPage />} />
+            <Route path="/research/projects/:id" element={<ProjectDetailPage />} />
             <Route
               path="/literature"
-              element={<PlaceholderPage titleKey="nav.literature" phase="Phase 4-5" />}
+              element={<PlaceholderPage titleKey="nav.literature" phase="Phase 5" />}
             />
             <Route path="/inbox" element={<InboxPage />} />
             <Route

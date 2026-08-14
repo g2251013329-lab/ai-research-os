@@ -28,6 +28,21 @@ engine = create_db_engine()
 
 def init_db() -> None:
     SQLModel.metadata.create_all(engine)
+    _migrate(engine)
+
+
+def _migrate(db_engine: object) -> None:
+    """Small ALTER TABLE migrations for evolving schemas."""
+    with db_engine.connect() as conn:
+        cols = {
+            row[1]
+            for row in conn.exec_driver_sql("PRAGMA table_info(timelineevent)").fetchall()
+        }
+        if "project_id" not in cols:
+            conn.exec_driver_sql(
+                "ALTER TABLE timelineevent ADD COLUMN project_id INTEGER"
+            )
+        conn.commit()
 
 
 def get_session():

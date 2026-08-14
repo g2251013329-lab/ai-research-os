@@ -12,10 +12,16 @@ from fastapi.staticfiles import StaticFiles
 from . import models  # noqa: F401  (register tables before init_db)
 from .api import (
     dashboard,
+    experiments,
     focus,
     health,
+    hypotheses,
     inbox,
     learning,
+    papers,
+    projects,
+    questions,
+    research,
     search,
     settings,
     system,
@@ -59,6 +65,12 @@ app.include_router(focus.router)
 app.include_router(timeline.router)
 app.include_router(dashboard.router)
 app.include_router(learning.router)
+app.include_router(projects.router)
+app.include_router(questions.router)
+app.include_router(hypotheses.router)
+app.include_router(papers.router)
+app.include_router(experiments.router)
+app.include_router(research.router)
 
 # Serve the built frontend when it exists (production mode).
 _frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"

@@ -12,7 +12,18 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
 
 from ..core.db import get_session
-from ..models import FocusSession, LearningConcept, StudySession, Task, TimelineEvent
+from ..models import (
+    Experiment,
+    FocusSession,
+    Hypothesis,
+    LearningConcept,
+    Paper,
+    Project,
+    ResearchQuestion,
+    StudySession,
+    Task,
+    TimelineEvent,
+)
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
@@ -49,6 +60,16 @@ def dashboard(session: Session = Depends(get_session)) -> dict:
     for c in concepts:
         concept_status[c.status] = concept_status.get(c.status, 0) + 1
 
+    # Real research counts (PRD §4.2)
+    open_questions = session.exec(
+        select(ResearchQuestion).where(
+            ResearchQuestion.status.in_(("open", "exploring", "testing"))
+        )
+    ).all()
+    active_hypotheses = session.exec(
+        select(Hypothesis).where(Hypothesis.status.in_(("proposed", "testing")))
+    ).all()
+
     return {
         "today_tasks": [t.model_dump(mode="json") for t in active],
         "today_done": len(done_today),
@@ -58,13 +79,12 @@ def dashboard(session: Session = Depends(get_session)) -> dict:
             "weekly_focus_minutes": sum(f.duration_min for f in focus_week),
             "concepts": {"total": len(concepts), **concept_status},
         },
-        # Phase 4 entities — structure ready, counts 0 until then
         "counts": {
-            "projects": 0,
-            "papers": 0,
-            "experiments": 0,
-            "open_questions": 0,
-            "active_hypotheses": 0,
+            "projects": len(session.exec(select(Project)).all()),
+            "papers": len(session.exec(select(Paper)).all()),
+            "experiments": len(session.exec(select(Experiment)).all()),
+            "open_questions": len(open_questions),
+            "active_hypotheses": len(active_hypotheses),
         },
         "recent_activity": [e.model_dump(mode="json") for e in activity],
     }
