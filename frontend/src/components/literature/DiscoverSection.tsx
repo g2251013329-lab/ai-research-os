@@ -139,7 +139,15 @@ export default function DiscoverSection() {
                   </a>
                   <div
                     className="truncate text-[10.5px] text-neutral-400"
-                    data-tip={[hit.authors, hit.year, hit.journal, hit.source].filter(Boolean).join(' · ')}
+                    data-tip={[
+                      hit.authors,
+                      hit.year,
+                      hit.journal,
+                      hit.source,
+                      hit.reason ? `💡 ${hit.reason}` : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
                   >
                     {[hit.authors, hit.year, hit.journal].filter(Boolean).join(' · ')}
                     {hit.reason && (

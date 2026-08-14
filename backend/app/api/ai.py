@@ -251,6 +251,10 @@ def _scholar_search(query: str) -> list[dict[str, Any]]:
         parts = [p.strip() for p in meta.split(" - ")]
         authors = parts[0] if parts else ""
         journal = parts[-1] if len(parts) >= 3 else ""
+        abstract = ""
+        m_abs = re.search(r'<div class="gs_rs">(.*?)</div>', chunk, re.S)
+        if m_abs:
+            abstract = html_mod.unescape(re.sub(r"<[^>]+>", "", m_abs.group(1))).strip()
         out.append(
             {
                 "title": title,
@@ -259,6 +263,7 @@ def _scholar_search(query: str) -> list[dict[str, Any]]:
                 "journal": journal,
                 "doi": "",
                 "url": url,
+                "abstract": abstract[:400],
                 "source": "Google Scholar",
             }
         )
@@ -284,6 +289,7 @@ def _discover_sources(query: str) -> list[dict[str, Any]]:
                     "journal": hit.get("journalTitle") or "",
                     "doi": hit.get("doi") or "",
                     "url": f"https://europepmc.org/article/{hit.get('source', 'MED')}/{hit.get('id', '')}",
+                    "abstract": (hit.get("abstractText") or "")[:400],
                     "source": "Europe PMC",
                 }
             )
@@ -295,7 +301,7 @@ def _discover_sources(query: str) -> list[dict[str, Any]]:
             params={
                 "query": query,
                 "limit": 15,
-                "fields": "title,authors,year,externalIds,journal",
+                "fields": "title,authors,year,externalIds,journal,abstract",
             },
             timeout=12,
         )
@@ -308,7 +314,7 @@ def _discover_sources(query: str) -> list[dict[str, Any]]:
                 params={
                     "query": query,
                     "limit": 15,
-                    "fields": "title,authors,year,externalIds,journal",
+                    "fields": "title,authors,year,externalIds,journal,abstract",
                 },
                 timeout=12,
             )
@@ -325,6 +331,7 @@ def _discover_sources(query: str) -> list[dict[str, Any]]:
                     "journal": ((hit.get("journal") or {}).get("name") or ""),
                     "doi": doi,
                     "url": f"https://doi.org/{doi}" if doi else "",
+                    "abstract": (hit.get("abstract") or "")[:400],
                     "source": "Semantic Scholar",
                 }
             )
@@ -344,12 +351,13 @@ def _ai_rank(query: str, items: list[dict]) -> list[dict] | None:
             "title": item.get("title", ""),
             "year": item.get("year", ""),
             "journal": item.get("journal", ""),
+            "abstract": (item.get("abstract") or "")[:200],
         }
         for idx, item in enumerate(items)
     ]
     prompt = (
         f"用户研究主题：{query}\n候选文献 JSON：{json.dumps(compact, ensure_ascii=False)}\n"
-        f"请选出最相关的 {min(8, len(items))} 篇并按相关性排序，只输出 JSON："
+        f"请依据标题与摘要判断相关性，选出最相关的 {min(8, len(items))} 篇并按相关性排序，只输出 JSON："
         '{"picks": [{"i": 索引, "reason": "一句话理由（中文）"}]}'
     )
     try:
