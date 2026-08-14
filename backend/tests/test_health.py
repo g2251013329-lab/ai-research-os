@@ -21,13 +21,20 @@ def test_settings_roundtrip():
     assert data["theme"] in ("light", "dark")
     assert data["accent"] in ("ocean", "mint", "sakura", "grape", "sunset", "cyan", "coral", "mono")
 
-    r = client.put("/api/settings", json={"language": "en", "theme": "light", "accent": "mint"})
+    r = client.put(
+        "/api/settings",
+        json={"language": "en", "theme": "light", "accent": "mint", "brand_subtitle": "LLPS Lab"},
+    )
     assert r.status_code == 200
     assert r.json()["language"] == "en"
     assert r.json()["accent"] == "mint"
+    assert r.json()["brand_subtitle"] == "LLPS Lab"
 
     # restore defaults
-    client.put("/api/settings", json={"language": "zh", "theme": "dark", "accent": "ocean"})
+    client.put(
+        "/api/settings",
+        json={"language": "zh", "theme": "dark", "accent": "ocean", "brand_subtitle": "LLPS"},
+    )
 
 
 def test_deepseek_key_status_without_key():

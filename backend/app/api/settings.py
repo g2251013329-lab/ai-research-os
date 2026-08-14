@@ -27,6 +27,7 @@ PUBLIC_KEYS = (
     "language",
     "theme",
     "accent",
+    "brand_subtitle",
     "deepseek_model",
     "deepseek_base_url",
 )
@@ -36,6 +37,7 @@ DEFAULTS: dict[str, Any] = {
     "language": "zh",
     "theme": "dark",
     "accent": "ocean",
+    "brand_subtitle": "LLPS",
     "deepseek_model": app_settings.deepseek_model,
     "deepseek_base_url": app_settings.deepseek_base_url,
 }
@@ -133,6 +135,7 @@ class SettingsUpdate(BaseModel):
     language: str | None = None
     theme: str | None = None
     accent: str | None = None
+    brand_subtitle: str | None = None
     deepseek_model: str | None = None
     deepseek_base_url: str | None = None
 

@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+import { useSettingsStore } from '../store/useSettingsStore'
 
 /**
  * Brand mark: a liquid droplet (LLPS) with an orbiting electron ring.
@@ -43,7 +43,8 @@ export function LogoMark({ size = 26 }: { size?: number }) {
 
 /** Sidebar brand: droplet mark + artistic gradient wordmark. */
 export default function BrandMark() {
-  const { t } = useTranslation()
+  const subtitle = useSettingsStore((s) => s.settings?.brand_subtitle ?? 'LLPS')
+
   return (
     <div className="flex items-center gap-2.5">
       <LogoMark size={26} />
@@ -52,7 +53,7 @@ export default function BrandMark() {
           AI Research OS
         </div>
         <div className="truncate text-[8.5px] uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">
-          {t('app.subtitle')}
+          {subtitle}
         </div>
       </div>
     </div>

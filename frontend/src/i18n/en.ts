@@ -46,6 +46,10 @@ export default {
       label: 'Obsidian Vault Path',
       desc: 'Notes are stored as Markdown files in this vault',
     },
+    brand: {
+      label: 'Brand Subtitle',
+      desc: 'Text shown below the logo in the top-left corner',
+    },
     language: { label: 'Language' },
     theme: { label: 'Theme' },
     ai: {

@@ -7,6 +7,7 @@ export interface AppSettings {
   language: 'zh' | 'en'
   theme: 'light' | 'dark'
   accent: string
+  brand_subtitle: string
   deepseek_model: string
   deepseek_base_url: string
 }

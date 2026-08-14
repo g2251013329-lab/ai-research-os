@@ -46,6 +46,10 @@ export default {
       label: 'Obsidian Vault 路径',
       desc: '笔记将存储为该 vault 中的 Markdown 文件',
     },
+    brand: {
+      label: '品牌副标题',
+      desc: '显示在左上角 Logo 下方的文字',
+    },
     language: { label: '界面语言' },
     theme: { label: '主题' },
     ai: {
