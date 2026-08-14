@@ -5,12 +5,14 @@ import {
   BookOpen,
   ExternalLink,
   FolderKanban,
+  Library,
   Loader2,
   Search,
   Sparkles,
 } from 'lucide-react'
 import { api } from '../api/client'
 import { useToastStore } from '../store/useToastStore'
+import PapersView from '../components/research/PapersView'
 
 interface ZoteroItem {
   key: string
@@ -43,6 +45,7 @@ export default function LiteraturePage() {
   const [q, setQ] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [projectId, setProjectId] = useState<number | ''>('')
+  const [tab, setTab] = useState<'zotero' | 'mine'>('zotero')
 
   const { data: status } = useQuery({
     queryKey: ['zotero', 'status'],
@@ -179,7 +182,41 @@ export default function LiteraturePage() {
         </div>
       )}
 
-      {connected && (
+      {/* tabs: Zotero library / my papers */}
+      <div className="mt-4 flex gap-1 border-b border-neutral-200 dark:border-neutral-800">
+        <button
+          type="button"
+          onClick={() => setTab('zotero')}
+          className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-[13px] transition-colors ${
+            tab === 'zotero'
+              ? 'border-accent font-medium text-accent'
+              : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
+          }`}
+        >
+          <Library size={13} />
+          {t('literature.tabs.zotero')}
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('mine')}
+          className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-[13px] transition-colors ${
+            tab === 'mine'
+              ? 'border-accent font-medium text-accent'
+              : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
+          }`}
+        >
+          <BookOpen size={13} />
+          {t('literature.tabs.mine')}
+        </button>
+      </div>
+
+      {tab === 'mine' && (
+        <div className="mt-4">
+          <PapersView projectId={null} />
+        </div>
+      )}
+
+      {connected && tab === 'zotero' && (
         <div className="mt-4 grid gap-4 lg:grid-cols-[200px_1fr]">          {/* collections */}
           <aside className="rounded-lg border border-neutral-200 bg-white p-2 dark:border-neutral-800 dark:bg-neutral-900">
             <button

@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
@@ -177,11 +177,11 @@ def fetch_crossref_metadata(doi: str) -> dict:
 @router.post("/upload", status_code=201)
 async def upload_paper(
     file: UploadFile,
-    project_id: int | None = None,
+    project_id: int | None = Form(default=None),
     session: Session = Depends(get_session),
-) -> Paper:
+) -> dict:
     """Upload a PDF directly: store it locally, extract DOI & best-effort
-    CrossRef metadata, and create a Paper record."""
+    CrossRef metadata, and create a Paper record. Deduplicated by DOI."""
     filename = file.filename or "paper.pdf"
     if not filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=422, detail="仅支持 PDF 文件")
@@ -195,6 +195,17 @@ async def upload_paper(
 
     title_from_name = Path(filename).stem.strip() or "未命名文献"
     doi = _extract_doi_from_pdf(dest)
+
+    # dedupe by DOI (or title when no DOI)
+    if doi:
+        existing = session.exec(select(Paper).where(Paper.doi == doi)).first()
+    else:
+        existing = session.exec(
+            select(Paper).where(Paper.title == title_from_name)
+        ).first()
+    if existing:
+        return {"paper": existing.model_dump(mode="json"), "created": False, "duplicated": True}
+
     meta = fetch_crossref_metadata(doi) if doi else {}
 
     paper = Paper(
@@ -216,7 +227,7 @@ async def upload_paper(
         f"上传文献：{paper.title[:60]}",
         project_id=project_id,
     )
-    return paper
+    return {"paper": paper.model_dump(mode="json"), "created": True, "duplicated": False}
 
 
 # ------------------------------------------------------------ question links

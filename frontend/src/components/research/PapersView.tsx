@@ -25,7 +25,7 @@ export interface Paper {
 
 const PAPER_STATUSES = ['unread', 'reading', 'read']
 
-export default function PapersView({ projectId }: { projectId: number }) {
+export default function PapersView({ projectId }: { projectId: number | null }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [creating, setCreating] = useState(false)
@@ -56,15 +56,22 @@ export default function PapersView({ projectId }: { projectId: number }) {
   })
 
   const { data: papers } = useQuery({
-    queryKey: ['papers', projectId],
-    queryFn: () => api<Paper[]>(`/api/papers?project_id=${projectId}`),
+    queryKey: ['papers', projectId ?? 'all'],
+    queryFn: () =>
+      api<Paper[]>(projectId != null ? `/api/papers?project_id=${projectId}` : '/api/papers'),
+  })
+  const { data: projects } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => api<{ id: number; title: string }[]>('/api/projects'),
   })
   const { data: rqs } = useQuery({
-    queryKey: ['questions', projectId],
-    queryFn: () => api<RQ[]>(`/api/questions?project_id=${projectId}`),
+    queryKey: ['questions', projectId ?? 'all'],
+    queryFn: () =>
+      api<RQ[]>(projectId != null ? `/api/questions?project_id=${projectId}` : '/api/questions'),
+    enabled: projectId != null,
   })
   const { data: links } = useQuery({
-    queryKey: ['papers', 'links', projectId],
+    queryKey: ['papers', 'links', projectId ?? 'all'],
     queryFn: async () => {
       // fetch papers linked to each question of this project
       const result: Record<number, number[]> = {}
@@ -117,8 +124,10 @@ export default function PapersView({ projectId }: { projectId: number }) {
   const uploadPdf = async (file: File) => {
     setUploading(true)
     try {
-      await uploadFile('/api/papers/upload', file, { project_id: String(projectId) })
-      toast(t('quickCreate.uploaded'))
+      const r = await uploadFile<{ created: boolean }>('/api/papers/upload', file, {
+        project_id: projectId != null ? String(projectId) : '',
+      })
+      toast(r.created ? t('quickCreate.uploaded') : t('quickCreate.duplicated'))
       invalidate()
     } catch (e) {
       toast(e instanceof Error ? e.message : String(e))
@@ -157,6 +166,15 @@ export default function PapersView({ projectId }: { projectId: number }) {
       setEditing(null)
       invalidate()
     },
+  })
+
+  const reassignMutation = useMutation({
+    mutationFn: ({ id, project_id }: { id: number; project_id: number | null }) =>
+      api(`/api/papers/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ project_id }),
+      }),
+    onSuccess: invalidate,
   })
 
   const openEdit = (p: Paper) => {
@@ -267,6 +285,19 @@ export default function PapersView({ projectId }: { projectId: number }) {
                 </button>
                 <div className="mt-0.5 text-[11.5px] text-neutral-400">
                   {[p.authors, p.year, p.journal].filter(Boolean).join(' · ')}
+                  {projectId === null && (
+                    <span className="ml-1.5">
+                      {p.project_id == null ? (
+                        <span className="rounded bg-amber-50 px-1.5 py-px text-[10px] text-amber-600 dark:bg-amber-950/60 dark:text-amber-300">
+                          {t('research.paper.unassigned')}
+                        </span>
+                      ) : (
+                        <span className="rounded bg-accent-soft px-1.5 py-px text-[10px] text-accent">
+                          {projects?.find((x) => x.id === p.project_id)?.title ?? '?'}
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </div>
                 {p.abstract && (
                   <div className="mt-1 line-clamp-2 text-[11.5px] text-neutral-500 dark:text-neutral-400" data-tip={p.abstract}>
@@ -298,6 +329,27 @@ export default function PapersView({ projectId }: { projectId: number }) {
                   </div>
                 )}
               </div>
+              {/* project reassign (all-papers view) */}
+              {projectId === null && (
+                <select
+                  value={p.project_id ?? ''}
+                  onChange={(e) =>
+                    reassignMutation.mutate({
+                      id: p.id,
+                      project_id: e.target.value ? Number(e.target.value) : null,
+                    })
+                  }
+                  className="shrink-0 rounded-md border border-neutral-200 bg-white px-1.5 py-1 text-[11px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
+                  data-tip={t('research.paper.assignProject')}
+                >
+                  <option value="">{t('research.paper.unassigned')}</option>
+                  {(projects ?? []).map((pr) => (
+                    <option key={pr.id} value={pr.id}>
+                      {pr.title}
+                    </option>
+                  ))}
+                </select>
+              )}
               <button
                 type="button"
                 onClick={() => void openInReader(p)}

@@ -60,10 +60,10 @@ export default function QuickCreateModal() {
   const uploadPdf = async (file: File) => {
     setUploading(true)
     try {
-      await uploadFile('/api/papers/upload', file, {
+      const r = await uploadFile<{ created: boolean }>('/api/papers/upload', file, {
         project_id: projectId ? String(projectId) : '',
       })
-      toast(t('quickCreate.uploaded'))
+      toast(r.created ? t('quickCreate.uploaded') : t('quickCreate.duplicated'))
       invalidateAll()
       close()
     } catch (e) {

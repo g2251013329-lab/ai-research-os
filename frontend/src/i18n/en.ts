@@ -154,6 +154,7 @@ export default {
     create: 'Create',
     created: 'Created',
     uploaded: 'Paper uploaded & imported',
+    duplicated: 'Already exists — not added again',
   },
   task: {
     new: 'New Task',
@@ -466,6 +467,8 @@ export default {
       edit: 'Edit',
       empty: 'No papers yet',
       dropHint: 'Drop a PDF here to add it (title & DOI extracted)',
+      unassigned: 'Unassigned',
+      assignProject: 'Assign project',
       titlePlaceholder: 'Paper title',
       authors: 'Authors',
       year: 'Year',
@@ -529,7 +532,11 @@ export default {
   },
   literature: {
     title: 'Literature',
-    subtitle: 'Browse and import papers from your Zotero library',
+    subtitle: 'Browse your Zotero library and manage your papers',
+    tabs: {
+      zotero: 'Zotero Library',
+      mine: 'My Papers',
+    },
     zoteroOk: 'Zotero connected',
     zoteroApi: 'Zotero connected (local API)',
     zoteroMissing: 'Zotero library not found',

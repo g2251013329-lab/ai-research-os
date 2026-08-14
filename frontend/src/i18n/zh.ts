@@ -153,6 +153,7 @@ export default {
     create: '创建',
     created: '创建成功',
     uploaded: '文献已上传并导入',
+    duplicated: '该文献已存在，未重复添加',
   },
   task: {
     new: '新建任务',
@@ -458,6 +459,8 @@ export default {
       edit: '编辑',
       empty: '还没有文献',
       dropHint: '把 PDF 拖到这里直接添加（自动提取标题与 DOI）',
+      unassigned: '未关联项目',
+      assignProject: '归属项目',
       titlePlaceholder: '论文标题',
       authors: '作者',
       year: '年份',
@@ -521,7 +524,11 @@ export default {
   },
   literature: {
     title: '文献',
-    subtitle: '从 Zotero 库浏览、导入文献，并关联到研究项目',
+    subtitle: '浏览 Zotero 库并管理你的文献',
+    tabs: {
+      zotero: 'Zotero 库',
+      mine: '我的文献',
+    },
     zoteroOk: 'Zotero 已连接',
     zoteroApi: 'Zotero 已连接（本地 API）',
     zoteroMissing: '未找到 Zotero 库',

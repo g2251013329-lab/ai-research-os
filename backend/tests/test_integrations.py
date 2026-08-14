@@ -253,7 +253,8 @@ def test_paper_pdf_text_extraction():
 
 
 def test_pdf_upload_creates_paper(monkeypatch):
-    """Drag & drop PDF: stored locally, DOI extracted, CrossRef enriched."""
+    """Drag & drop PDF: stored locally, DOI extracted, CrossRef enriched,
+    project association via multipart form, and dedupe by DOI."""
     from app.api.papers import fetch_crossref_metadata
 
     monkeypatch.setattr(
@@ -266,26 +267,42 @@ def test_pdf_upload_creates_paper(monkeypatch):
         },
     )
 
+    proj = client.post("/api/projects", json={"title": "Upload target"}).json()
     pdf = _make_pdf(["FUS phase separation DOI: 10.1002/advs.76023 in text"])
+
+    # project association via multipart form field
     r = client.post(
         "/api/papers/upload",
         files={"file": ("my-paper.pdf", pdf, "application/pdf")},
+        data={"project_id": str(proj["id"])},
     )
     assert r.status_code == 201
-    paper = r.json()
+    body = r.json()
+    assert body["created"] is True
+    paper = body["paper"]
     assert paper["title"] == "Uploaded FUS Paper"
     assert paper["doi"] == "10.1002/advs.76023"
-    assert paper["journal"] == "Test Journal"
+    assert paper["project_id"] == proj["id"], "project association must work"
     assert Path(paper["local_path"]).exists()
 
-    # non-PDF rejected
+    # same PDF again → dedupe, no second record
     r2 = client.post(
+        "/api/papers/upload",
+        files={"file": ("my-paper.pdf", pdf, "application/pdf")},
+    )
+    assert r2.status_code == 201
+    assert r2.json()["duplicated"] is True
+    assert len(client.get("/api/papers").json()) == 1
+
+    # non-PDF rejected
+    r3 = client.post(
         "/api/papers/upload",
         files={"file": ("note.txt", b"hello", "text/plain")},
     )
-    assert r2.status_code == 422
+    assert r3.status_code == 422
 
     client.delete(f"/api/papers/{paper['id']}")
+    client.delete(f"/api/projects/{proj['id']}")
 
 
 def test_git_sync_flow():
