@@ -10,19 +10,25 @@ MAX_PDF_CHARS = 24_000
 MAX_PDF_PAGES = 200  # hard safety cap on pages read
 
 
+def pdf_text_from_file(path) -> str:
+    """Extract sampled text from a local PDF file ("" on failure)."""
+    try:
+        from pypdf import PdfReader
+
+        reader = PdfReader(str(path))
+        return _sample_pages(reader, len(reader.pages))
+    except Exception:
+        return ""
+
+
 def pdf_text_for_zotero_key(key: str, zotero_path: str) -> str:
     """Resolve a Zotero item's PDF attachment and extract sampled text."""
     from ..api.zotero import resolve_pdf_paths
 
-    paths = resolve_pdf_paths(key)
-    for cand in paths:
-        try:
-            from pypdf import PdfReader
-
-            reader = PdfReader(str(cand))
-            return _sample_pages(reader, len(reader.pages))
-        except Exception:
-            continue
+    for cand in resolve_pdf_paths(key):
+        text = pdf_text_from_file(cand)
+        if text:
+            return text
     return ""
 
 

@@ -305,6 +305,21 @@ def test_pdf_upload_creates_paper(monkeypatch):
     client.delete(f"/api/projects/{proj['id']}")
 
 
+def test_local_path_pdf_text_for_summary():
+    """Uploaded papers (local_path) must feed PDF text into AI summaries."""
+    from app.ai.context import _paper_pdf_text
+    from app.models import Paper
+
+    pdf_path = TEST_DIR / "local-upload-paper.pdf"
+    pdf_path.write_bytes(_make_pdf(["Local upload FUS paper content"]))
+    paper = Paper(local_path=str(pdf_path))
+    text = _paper_pdf_text(paper)
+    assert "Local upload FUS paper content" in text
+
+    # no local path, no zotero key → empty (AI will say it lacks content)
+    assert _paper_pdf_text(Paper()) == ""
+
+
 def test_git_sync_flow():
     vault = TEST_DIR / "vault-git"
     remote = TEST_DIR / "vault-git-remote.git"

@@ -17,7 +17,7 @@ from ..models import (
     ResearchQuestion,
 )
 from .memory import memory_context
-from .pdf import pdf_text_for_zotero_key
+from .pdf import pdf_text_for_zotero_key, pdf_text_from_file
 
 
 def _vault() -> Path:
@@ -192,9 +192,13 @@ def build_context(session: Session, obj_type: str, obj_id: int) -> str:
 
 
 def _paper_pdf_text(paper: Paper) -> str:
-    """PDF text for an imported paper (via its Zotero key)."""
-    if not paper.zotero_key:
-        return ""
-    return pdf_text_for_zotero_key(
-        paper.zotero_key, get_user_setting("zotero_path", "~/Zotero")
-    )
+    """PDF text for a paper: uploaded local file first, then Zotero attachment."""
+    if paper.local_path:
+        text = pdf_text_from_file(paper.local_path)
+        if text:
+            return text
+    if paper.zotero_key:
+        return pdf_text_for_zotero_key(
+            paper.zotero_key, get_user_setting("zotero_path", "~/Zotero")
+        )
+    return ""
