@@ -6,9 +6,11 @@ import {
   ChevronRight,
   Loader2,
   Plus,
+  Sparkles,
   Trash2,
 } from 'lucide-react'
 import { api } from '../../api/client'
+import AiModal from '../ai/AiModal'
 
 export interface Concept {
   id: number
@@ -42,6 +44,15 @@ export default function RoadmapView() {
   const [collapsed, setCollapsed] = useState<Set<number>>(new Set())
   const [addingUnder, setAddingUnder] = useState<number | null>(null)
   const [newTitle, setNewTitle] = useState('')
+  const [aiNode, setAiNode] = useState<Concept | null>(null)
+  const [aiMode, setAiMode] = useState('explain')
+
+  const AI_MODES = [
+    { id: 'explain', label: t('learning.ai.explain') },
+    { id: 'simplify', label: t('learning.ai.simplify') },
+    { id: 'examples', label: t('learning.ai.examples') },
+    { id: 'quiz', label: t('learning.ai.quiz') },
+  ]
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ['learning'] })
@@ -136,6 +147,17 @@ export default function RoadmapView() {
           >
             <Plus size={13} />
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAiNode(node)
+              setAiMode('explain')
+            }}
+            className="rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-neutral-600"
+            data-tip={t('learning.ai.explain')}
+          >
+            <Sparkles size={13} />
+          </button>
           {!hasChildren && (
             <button
               type="button"
@@ -219,6 +241,46 @@ export default function RoadmapView() {
         )}
         {(tree ?? []).map((node) => renderNode(node, 0))}
       </div>
+
+      {/* AI concept explainer */}
+      {aiNode && (
+        <>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {AI_MODES.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setAiMode(m.id)}
+                className={`rounded-md border px-2.5 py-1 text-[12px] transition-colors ${
+                  aiMode === m.id
+                    ? 'border-accent bg-accent-soft text-accent'
+                    : 'border-neutral-200 text-neutral-500 hover:border-neutral-300 dark:border-neutral-700'
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setAiNode(null)}
+              className="ml-auto rounded-md border border-neutral-200 px-2.5 py-1 text-[12px] text-neutral-400 transition-colors hover:border-neutral-300 dark:border-neutral-700"
+            >
+              ✕
+            </button>
+          </div>
+          <AiModal
+            title={`${t('learning.ai.explain')}: ${aiNode.title}`}
+            fetcher={async () => {
+              const r = await api<{ answer: string }>('/api/ai/learning-assist', {
+                method: 'POST',
+                body: JSON.stringify({ concept_id: aiNode.id, mode: aiMode }),
+              })
+              return r.answer
+            }}
+            onClose={() => setAiNode(null)}
+          />
+        </>
+      )}
     </div>
   )
 }

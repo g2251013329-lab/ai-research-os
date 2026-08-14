@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { BookOpen, ExternalLink, Loader2, Plus, Trash2, X } from 'lucide-react'
+import { BookOpen, ExternalLink, Loader2, Plus, Sparkles, Trash2, X } from 'lucide-react'
 import { api } from '../../api/client'
+import AiModal from '../ai/AiModal'
 import type { RQ } from './QuestionsView'
 
 export interface Paper {
@@ -35,6 +36,7 @@ export default function PapersView({ projectId }: { projectId: number }) {
     abstract: '',
   })
   const [saving, setSaving] = useState(false)
+  const [aiPaper, setAiPaper] = useState<Paper | null>(null)
 
   const { data: papers } = useQuery({
     queryKey: ['papers', projectId],
@@ -185,6 +187,15 @@ export default function PapersView({ projectId }: { projectId: number }) {
                   </div>
                 )}
               </div>
+              <button
+                type="button"
+                onClick={() => setAiPaper(p)}
+                className="flex shrink-0 items-center gap-1 rounded-md border border-neutral-200 px-2 py-1 text-[11.5px] text-neutral-500 transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+                data-tip={t('ai.summarizePaper')}
+              >
+                <Sparkles size={11} />
+                {t('ai.summarize')}
+              </button>
               <select
                 value={p.status}
                 onChange={(e) => statusMutation.mutate({ id: p.id, status: e.target.value })}
@@ -207,6 +218,20 @@ export default function PapersView({ projectId }: { projectId: number }) {
           </div>
         ))}
       </div>
+
+      {aiPaper && (
+        <AiModal
+          title={`${t('ai.summarizePaper')}: ${aiPaper.title.slice(0, 40)}`}
+          fetcher={async () => {
+            const r = await api<{ summary: string }>('/api/ai/summarize-paper', {
+              method: 'POST',
+              body: JSON.stringify({ paper_id: aiPaper.id }),
+            })
+            return r.summary
+          }}
+          onClose={() => setAiPaper(null)}
+        />
+      )}
 
       {creating && (
         <div

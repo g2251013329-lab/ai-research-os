@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Circle, Inbox, Loader2, Trash2 } from 'lucide-react'
+import { Check, Circle, Inbox, Loader2, Sparkles, Trash2, X } from 'lucide-react'
 import { api } from '../api/client'
 import { useToastStore } from '../store/useToastStore'
 import { relativeTime } from '../utils/time'
@@ -37,6 +37,15 @@ export default function InboxPage() {
   const [text, setText] = useState('')
   const [kind, setKind] = useState('other')
   const [saving, setSaving] = useState(false)
+  const [aiItem, setAiItem] = useState<InboxItem | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiSuggestion, setAiSuggestion] = useState<{
+    kind?: string
+    project?: string | null
+    tags?: string[]
+    next_action?: string
+    reason?: string
+  } | null>(null)
 
   const { data: items } = useQuery({
     queryKey: ['inbox', filter],
@@ -72,6 +81,47 @@ export default function InboxPage() {
     mutationFn: (id: number) => api(`/api/inbox/${id}`, { method: 'DELETE' }),
     onSuccess: invalidate,
   })
+
+  const classify = async (item: InboxItem) => {
+    setAiItem(item)
+    setAiSuggestion(null)
+    setAiLoading(true)
+    try {
+      const r = await api<{
+        suggestion: {
+          kind?: string
+          project?: string | null
+          tags?: string[]
+          next_action?: string
+          reason?: string
+        }
+      }>('/api/ai/inbox-classify', {
+        method: 'POST',
+        body: JSON.stringify({ item_id: item.id }),
+      })
+      setAiSuggestion(r.suggestion)
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e))
+      setAiItem(null)
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  const applyKind = async (kindValue: string) => {
+    if (!aiItem) return
+    try {
+      await api(`/api/inbox/${aiItem.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ kind: kindValue }),
+      })
+      toast(t('ai.applied'))
+      invalidate()
+      setAiItem(null)
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e))
+    }
+  }
 
   const field =
     'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
@@ -190,6 +240,14 @@ export default function InboxPage() {
             </div>
             <button
               type="button"
+              onClick={() => void classify(item)}
+              className="mt-0.5 rounded p-1 text-neutral-300 transition-colors hover:text-accent dark:text-neutral-600"
+              data-tip={t('ai.inboxClassify')}
+            >
+              <Sparkles size={14} />
+            </button>
+            <button
+              type="button"
               onClick={() => deleteMutation.mutate(item.id)}
               className="mt-0.5 rounded p-1 text-neutral-300 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-neutral-600 dark:hover:bg-red-950/40"
               data-tip={t('inbox.delete')}
@@ -199,6 +257,91 @@ export default function InboxPage() {
           </div>
         ))}
       </div>
+
+      {/* AI classify modal */}
+      {aiItem && (
+        <div
+          className="fixed inset-0 z-[85] flex items-center justify-center bg-black/40 backdrop-blur-[2px]"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setAiItem(null)
+          }}
+        >
+          <div className="w-[480px] max-w-[92vw] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-[13.5px] font-semibold">
+                <Sparkles size={14} className="text-accent" />
+                {t('ai.inboxClassify')}
+              </span>
+              <button
+                type="button"
+                onClick={() => setAiItem(null)}
+                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <p className="mt-2 line-clamp-2 text-[12px] text-neutral-500 dark:text-neutral-400" data-tip={aiItem.text}>
+              {aiItem.text}
+            </p>
+
+            {aiLoading && (
+              <div className="flex items-center justify-center gap-2 py-8 text-neutral-400">
+                <Loader2 size={16} className="animate-spin" /> {t('ai.thinking')}
+              </div>
+            )}
+
+            {aiSuggestion && (
+              <div className="mt-3 space-y-2 rounded-lg bg-neutral-50 p-3 text-[12.5px] dark:bg-neutral-800/60">
+                <div className="flex items-center gap-2">
+                  <span className="text-neutral-400">{t('ai.suggestKind')}</span>
+                  <span
+                    className={`rounded px-1.5 py-px ${KIND_STYLES[aiSuggestion.kind ?? 'other'] ?? KIND_STYLES.other}`}
+                  >
+                    {t(`inbox.kinds.${aiSuggestion.kind ?? 'other'}`)}
+                  </span>
+                </div>
+                {aiSuggestion.project && (
+                  <div className="text-neutral-500 dark:text-neutral-400">
+                    {t('ai.suggestProject')}: {aiSuggestion.project}
+                  </div>
+                )}
+                {aiSuggestion.tags && aiSuggestion.tags.length > 0 && (
+                  <div className="text-neutral-500 dark:text-neutral-400">
+                    {t('ai.suggestTags')}: {aiSuggestion.tags.join(', ')}
+                  </div>
+                )}
+                {aiSuggestion.next_action && (
+                  <div className="text-neutral-500 dark:text-neutral-400">
+                    {t('ai.suggestAction')}: {aiSuggestion.next_action}
+                  </div>
+                )}
+                {aiSuggestion.reason && (
+                  <div className="text-[11.5px] text-neutral-400">💡 {aiSuggestion.reason}</div>
+                )}
+              </div>
+            )}
+
+            {aiSuggestion?.kind && (
+              <div className="mt-3 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAiItem(null)}
+                  className="rounded-md border border-neutral-300 px-3 py-1.5 text-[13px] transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void applyKind(aiSuggestion.kind ?? 'other')}
+                  className="flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+                >
+                  <Check size={13} /> {t('ai.applyKind')}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

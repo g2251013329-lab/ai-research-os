@@ -160,6 +160,17 @@ class Experiment(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=utcnow)
 
 
+class AIContextEntry(SQLModel, table=True):
+    """AI Research Memory (PRD §21.2): user-confirmed facts, inspectable."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    kind: str = "fact"  # fact | finding | decision | terminology | note
+    content: str
+    project_id: int | None = None
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
 TASK_KINDS = ("general", "learning", "research", "experiment")
 TASK_STATUSES = ("todo", "doing", "done")
 TASK_PRIORITIES = ("low", "medium", "high")

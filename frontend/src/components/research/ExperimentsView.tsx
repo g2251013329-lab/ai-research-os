@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, FlaskConical, Loader2, Plus, Trash2, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, FlaskConical, Loader2, Plus, Sparkles, Trash2, X } from 'lucide-react'
 import { api } from '../../api/client'
+import AiModal from '../ai/AiModal'
 
 export interface Experiment {
   id: number
@@ -55,6 +56,7 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
   const [title, setTitle] = useState('')
   const [form, setForm] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
+  const [aiExp, setAiExp] = useState<Experiment | null>(null)
 
   const { data: experiments } = useQuery({
     queryKey: ['experiments', projectId],
@@ -156,6 +158,15 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
                 </select>
                 <button
                   type="button"
+                  onClick={() => setAiExp(exp)}
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-neutral-200 px-2 py-1 text-[11.5px] text-neutral-500 transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+                  data-tip={t('ai.experimentNext')}
+                >
+                  <Sparkles size={11} />
+                  {t('ai.nextStep')}
+                </button>
+                <button
+                  type="button"
                   onClick={() => deleteMutation.mutate(exp.id)}
                   className="rounded p-1 text-neutral-300 hover:text-red-500 dark:text-neutral-600"
                 >
@@ -188,6 +199,20 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
           )
         })}
       </div>
+
+      {aiExp && (
+        <AiModal
+          title={`${t('ai.experimentNext')}: ${aiExp.title.slice(0, 40)}`}
+          fetcher={async () => {
+            const r = await api<{ suggestions: string }>('/api/ai/experiment-next', {
+              method: 'POST',
+              body: JSON.stringify({ experiment_id: aiExp.id }),
+            })
+            return r.suggestions
+          }}
+          onClose={() => setAiExp(null)}
+        />
+      )}
 
       {creating && (
         <div

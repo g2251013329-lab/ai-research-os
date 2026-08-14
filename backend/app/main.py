@@ -10,7 +10,9 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import models  # noqa: F401  (register tables before init_db)
+from .ai import memory as memory_api
 from .api import (
+    ai,
     dashboard,
     experiments,
     focus,
@@ -75,6 +77,8 @@ app.include_router(experiments.router)
 app.include_router(research.router)
 app.include_router(zotero.router)
 app.include_router(git.router)
+app.include_router(ai.router)
+app.include_router(memory_api.router)
 
 # Serve the built frontend when it exists (production mode).
 _frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"

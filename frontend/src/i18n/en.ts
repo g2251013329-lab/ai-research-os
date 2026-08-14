@@ -192,6 +192,54 @@ export default {
     finishEarly: 'Finish',
     completedToast: 'Focus session recorded 🎉',
   },
+  ai: {
+    thinking: 'AI is thinking…',
+    apply: 'Apply',
+    applied: 'Applied',
+    context: 'Context',
+    noContext: 'No context (general chat)',
+    autoDetected: 'Auto-detected',
+    chatHint:
+      'Pick a context on the left (or it auto-links on project pages), then ask. Answers use the project\'s questions, hypotheses, experiments and notes.',
+    chatPlaceholder: 'Ask… (Enter to send)',
+    remember: 'Remember this',
+    remembered: 'Saved to AI memory',
+    memory: 'AI Memory',
+    memoryPlaceholder: 'Add a memory (e.g. FUS belongs to the FET family)',
+    memoryEmpty: 'No memory entries yet',
+    memoryKinds: {
+      fact: 'Fact',
+      finding: 'Finding',
+      decision: 'Decision',
+      terminology: 'Term',
+      note: 'Note',
+    },
+    quick: {
+      summarize: 'Summary',
+      nextSteps: 'Next steps',
+      gaps: 'Knowledge gaps',
+    },
+    quickSummarize:
+      'Summarize this project: core questions, hypotheses, experimental evidence and main conclusions.',
+    quickNext:
+      'Based on the current state, suggest the 3 most valuable next steps (experiment, reading or writing) with reasons.',
+    quickGaps:
+      'Analyze where evidence is missing or contradictory in this project and point out knowledge gaps.',
+    summarize: 'AI Summary',
+    summarizePaper: 'AI Paper Summary',
+    nextStep: 'AI Next Step',
+    experimentNext: 'AI Experiment Advice',
+    writingAssist: 'AI Writing Assistant',
+    writingInstruction:
+      'Instruction, e.g. polish this text to be more academic / check the logic and point out issues…',
+    generate: 'Generate',
+    inboxClassify: 'AI Classify',
+    suggestKind: 'Suggested kind',
+    suggestProject: 'Suggested project',
+    suggestTags: 'Suggested tags',
+    suggestAction: 'Suggested action',
+    applyKind: 'Apply kind',
+  },
   learning: {
     title: 'Learning',
     subtitle: 'Plan, practice, review — and connect knowledge to your research',
@@ -206,6 +254,12 @@ export default {
     quick: {
       checkin: 'Study Check-in',
       newTask: 'New learning task',
+    },
+    ai: {
+      explain: 'AI Explain',
+      simplify: 'AI Simplify',
+      examples: 'AI Examples',
+      quiz: 'AI Quiz',
     },
     statuses: {
       not_started: 'Not started',
