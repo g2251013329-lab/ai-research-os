@@ -50,9 +50,36 @@ class TimelineEvent(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utcnow)
 
 
+class LearningConcept(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    title: str
+    description: str = ""
+    parent_id: int | None = Field(default=None, foreign_key="learningconcept.id")
+    status: str = "not_started"  # not_started | learning | practiced | understood | mastered
+    sort_order: int = 0
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+class StudySession(SQLModel, table=True):
+    """Daily check-in (PRD §5.4)."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    topic: str
+    duration_min: int = Field(ge=1, le=720)
+    status: str = "completed"  # completed | partial | skipped
+    notes: str = ""
+    reflections: str = ""
+    takeaways: str = ""
+    session_date: str  # ISO date the session belongs to (YYYY-MM-DD)
+    created_at: datetime = Field(default_factory=utcnow)
+
+
 TASK_KINDS = ("general", "learning", "research", "experiment")
 TASK_STATUSES = ("todo", "doing", "done")
 TASK_PRIORITIES = ("low", "medium", "high")
+CONCEPT_STATUSES = ("not_started", "learning", "practiced", "understood", "mastered")
+SESSION_STATUSES = ("completed", "partial", "skipped")
 INBOX_KINDS = (
     "paper",
     "idea",

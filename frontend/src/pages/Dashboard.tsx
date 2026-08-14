@@ -35,7 +35,11 @@ interface DashboardData {
   today_tasks: Task[]
   today_done: number
   focus_minutes_today: number
-  learning: { streak_days: number; weekly_focus_minutes: number }
+  learning: {
+    streak_days: number
+    weekly_focus_minutes: number
+    concepts: { total: number; mastered?: number; [k: string]: number | undefined }
+  }
   counts: {
     projects: number
     papers: number
@@ -86,7 +90,7 @@ export default function Dashboard() {
     {
       key: 'newTask',
       icon: Plus,
-      run: openTaskModal,
+      run: () => openTaskModal(),
     },
     {
       key: 'addInbox',
@@ -111,7 +115,7 @@ export default function Dashboard() {
     {
       key: 'focusMode',
       icon: Timer,
-      run: openFocus,
+      run: () => openFocus(),
     },
   ]
 
@@ -165,7 +169,7 @@ export default function Dashboard() {
             </h2>
             <button
               type="button"
-              onClick={openTaskModal}
+              onClick={() => openTaskModal()}
               className="flex items-center gap-1 rounded-md px-2 py-1 text-[12px] text-accent transition-colors hover:bg-accent-soft"
             >
               <Plus size={12} /> {t('task.new')}
@@ -278,6 +282,24 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+            {learning?.concepts && learning.concepts.total > 0 && (
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-[11px] text-neutral-400">
+                  <span>{t('dashboard.conceptProgress')}</span>
+                  <span>
+                    {learning.concepts.mastered ?? 0}/{learning.concepts.total}
+                  </span>
+                </div>
+                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+                  <div
+                    className="h-full rounded-full bg-accent transition-all"
+                    style={{
+                      width: `${Math.round(((learning.concepts.mastered ?? 0) / learning.concepts.total) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
             <p className="mt-2.5 text-[11px] text-neutral-400">
               {t('dashboard.phase3Note')}
             </p>

@@ -2,8 +2,9 @@ import { create } from 'zustand'
 
 interface UiState {
   taskModalOpen: boolean
+  taskModalKind: string
   focusOpen: boolean
-  openTaskModal: () => void
+  openTaskModal: (kind?: string) => void
   closeTaskModal: () => void
   openFocus: () => void
   closeFocus: () => void
@@ -11,8 +12,10 @@ interface UiState {
 
 export const useUiStore = create<UiState>((set) => ({
   taskModalOpen: false,
+  taskModalKind: 'general',
   focusOpen: false,
-  openTaskModal: () => set({ taskModalOpen: true }),
+  openTaskModal: (kind = 'general') =>
+    set({ taskModalOpen: true, taskModalKind: kind }),
   closeTaskModal: () => set({ taskModalOpen: false }),
   openFocus: () => set({ focusOpen: true }),
   closeFocus: () => set({ focusOpen: false }),

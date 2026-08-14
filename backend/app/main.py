@@ -10,14 +10,27 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import models  # noqa: F401  (register tables before init_db)
-from .api import dashboard, focus, health, inbox, search, settings, system, tasks, timeline
+from .api import (
+    dashboard,
+    focus,
+    health,
+    inbox,
+    learning,
+    search,
+    settings,
+    system,
+    tasks,
+    timeline,
+)
 from .core.config import settings as app_settings
-from .core.db import init_db
+from .core.db import Session, engine, init_db
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     init_db()
+    with Session(engine) as session:
+        learning.seed_learning_roadmap(session)
     yield
 
 
@@ -45,6 +58,7 @@ app.include_router(inbox.router)
 app.include_router(focus.router)
 app.include_router(timeline.router)
 app.include_router(dashboard.router)
+app.include_router(learning.router)
 
 # Serve the built frontend when it exists (production mode).
 _frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"

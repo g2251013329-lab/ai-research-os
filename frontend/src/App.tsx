@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import AppLayout from './components/layout/AppLayout'
 import Dashboard from './pages/Dashboard'
 import InboxPage from './pages/InboxPage'
+import LearningPage from './pages/LearningPage'
 import NotFound from './pages/NotFound'
 import PlaceholderPage from './pages/PlaceholderPage'
 import SettingsPage from './pages/SettingsPage'
@@ -24,10 +25,7 @@ export default function App() {
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
-            <Route
-              path="/learning"
-              element={<PlaceholderPage titleKey="nav.learning" phase="Phase 3" />}
-            />
+            <Route path="/learning" element={<LearningPage />} />
             <Route
               path="/research"
               element={<PlaceholderPage titleKey="nav.research" phase="Phase 4" />}

@@ -1,0 +1,108 @@
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+client = TestClient(app)
+
+TEST_VAULT = Path(__file__).resolve().parents[1] / ".test-data" / "learning-vault"
+
+
+def test_roadmap_crud():
+    # cleanup
+    for c in client.get("/api/learning/roadmap").json():
+        if not c.get("children"):
+            client.delete(f"/api/learning/concepts/{c['id']}")
+    for c in client.get("/api/learning/roadmap").json():
+        client.delete(f"/api/learning/concepts/{c['id']}")
+
+    top = client.post("/api/learning/concepts", json={"title": "LLPS"}).json()
+    child = client.post(
+        "/api/learning/concepts", json={"title": "Thermodynamics", "parent_id": top["id"]}
+    ).json()
+
+    r = client.patch(
+        f"/api/learning/concepts/{child['id']}", json={"status": "mastered"}
+    )
+    assert r.status_code == 200
+    assert r.json()["status"] == "mastered"
+
+    tree = client.get("/api/learning/roadmap").json()
+    assert any(
+        n["id"] == top["id"] and any(x["title"] == "Thermodynamics" for x in n["children"])
+        for n in tree
+    )
+
+    # cannot delete parent with children
+    assert client.delete(f"/api/learning/concepts/{top['id']}").status_code == 422
+    # invalid status rejected
+    assert (
+        client.patch(f"/api/learning/concepts/{child['id']}", json={"status": "bogus"}).status_code
+        == 422
+    )
+
+    client.delete(f"/api/learning/concepts/{child['id']}")
+    client.delete(f"/api/learning/concepts/{top['id']}")
+
+
+def test_checkin_and_calendar():
+    for s in client.get("/api/learning/sessions").json():
+        client.delete(f"/api/learning/sessions/{s['id']}")
+
+    r = client.post(
+        "/api/learning/sessions",
+        json={
+            "topic": "Polymer Physics",
+            "duration_min": 52,
+            "status": "completed",
+            "notes": "Flory-Huggins",
+            "takeaways": "chi parameter",
+        },
+    )
+    assert r.status_code == 201
+    sid = r.json()["id"]
+    assert r.json()["session_date"]  # default today
+
+    today = Path(".").resolve()
+    month = r.json()["session_date"][:7]
+
+    cal = client.get("/api/learning/calendar", params={"month": month}).json()
+    assert any(s["id"] == sid for s in cal["sessions"])
+
+    # task with due date appears
+    t = client.post(
+        "/api/tasks", json={"title": "finish lecture", "due_date": f"{month}-15"}
+    ).json()
+    cal2 = client.get("/api/learning/calendar", params={"month": month}).json()
+    assert any(x["title"] == "finish lecture" for x in cal2["tasks"])
+
+    client.delete(f"/api/tasks/{t['id']}")
+    client.delete(f"/api/learning/sessions/{sid}")
+
+
+def test_learning_notes_in_vault():
+    TEST_VAULT.mkdir(parents=True, exist_ok=True)
+    client.put("/api/settings", json={"vault_path": str(TEST_VAULT)})
+    try:
+        r = client.post("/api/learning/notes", json={"title": "FRAP 原理笔记"})
+        assert r.status_code == 201
+        rel = r.json()["relative"]
+        assert rel.startswith("learning/")
+        assert (TEST_VAULT / rel).exists()
+
+        notes = client.get("/api/learning/notes").json()
+        assert any(n["title"] == "FRAP 原理笔记" for n in notes)
+    finally:
+        client.put("/api/settings", json={"vault_path": "/Users/mathew/ai-research-vault"})
+
+
+def test_learning_overview_and_dashboard():
+    r = client.get("/api/learning/overview")
+    assert r.status_code == 200
+    data = r.json()
+    assert "progress" in data and "weak_areas" in data and "recent_sessions" in data
+
+    d = client.get("/api/dashboard").json()
+    assert "concepts" in d["learning"]
+    assert "total" in d["learning"]["concepts"]

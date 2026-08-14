@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, X } from 'lucide-react'
 import { api } from '../../api/client'
@@ -11,6 +11,7 @@ const PRIORITIES = ['low', 'medium', 'high']
 export default function TaskModal() {
   const { t } = useTranslation()
   const open = useUiStore((s) => s.taskModalOpen)
+  const taskModalKind = useUiStore((s) => s.taskModalKind)
   const close = useUiStore((s) => s.closeTaskModal)
   const queryClient = useQueryClient()
 
@@ -20,6 +21,10 @@ export default function TaskModal() {
   const [dueDate, setDueDate] = useState('')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (open) setKind(taskModalKind)
+  }, [open, taskModalKind])
 
   if (!open) return null
 
