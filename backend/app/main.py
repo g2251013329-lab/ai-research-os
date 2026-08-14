@@ -9,7 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from .api import health, search, settings, system
+from . import models  # noqa: F401  (register tables before init_db)
+from .api import dashboard, focus, health, inbox, search, settings, system, tasks, timeline
 from .core.config import settings as app_settings
 from .core.db import init_db
 
@@ -39,6 +40,11 @@ app.include_router(health.router)
 app.include_router(settings.router)
 app.include_router(search.router)
 app.include_router(system.router)
+app.include_router(tasks.router)
+app.include_router(inbox.router)
+app.include_router(focus.router)
+app.include_router(timeline.router)
+app.include_router(dashboard.router)
 
 # Serve the built frontend when it exists (production mode).
 _frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"

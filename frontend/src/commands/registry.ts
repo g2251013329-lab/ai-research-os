@@ -16,6 +16,8 @@ export interface CommandDeps {
   toggleTheme: () => void
   toggleLanguage: () => void
   launchApp: (app: string) => void
+  openTaskModal: () => void
+  openFocus: () => void
   toast: (message: string) => void
   t: (key: string) => string
 }

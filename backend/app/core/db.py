@@ -31,5 +31,5 @@ def init_db() -> None:
 
 
 def get_session():
-    with Session(engine) as session:
+    with Session(engine, expire_on_commit=False) as session:
         yield session
