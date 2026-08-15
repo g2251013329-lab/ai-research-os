@@ -26,6 +26,7 @@ from .api import (
     projects,
     questions,
     research,
+    schedule,
     search,
     settings,
     stats,
@@ -83,6 +84,7 @@ app.include_router(ai.router)
 app.include_router(memory_api.router)
 app.include_router(graph.router)
 app.include_router(stats.router)
+app.include_router(schedule.router)
 
 # Serve the built frontend when it exists (production mode).
 _frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"

@@ -1,8 +1,18 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, ChevronLeft, ChevronRight, Timer } from 'lucide-react'
+import {
+  CalendarClock,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Timer,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { api } from '../../api/client'
+import { useToastStore } from '../../store/useToastStore'
 
 interface CalTask {
   id: number
@@ -25,29 +35,92 @@ interface CalFocus {
   ended_at: string
 }
 
+interface CalSchedule {
+  id: number
+  date: string
+  start_time: string
+  end_time: string
+  title: string
+  kind: string
+}
+
+interface DayEvents {
+  tasks: CalTask[]
+  sessions: CalSession[]
+  focus: CalFocus[]
+  schedule: CalSchedule[]
+}
+
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
+const SCHEDULE_KINDS = ['general', 'learning', 'research', 'experiment', 'leisure']
 
 export default function CalendarView() {
   const { t } = useTranslation()
+  const toast = useToastStore((s) => s.show)
   const queryClient = useQueryClient()
   const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7))
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
 
+  // schedule add form
+  const [sTitle, setSTitle] = useState('')
+  const [sStart, setSStart] = useState('09:00')
+  const [sEnd, setSEnd] = useState('10:00')
+  const [sKind, setSKind] = useState('general')
+  const [confirmDeleteTask, setConfirmDeleteTask] = useState<number | null>(null)
+
   const { data } = useQuery({
     queryKey: ['learning', 'calendar', month],
     queryFn: () =>
-      api<{ tasks: CalTask[]; sessions: CalSession[]; focus: CalFocus[] }>(
-        `/api/learning/calendar?month=${month}`,
-      ),
+      api<{
+        tasks: CalTask[]
+        sessions: CalSession[]
+        focus: CalFocus[]
+        schedule: CalSchedule[]
+      }>(`/api/learning/calendar?month=${month}`),
   })
+
+  const invalidateCalendar = () => {
+    void queryClient.invalidateQueries({ queryKey: ['learning', 'calendar'] })
+    void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+  }
 
   const rescheduleMutation = useMutation({
     mutationFn: ({ id, due }: { id: number; due: string }) =>
       api(`/api/tasks/${id}`, { method: 'PATCH', body: JSON.stringify({ due_date: due }) }),
+    onSuccess: invalidateCalendar,
+  })
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: (id: number) => api(`/api/tasks/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['learning', 'calendar'] })
-      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      setConfirmDeleteTask(null)
+      invalidateCalendar()
     },
+  })
+
+  const addScheduleMutation = useMutation({
+    mutationFn: () =>
+      api('/api/schedule', {
+        method: 'POST',
+        body: JSON.stringify({
+          date: selectedDay,
+          start_time: sStart,
+          end_time: sEnd,
+          title: sTitle.trim(),
+          kind: sKind,
+        }),
+      }),
+    onSuccess: () => {
+      setSTitle('')
+      toast(t('learning.calendar.scheduleAdded'))
+      invalidateCalendar()
+    },
+    onError: (e) => toast(e instanceof Error ? e.message : String(e)),
+  })
+
+  const deleteScheduleMutation = useMutation({
+    mutationFn: (id: number) => api(`/api/schedule/${id}`, { method: 'DELETE' }),
+    onSuccess: invalidateCalendar,
   })
 
   const [year, mon] = month.split('-').map(Number)
@@ -56,18 +129,24 @@ export default function CalendarView() {
   const today = new Date().toISOString().slice(0, 10)
 
   const eventsByDay = useMemo(() => {
-    const map: Record<string, { tasks: CalTask[]; sessions: CalSession[]; focus: CalFocus[] }> = {}
+    const map: Record<string, DayEvents> = {}
     for (const task of data?.tasks ?? []) {
       const d = task.due_date ?? ''
       if (!d) continue
-      ;(map[d] ??= { tasks: [], sessions: [], focus: [] }).tasks.push(task)
+      ;(map[d] ??= { tasks: [], sessions: [], focus: [], schedule: [] }).tasks.push(task)
     }
     for (const s of data?.sessions ?? []) {
-      ;(map[s.session_date] ??= { tasks: [], sessions: [], focus: [] }).sessions.push(s)
+      ;(map[s.session_date] ??= { tasks: [], sessions: [], focus: [], schedule: [] }).sessions.push(s)
     }
     for (const f of data?.focus ?? []) {
       const d = f.ended_at.slice(0, 10)
-      ;(map[d] ??= { tasks: [], sessions: [], focus: [] }).focus.push(f)
+      ;(map[d] ??= { tasks: [], sessions: [], focus: [], schedule: [] }).focus.push(f)
+    }
+    for (const s of data?.schedule ?? []) {
+      ;(map[s.date] ??= { tasks: [], sessions: [], focus: [], schedule: [] }).schedule.push(s)
+    }
+    for (const day of Object.values(map)) {
+      day.schedule.sort((a, b) => a.start_time.localeCompare(b.start_time))
     }
     return map
   }, [data])
@@ -82,8 +161,11 @@ export default function CalendarView() {
 
   const selected = selectedDay ? eventsByDay[selectedDay] : null
 
+  const field =
+    'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
+
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
+    <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
       {/* month grid */}
       <div>
         <div className="flex items-center justify-between">
@@ -155,6 +237,15 @@ export default function CalendarView() {
                 >
                   {day.slice(8)}
                 </span>
+                {ev?.schedule.map((s) => (
+                  <span
+                    key={`s${s.id}`}
+                    data-tip={`${s.start_time}${s.end_time ? '–' + s.end_time : ''} ${s.title}`}
+                    className="mt-0.5 w-full truncate rounded bg-violet-50 px-1 text-[10px] text-violet-700 dark:bg-violet-950/60 dark:text-violet-300"
+                  >
+                    {s.start_time} {s.title}
+                  </span>
+                ))}
                 {ev?.tasks.map((task) => (
                   <span
                     key={`t${task.id}`}
@@ -166,7 +257,7 @@ export default function CalendarView() {
                 ))}
                 {ev?.sessions.map((s) => (
                   <span
-                    key={`s${s.id}`}
+                    key={`cs${s.id}`}
                     data-tip={s.topic}
                     className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-emerald-50 px-1 text-[10px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                   >
@@ -193,15 +284,115 @@ export default function CalendarView() {
         <div className="text-[13px] font-semibold">
           {selectedDay ?? t('learning.calendar.selectDay')}
         </div>
-        {selectedDay && !selected && (
-          <p className="mt-3 text-[12px] text-neutral-400">{t('learning.calendar.noEvents')}</p>
-        )}
-        {selected && (
-          <div className="mt-2 space-y-2">
-            {selected.tasks.map((task) => (
+
+        {selectedDay && (
+          <div className="mt-2 space-y-3">
+            {/* schedule add */}
+            <div className="rounded-md border border-violet-100 bg-violet-50/50 p-2 dark:border-violet-900/40 dark:bg-violet-950/20">
+              <div className="flex items-center gap-1 text-[11px] font-medium text-violet-700 dark:text-violet-300">
+                <CalendarClock size={11} />
+                {t('learning.calendar.schedule')}
+              </div>
+              <input
+                value={sTitle}
+                onChange={(e) => setSTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && sTitle.trim()) addScheduleMutation.mutate()
+                }}
+                placeholder={t('learning.calendar.schedulePlaceholder')}
+                className={`mt-1.5 w-full text-[12px] ${field}`}
+              />
+              <div className="mt-1.5 flex items-center gap-1.5">
+                <input
+                  type="time"
+                  value={sStart}
+                  onChange={(e) => setSStart(e.target.value)}
+                  className={`w-[86px] text-[12px] ${field}`}
+                />
+                <span className="text-[11px] text-neutral-400">–</span>
+                <input
+                  type="time"
+                  value={sEnd}
+                  onChange={(e) => setSEnd(e.target.value)}
+                  className={`w-[86px] text-[12px] ${field}`}
+                />
+                <select
+                  value={sKind}
+                  onChange={(e) => setSKind(e.target.value)}
+                  className={`flex-1 text-[12px] ${field}`}
+                >
+                  {SCHEDULE_KINDS.map((k) => (
+                    <option key={k} value={k}>
+                      {t(`learning.calendar.kinds.${k}`)}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  disabled={!sTitle.trim()}
+                  onClick={() => addScheduleMutation.mutate()}
+                  className="rounded-md bg-accent px-2 py-1.5 text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+                  aria-label="add"
+                >
+                  <Plus size={13} />
+                </button>
+              </div>
+            </div>
+
+            {/* schedule list */}
+            {selected?.schedule.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center gap-1.5 rounded-md bg-violet-50 p-2 text-[12px] text-violet-700 dark:bg-violet-950/60 dark:text-violet-300"
+              >
+                <span className="shrink-0 font-mono text-[11px]">
+                  {s.start_time}
+                  {s.end_time ? `–${s.end_time}` : ''}
+                </span>
+                <span className="truncate" data-tip={s.title}>
+                  {s.title}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => deleteScheduleMutation.mutate(s.id)}
+                  className="ml-auto shrink-0 rounded p-0.5 text-violet-300 transition-colors hover:text-red-500 dark:text-violet-600"
+                  data-tip={t('inbox.delete')}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+
+            {/* tasks */}
+            {selected?.tasks.map((task) => (
               <div key={task.id} className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
-                <div data-tip={task.title} className="truncate text-[12px]">
-                  {task.title}
+                <div className="flex items-center gap-1.5">
+                  <div data-tip={task.title} className="min-w-0 flex-1 truncate text-[12px]">
+                    {task.title}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirmDeleteTask === task.id) {
+                        deleteTaskMutation.mutate(task.id)
+                      } else {
+                        setConfirmDeleteTask(task.id)
+                        setTimeout(() => setConfirmDeleteTask(null), 2500)
+                      }
+                    }}
+                    className={`shrink-0 rounded px-1.5 py-0.5 text-[10.5px] transition-colors ${
+                      confirmDeleteTask === task.id
+                        ? 'bg-red-500 text-white'
+                        : 'text-neutral-400 hover:text-red-500'
+                    }`}
+                    data-tip={t('learning.calendar.deleteTask')}
+                  >
+                    {confirmDeleteTask === task.id ? (
+                      t('learning.calendar.confirmDelete')
+                    ) : (
+                      <Trash2 size={12} />
+                    )}
+                  </button>
                 </div>
                 <input
                   type="date"
@@ -215,9 +406,11 @@ export default function CalendarView() {
                 />
               </div>
             ))}
-            {selected.sessions.map((s) => (
+
+            {/* check-ins & focus */}
+            {selected?.sessions.map((s) => (
               <div
-                key={s.id}
+                key={`cs${s.id}`}
                 className="flex items-center gap-1.5 rounded-md bg-emerald-50 p-2 text-[12px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
               >
                 <CheckCircle2 size={12} />
@@ -225,9 +418,9 @@ export default function CalendarView() {
                 <span className="ml-auto shrink-0 text-[11px]">{s.duration_min}′</span>
               </div>
             ))}
-            {selected.focus.map((f) => (
+            {selected?.focus.map((f) => (
               <div
-                key={f.id}
+                key={`cf${f.id}`}
                 className="flex items-center gap-1.5 rounded-md bg-amber-50 p-2 text-[12px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
               >
                 <Timer size={12} />
@@ -235,6 +428,14 @@ export default function CalendarView() {
                 <span className="ml-auto shrink-0 text-[11px]">{f.duration_min}′</span>
               </div>
             ))}
+
+            {!selected && (
+              <p className="text-[12px] text-neutral-400">{t('learning.calendar.noEvents')}</p>
+            )}
+            {selected && !selected.tasks.length && !selected.sessions.length &&
+              !selected.focus.length && !selected.schedule.length && (
+              <p className="text-[12px] text-neutral-400">{t('learning.calendar.noEvents')}</p>
+            )}
           </div>
         )}
       </div>

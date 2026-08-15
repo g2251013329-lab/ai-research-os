@@ -47,6 +47,7 @@ export default function TaskModal() {
       setDueDate('')
       await queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       await queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      await queryClient.invalidateQueries({ queryKey: ['learning', 'calendar'] })
       close()
     } finally {
       setSaving(false)

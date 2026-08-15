@@ -317,6 +317,18 @@ export default {
       noEvents: 'Nothing scheduled',
       reschedule: 'Reschedule due date (drag & drop later)',
       focus: 'Focus',
+      schedule: 'Schedule',
+      schedulePlaceholder: 'Title, press Enter to add',
+      scheduleAdded: 'Schedule added',
+      deleteTask: 'Delete task',
+      confirmDelete: 'Confirm delete?',
+      kinds: {
+        general: 'General',
+        learning: 'Learning',
+        research: 'Research',
+        experiment: 'Experiment',
+        leisure: 'Leisure',
+      },
     },
     checkin: {
       title: 'Study Check-in',

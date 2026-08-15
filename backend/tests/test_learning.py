@@ -106,3 +106,45 @@ def test_learning_overview_and_dashboard():
     d = client.get("/api/dashboard").json()
     assert "concepts" in d["learning"]
     assert "total" in d["learning"]["concepts"]
+
+
+def test_schedule_crud_and_calendar():
+    # cleanup
+    for s in client.get("/api/schedule", params={"month": "2026-08"}).json():
+        client.delete(f"/api/schedule/{s['id']}")
+
+    r = client.post(
+        "/api/schedule",
+        json={
+            "date": "2026-08-15",
+            "start_time": "09:00",
+            "end_time": "10:30",
+            "title": "组会",
+            "kind": "research",
+        },
+    )
+    assert r.status_code == 201
+    sid = r.json()["id"]
+    assert r.json()["start_time"] == "09:00"
+
+    # invalid time rejected
+    assert (
+        client.post(
+            "/api/schedule",
+            json={"date": "2026-08-15", "start_time": "25:00", "title": "x"},
+        ).status_code
+        == 422
+    )
+
+    # calendar includes schedule
+    cal = client.get("/api/learning/calendar", params={"month": "2026-08"}).json()
+    assert any(s["id"] == sid for s in cal["schedule"])
+
+    # list by date
+    day = client.get("/api/schedule", params={"date": "2026-08-15"}).json()
+    assert any(s["id"] == sid for s in day)
+
+    # update + delete
+    r = client.patch(f"/api/schedule/{sid}", json={"start_time": "11:00"})
+    assert r.json()["start_time"] == "11:00"
+    assert client.delete(f"/api/schedule/{sid}").status_code == 200

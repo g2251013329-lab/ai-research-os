@@ -172,6 +172,18 @@ class AIContextEntry(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=utcnow)
 
 
+class ScheduleItem(SQLModel, table=True):
+    """Time-blocked daily plan (PRD §5.3): date + start/end time + title."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    date: str  # YYYY-MM-DD
+    start_time: str  # HH:MM
+    end_time: str = ""  # HH:MM (optional)
+    title: str
+    kind: str = "general"  # general | learning | research | experiment | leisure
+    created_at: datetime = Field(default_factory=utcnow)
+
+
 TASK_KINDS = ("general", "learning", "research", "experiment")
 TASK_STATUSES = ("todo", "doing", "done")
 TASK_PRIORITIES = ("low", "medium", "high")

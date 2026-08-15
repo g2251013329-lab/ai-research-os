@@ -310,6 +310,18 @@ export default {
       noEvents: '这一天没有安排',
       reschedule: '调整截止日期（拖动功能后续支持）',
       focus: '专注',
+      schedule: '日程',
+      schedulePlaceholder: '日程标题，回车添加',
+      scheduleAdded: '已添加日程',
+      deleteTask: '删除任务',
+      confirmDelete: '确认删除？',
+      kinds: {
+        general: '一般',
+        learning: '学习',
+        research: '科研',
+        experiment: '实验',
+        leisure: '休闲',
+      },
     },
     checkin: {
       title: '学习打卡',

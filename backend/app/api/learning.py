@@ -18,6 +18,7 @@ from ..models import (
     SESSION_STATUSES,
     FocusSession,
     LearningConcept,
+    ScheduleItem,
     StudySession,
     Task,
 )
@@ -321,6 +322,9 @@ def calendar(
     sessions = session.exec(
         select(StudySession).where(StudySession.session_date.startswith(month))
     ).all()
+    schedules = session.exec(
+        select(ScheduleItem).where(ScheduleItem.date.startswith(month))
+    ).all()
     start, end = _month_bounds(month)
     focus = session.exec(
         select(FocusSession).where(
@@ -331,6 +335,7 @@ def calendar(
         "month": month,
         "tasks": [t.model_dump(mode="json") for t in tasks],
         "sessions": [s.model_dump(mode="json") for s in sessions],
+        "schedule": [s.model_dump(mode="json") for s in schedules],
         "focus": [f.model_dump(mode="json") for f in focus],
     }
 
