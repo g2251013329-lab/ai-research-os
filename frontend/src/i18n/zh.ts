@@ -303,9 +303,13 @@ export default {
       newRoot: '根概念名称…',
       empty: '路线图是空的',
       changeStatus: '修改学习状态',
+      deleteTree: '删除该概念及 {{n}} 个子概念',
+      confirm: '确认删除？',
+      confirmTree: '确认删除 ({{n}} 子级)？',
     },
     links: {
       button: '关联研究（论文/项目/实验/问题/笔记）',
+      badge: '已关联',
       title: '研究关联',
       hint: '把学到的知识连接到实际研究：这个知识点用在了哪些地方？',
       add: '添加',
@@ -329,6 +333,7 @@ export default {
       schedule: '日程',
       schedulePlaceholder: '日程标题，回车添加',
       scheduleAdded: '已添加日程',
+      unscheduled: '其他安排（无固定时间）',
       deleteTask: '删除任务',
       confirmDelete: '确认删除？',
       view: {
@@ -447,9 +452,15 @@ export default {
       nav: '导航',
       appearance: '外观与语言',
       apps: '外部工具',
-      upcoming: '即将上线',
+      actions: '常用操作',
     },
     soon: '该功能将在 {{phase}} 实现',
+    info: {
+      title: '快捷键',
+      search: '全局搜索',
+      palette: '命令面板',
+      close: '关闭面板',
+    },
   },
   commands: {
     dashboard: '打开仪表盘',

@@ -481,7 +481,6 @@ export default function CalendarView() {
                       className={`absolute left-1 right-1 overflow-hidden rounded-md px-2 py-0.5 text-[11px] leading-tight ${SCHEDULE_COLORS[s.kind] ?? SCHEDULE_COLORS.general}`}
                       style={{ top: top + 2, height: height - 4 }}
                     >
-                      <span className="font-mono text-[10px]">{s.start_time}</span>{' '}
                       <span className="truncate">{s.title}</span>
                     </div>
                   )
@@ -489,42 +488,48 @@ export default function CalendarView() {
               </div>
             </div>
             {/* non-time-blocked items */}
-            <div className="flex flex-wrap gap-1.5 border-t border-neutral-100 px-3 py-2 dark:border-neutral-800">
-              {dayEvents?.tasks.map((task) => (
-                <span
-                  key={`t${task.id}`}
-                  data-tip={task.title}
-                  className="truncate rounded bg-blue-50 px-2 py-1 text-[11px] text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
-                >
-                  {task.title}
-                </span>
-              ))}
-              {dayEvents?.sessions.map((s) => (
-                <span
-                  key={`cs${s.id}`}
-                  data-tip={s.topic}
-                  className="flex items-center gap-1 truncate rounded bg-emerald-50 px-2 py-1 text-[11px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
-                >
-                  <CheckCircle2 size={10} /> {s.topic}
-                </span>
-              ))}
-              {dayEvents?.focus.map((f) => (
-                <span
-                  key={`cf${f.id}`}
-                  data-tip={`${t('learning.calendar.focus')} ${f.duration_min}′`}
-                  className="flex items-center gap-1 truncate rounded bg-amber-50 px-2 py-1 text-[11px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
-                >
-                  <Timer size={10} /> {f.duration_min}′
-                </span>
-              ))}
-              {!dayEvents?.tasks.length &&
-                !dayEvents?.sessions.length &&
-                !dayEvents?.focus.length &&
-                !dayEvents?.schedule.length && (
-                  <span className="text-[11.5px] text-neutral-400">
-                    {t('learning.calendar.noEvents')}
+            <div className="border-t border-neutral-100 bg-neutral-50/60 px-3 py-2 dark:border-neutral-800 dark:bg-neutral-900/40">
+              <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-neutral-400">
+                <CalendarClock size={11} />
+                {t('learning.calendar.unscheduled')}
+              </div>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {dayEvents?.tasks.map((task) => (
+                  <span
+                    key={`t${task.id}`}
+                    data-tip={task.title}
+                    className="truncate rounded bg-blue-50 px-2 py-1 text-[11px] text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
+                  >
+                    {task.title}
                   </span>
-                )}
+                ))}
+                {dayEvents?.sessions.map((s) => (
+                  <span
+                    key={`cs${s.id}`}
+                    data-tip={s.topic}
+                    className="flex items-center gap-1 truncate rounded bg-emerald-50 px-2 py-1 text-[11px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+                  >
+                    <CheckCircle2 size={10} /> {s.topic}
+                  </span>
+                ))}
+                {dayEvents?.focus.map((f) => (
+                  <span
+                    key={`cf${f.id}`}
+                    data-tip={`${t('learning.calendar.focus')} ${f.duration_min}′`}
+                    className="flex items-center gap-1 truncate rounded bg-amber-50 px-2 py-1 text-[11px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
+                  >
+                    <Timer size={10} /> {f.duration_min}′
+                  </span>
+                ))}
+                {!dayEvents?.tasks.length &&
+                  !dayEvents?.sessions.length &&
+                  !dayEvents?.focus.length &&
+                  !dayEvents?.schedule.length && (
+                    <span className="text-[11.5px] text-neutral-400">
+                      {t('learning.calendar.noEvents')}
+                    </span>
+                  )}
+              </div>
             </div>
           </div>
         )}

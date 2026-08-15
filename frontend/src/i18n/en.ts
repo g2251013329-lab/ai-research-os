@@ -310,9 +310,13 @@ export default {
       newRoot: 'Root concept name…',
       empty: 'Roadmap is empty',
       changeStatus: 'Change status',
+      deleteTree: 'Delete this concept and its {{n}} children',
+      confirm: 'Confirm delete?',
+      confirmTree: 'Confirm delete ({{n}} children)?',
     },
     links: {
       button: 'Link to research (papers/projects/experiments/questions/notes)',
+      badge: 'Linked',
       title: 'Research links',
       hint: 'Connect knowledge to actual research: where is this concept used?',
       add: 'Add',
@@ -336,6 +340,7 @@ export default {
       schedule: 'Schedule',
       schedulePlaceholder: 'Title, press Enter to add',
       scheduleAdded: 'Schedule added',
+      unscheduled: 'Unscheduled',
       deleteTask: 'Delete task',
       confirmDelete: 'Confirm delete?',
       view: {
@@ -454,9 +459,15 @@ export default {
       nav: 'Navigation',
       appearance: 'Appearance & Language',
       apps: 'External Tools',
-      upcoming: 'Coming Soon',
+      actions: 'Quick Actions',
     },
     soon: 'This will be implemented in {{phase}}',
+    info: {
+      title: 'Shortcuts',
+      search: 'Global search',
+      palette: 'Command palette',
+      close: 'Close panel',
+    },
   },
   commands: {
     dashboard: 'Open Dashboard',

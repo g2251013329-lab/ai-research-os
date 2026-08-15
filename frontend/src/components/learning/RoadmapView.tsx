@@ -22,6 +22,7 @@ export interface Concept {
   parent_id: number | null
   status: string
   sort_order: number
+  link_count: number
   children: Concept[]
 }
 
@@ -50,6 +51,7 @@ export default function RoadmapView() {
   const [aiNode, setAiNode] = useState<Concept | null>(null)
   const [aiMode, setAiMode] = useState('explain')
   const [linkNode, setLinkNode] = useState<Concept | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null)
 
   const AI_MODES = [
     { id: 'explain', label: t('learning.ai.explain') },
@@ -166,21 +168,53 @@ export default function RoadmapView() {
           <button
             type="button"
             onClick={() => setLinkNode(node)}
-            className="rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-neutral-600"
+            className="relative rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-neutral-600"
             data-tip={t('learning.links.button')}
           >
             <Link2 size={13} />
+            {node.link_count > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-accent px-0.5 text-[8.5px] font-semibold leading-none text-white">
+                {node.link_count}
+              </span>
+            )}
           </button>
-          {!hasChildren && (
-            <button
-              type="button"
-              onClick={() => deleteMutation.mutate(node.id)}
-              className="rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100 dark:text-neutral-600"
-              data-tip={t('learning.roadmap.delete')}
-            >
-              <Trash2 size={13} />
-            </button>
+          {node.link_count > 0 && (
+            <span className="shrink-0 rounded bg-accent-soft px-1.5 py-px text-[10px] font-medium text-accent">
+              {t('learning.links.badge')} {node.link_count}
+            </span>
           )}
+          <button
+            type="button"
+            onClick={() => {
+              if (confirmDelete === node.id) {
+                setConfirmDelete(null)
+                deleteMutation.mutate(node.id)
+              } else {
+                setConfirmDelete(node.id)
+                setTimeout(() => setConfirmDelete(null), 2500)
+              }
+            }}
+            className={`rounded p-1 text-neutral-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-neutral-600 ${
+              confirmDelete === node.id
+                ? 'bg-red-500 text-white opacity-100'
+                : 'hover:text-red-500'
+            }`}
+            data-tip={
+              node.children.length
+                ? t('learning.roadmap.deleteTree', { n: node.children.length })
+                : t('learning.roadmap.delete')
+            }
+          >
+            {confirmDelete === node.id ? (
+              <span className="px-1 text-[10px] font-medium">
+                {node.children.length
+                  ? t('learning.roadmap.confirmTree', { n: node.children.length })
+                  : t('learning.roadmap.confirm')}
+              </span>
+            ) : (
+              <Trash2 size={13} />
+            )}
+          </button>
 
           {addingUnder === node.id && (
             <span className="flex items-center gap-1">

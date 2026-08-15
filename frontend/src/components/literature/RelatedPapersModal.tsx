@@ -135,7 +135,10 @@ export default function RelatedPapersModal({
                 )}
               </div>
               {r.abstract && (
-                <p className="mt-1.5 line-clamp-3 text-[11.5px] leading-relaxed text-neutral-500 dark:text-neutral-400">
+                <p
+                  data-tip={r.abstract}
+                  className="mt-1.5 line-clamp-3 text-[11.5px] leading-relaxed text-neutral-500 dark:text-neutral-400"
+                >
                   {r.abstract}
                 </p>
               )}

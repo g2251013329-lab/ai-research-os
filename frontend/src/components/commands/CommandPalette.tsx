@@ -29,7 +29,7 @@ import { useToastStore } from '../../store/useToastStore'
 import { useUiStore } from '../../store/useUiStore'
 import type { Command, CommandDeps } from '../../commands/registry'
 
-const GROUPS = ['nav', 'appearance', 'apps', 'upcoming']
+const GROUPS = ['nav', 'appearance', 'apps', 'actions']
 
 export default function CommandPalette({
   open,
@@ -48,6 +48,7 @@ export default function CommandPalette({
   const openQuickCreate = useUiStore((s) => s.openQuickCreate)
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
+  const [showInfo, setShowInfo] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -96,17 +97,17 @@ export default function CommandPalette({
       { id: 'open-zotero', titleKey: 'commands.openZotero', groupKey: 'apps', icon: FolderKanban, available: true, run: () => deps.launchApp('Zotero') },
       { id: 'open-obsidian', titleKey: 'commands.openObsidian', groupKey: 'apps', icon: NotebookPen, available: true, run: () => deps.launchApp('Obsidian') },
       { id: 'open-xiaolvjing', titleKey: 'commands.openXiaolvjing', groupKey: 'apps', icon: BookOpen, available: true, run: () => deps.launchApp('小绿鲸英文文献阅读器') },
-      // upcoming
-      { id: 'create-note', titleKey: 'commands.createNote', groupKey: 'upcoming', icon: SquarePen, available: false, phase: 'Phase 4', run: () => toast(t('palette.soon', { phase: 'Phase 4' })) },
-      { id: 'palette-info', titleKey: 'commands.paletteInfo', groupKey: 'upcoming', icon: Palette, available: false, phase: 'Phase 4', run: () => toast(t('palette.soon', { phase: 'Phase 4' })) },
+      // now real: notes + palette info
+      { id: 'create-note', titleKey: 'commands.createNote', groupKey: 'actions', icon: SquarePen, available: true, run: () => { navigate('/learning?tab=notes'); onClose() } },
+      { id: 'palette-info', titleKey: 'commands.paletteInfo', groupKey: 'actions', icon: Palette, available: true, run: () => setShowInfo(true) },
       // Phase 2: now real
-      { id: 'create-task', titleKey: 'commands.createTask', groupKey: 'upcoming', icon: ListTodo, available: true, run: () => { deps.openTaskModal(); navigate('/'); onClose() } },
-      { id: 'add-inbox', titleKey: 'commands.addInbox', groupKey: 'upcoming', icon: Inbox, available: true, run: () => { navigate('/inbox'); onClose() } },
-      { id: 'focus-mode', titleKey: 'commands.focusMode', groupKey: 'upcoming', icon: Timer, available: true, run: () => { deps.openFocus(); navigate('/'); onClose() } },
+      { id: 'create-task', titleKey: 'commands.createTask', groupKey: 'actions', icon: ListTodo, available: true, run: () => { deps.openTaskModal(); navigate('/'); onClose() } },
+      { id: 'add-inbox', titleKey: 'commands.addInbox', groupKey: 'actions', icon: Inbox, available: true, run: () => { navigate('/inbox'); onClose() } },
+      { id: 'focus-mode', titleKey: 'commands.focusMode', groupKey: 'actions', icon: Timer, available: true, run: () => { deps.openFocus(); navigate('/'); onClose() } },
       // Phase 4: now real
-      { id: 'create-experiment', titleKey: 'commands.createExperiment', groupKey: 'upcoming', icon: FlaskConical, available: true, run: () => { deps.openQuickCreate('experiment'); onClose() } },
-      { id: 'create-question', titleKey: 'commands.createQuestion', groupKey: 'upcoming', icon: HelpCircle, available: true, run: () => { deps.openQuickCreate('question'); onClose() } },
-      { id: 'add-paper', titleKey: 'commands.addPaper', groupKey: 'upcoming', icon: BookOpen, available: true, run: () => { deps.openQuickCreate('paper'); onClose() } },
+      { id: 'create-experiment', titleKey: 'commands.createExperiment', groupKey: 'actions', icon: FlaskConical, available: true, run: () => { deps.openQuickCreate('experiment'); onClose() } },
+      { id: 'create-question', titleKey: 'commands.createQuestion', groupKey: 'actions', icon: HelpCircle, available: true, run: () => { deps.openQuickCreate('question'); onClose() } },
+      { id: 'add-paper', titleKey: 'commands.addPaper', groupKey: 'actions', icon: BookOpen, available: true, run: () => { deps.openQuickCreate('paper'); onClose() } },
       // Phase 5: now real
       { id: 'sync-obsidian', titleKey: 'commands.syncObsidian', groupKey: 'apps', icon: Rocket, available: true, run: () => {
         void (async () => {
@@ -256,6 +257,45 @@ export default function CommandPalette({
           ))}
         </div>
       </div>
+
+      {/* shortcuts info */}
+      {showInfo && (
+        <div
+          className="fixed inset-0 z-[95] flex items-center justify-center bg-black/40 backdrop-blur-[2px]"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setShowInfo(false)
+          }}
+        >
+          <div className="w-[340px] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[13.5px] font-semibold">{t('palette.info.title')}</h3>
+              <button
+                type="button"
+                onClick={() => setShowInfo(false)}
+                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div className="mt-2 divide-y divide-neutral-100 dark:divide-neutral-800">
+              {(
+                [
+                  ['⌘K', t('palette.info.search')],
+                  ['⌘⇧L', t('palette.info.palette')],
+                  ['Esc', t('palette.info.close')],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key} className="flex items-center justify-between py-2 text-[12.5px]">
+                  <span className="text-neutral-500 dark:text-neutral-400">{label}</span>
+                  <kbd className="rounded border border-neutral-200 px-1.5 py-0.5 font-mono text-[11px] text-neutral-600 dark:border-neutral-700 dark:text-neutral-300">
+                    {key}
+                  </kbd>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

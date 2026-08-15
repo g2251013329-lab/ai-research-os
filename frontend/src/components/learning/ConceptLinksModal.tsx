@@ -73,6 +73,7 @@ export default function ConceptLinksModal({
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ['learning', 'links'] })
     void queryClient.invalidateQueries({ queryKey: ['learning', 'linkCandidates'] })
+    void queryClient.invalidateQueries({ queryKey: ['learning', 'roadmap'] })
   }
 
   const addLink = useMutation({
@@ -111,7 +112,7 @@ export default function ConceptLinksModal({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="w-[480px] max-w-[92vw] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="w-[520px] max-w-[92vw] overflow-hidden rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-1.5 text-[14px] font-semibold">
             <Link2 size={14} className="text-accent" />
@@ -129,7 +130,11 @@ export default function ConceptLinksModal({
 
         {/* add form */}
         <div className="mt-3 flex items-center gap-1.5">
-          <select value={kind} onChange={(e) => setKind(e.target.value)} className={field}>
+          <select
+            value={kind}
+            onChange={(e) => setKind(e.target.value)}
+            className={`shrink-0 ${field}`}
+          >
             {['paper', 'project', 'experiment', 'question', 'note'].map((k) => (
               <option key={k} value={k}>
                 {t(`learning.links.kinds.${k}`)}
@@ -139,7 +144,7 @@ export default function ConceptLinksModal({
           <select
             value={target}
             onChange={(e) => setTarget(e.target.value)}
-            className={`flex-1 ${field}`}
+            className={`min-w-0 flex-1 ${field}`}
           >
             <option value="">{t('learning.links.selectTarget')}</option>
             {candidatesForKind.map((c) => (

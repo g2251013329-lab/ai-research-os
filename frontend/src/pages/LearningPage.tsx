@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
 import {
   CalendarDays,
   CheckCircle2,
@@ -27,7 +28,21 @@ const TABS = ['roadmap', 'calendar', 'checkin', 'notes'] as const
 
 export default function LearningPage() {
   const { t } = useTranslation()
-  const [tab, setTab] = useState<(typeof TABS)[number]>('roadmap')
+  const [params] = useSearchParams()
+  const [tab, setTab] = useState<(typeof TABS)[number]>(() => {
+    const requested = params.get('tab')
+    return (TABS as readonly string[]).includes(requested ?? '')
+      ? (requested as (typeof TABS)[number])
+      : 'roadmap'
+  })
+
+  // respond to ?tab= navigation (e.g. from the command palette)
+  useEffect(() => {
+    const requested = params.get('tab')
+    if (requested && (TABS as readonly string[]).includes(requested)) {
+      setTab(requested as (typeof TABS)[number])
+    }
+  }, [params])
   const [checkinOpen, setCheckinOpen] = useState(false)
   const openTaskModal = useUiStore((s) => s.openTaskModal)
 

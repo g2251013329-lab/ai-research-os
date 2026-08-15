@@ -99,9 +99,15 @@ def roadmap(session: Session = Depends(get_session)) -> list[dict]:
             LearningConcept.parent_id, LearningConcept.sort_order, LearningConcept.title
         )
     ).all()
+    # link counts so the UI can badge concepts that connect to research
+    link_counts: dict[int, int] = {}
+    for link in session.exec(select(ConceptLink)).all():
+        link_counts[link.concept_id] = link_counts.get(link.concept_id, 0) + 1
     by_parent: dict[int | None, list[dict]] = {}
     for c in concepts:
-        by_parent.setdefault(c.parent_id, []).append(c.model_dump(mode="json"))
+        node = c.model_dump(mode="json")
+        node["link_count"] = link_counts.get(c.id, 0)
+        by_parent.setdefault(c.parent_id, []).append(node)
     for children in by_parent.values():
         children.sort(key=lambda c: (c["sort_order"], c["title"]))
 
@@ -162,25 +168,32 @@ def update_concept(
     return concept
 
 
+def _delete_concept_tree(session: Session, concept_id: int) -> int:
+    """Recursively delete a concept, its subtree and all concept links. Returns count."""
+    total = 0
+    for child in session.exec(
+        select(LearningConcept).where(LearningConcept.parent_id == concept_id)
+    ).all():
+        total += _delete_concept_tree(session, child.id)
+    for link in session.exec(
+        select(ConceptLink).where(ConceptLink.concept_id == concept_id)
+    ).all():
+        session.delete(link)
+    concept = session.get(LearningConcept, concept_id)
+    if concept:
+        session.delete(concept)
+        total += 1
+    return total
+
+
 @router.delete("/concepts/{concept_id}")
 def delete_concept(concept_id: int, session: Session = Depends(get_session)) -> dict:
     concept = session.get(LearningConcept, concept_id)
     if not concept:
         raise HTTPException(status_code=404, detail="Concept not found")
-    children = session.exec(
-        select(LearningConcept).where(LearningConcept.parent_id == concept_id)
-    ).all()
-    if children:
-        raise HTTPException(
-            status_code=422, detail="Delete child concepts first"
-        )
-    for link in session.exec(
-        select(ConceptLink).where(ConceptLink.concept_id == concept_id)
-    ).all():
-        session.delete(link)
-    session.delete(concept)
+    count = _delete_concept_tree(session, concept_id)
     session.commit()
-    return {"ok": True}
+    return {"ok": True, "deleted": count}
 
 
 # ------------------------------------------------ concept links (PRD §5.6)

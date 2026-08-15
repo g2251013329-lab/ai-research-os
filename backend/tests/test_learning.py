@@ -34,16 +34,24 @@ def test_roadmap_crud():
         for n in tree
     )
 
-    # cannot delete parent with children
-    assert client.delete(f"/api/learning/concepts/{top['id']}").status_code == 422
+    # deleting a parent cascades to children (subtree)
+    r = client.delete(f"/api/learning/concepts/{top['id']}")
+    assert r.status_code == 200
+    assert r.json()["deleted"] == 2
+    tree = client.get("/api/learning/roadmap").json()
+    assert all(n["id"] != top["id"] for n in tree)
     # invalid status rejected
+    child2 = client.post(
+        "/api/learning/concepts", json={"title": "Thermo2"}
+    ).json()
     assert (
-        client.patch(f"/api/learning/concepts/{child['id']}", json={"status": "bogus"}).status_code
+        client.patch(
+            f"/api/learning/concepts/{child2['id']}", json={"status": "bogus"}
+        ).status_code
         == 422
     )
 
-    client.delete(f"/api/learning/concepts/{child['id']}")
-    client.delete(f"/api/learning/concepts/{top['id']}")
+    client.delete(f"/api/learning/concepts/{child2['id']}")
 
 
 def test_checkin_and_calendar():
