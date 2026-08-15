@@ -51,6 +51,13 @@ npm run dev                    # http://localhost:5173（/api 代理到 8000）
 - 笔记直接存 Obsidian vault（Markdown + frontmatter），app 只存索引与关系。
 - 大体积科研数据不进 GitHub（PRD §16.2）。
 
+## 资源占用（v0.1.0 实测）
+
+- 后端为**单进程** uvicorn（Python 3.12 + FastAPI + SQLModel），实测 RSS **≈ 67 MB**。
+- 构成：CPython 基线 ~16 MB + FastAPI/Pydantic ~27 MB + SQLAlchemy/SQLModel ~17 MB（框架基线 ~44 MB，不可压缩）+ AI/Zotero/httpx 等业务依赖 ~23 MB。
+- 前端为构建后的静态资源，由后端直接托管，无额外常驻进程。
+- 说明：早期 ~39 MB 的估算目标基于 P0–P2 精简范围；Phase 5–7 加入 AI 客户端、Zotero 双通道与网络依赖后，67 MB 为当前功能的实际下限，仍显著低于单个浏览器标签页的典型占用。
+
 ## 开发阶段
 
 | 阶段 | 内容 | 状态 |
@@ -61,6 +68,8 @@ npm run dev                    # http://localhost:5173（/api 代理到 8000）
 | Phase 3 | Learning（LLPS 路线图 / 日历 / 打卡 / 学习笔记） | ✅ 已完成 |
 | Phase 4 | Research（项目 / 研究问题 / 假设 / 文献 / 实验 / 笔记 / 写作 / 时间线） | ✅ 已完成 |
 | Phase 5 | 集成（Zotero 只读+本地 API 回退 / 文献导入 / 小绿鲸打开 / vault Git 同步） | ✅ 已完成 |
-| Phase 6 | AI 层 | ✅ 已完成 |
+| Phase 6 | AI 层（上下文问答 / 记忆 / 摘要 / 收件箱归类 / 写作辅助 / 实验下一步 / 学习辅助） | ✅ 已完成 |
 | Phase 7 | P1 特性（跨源搜索 / AI 文献发现 / 论文对比 / 知识图谱 / 统计 / 闪卡） | ✅ 已完成 |
-| Phase 8 | 测试与优化 | ⏳ |
+| Phase 8 | 测试与优化（32 项后端测试全绿 / 时区本地化 / 内存实测） | ✅ 已完成 |
+
+**v0.1.0**（2026-08-15）：P0 + P1 全部完成，见 [`CHANGELOG.md`](CHANGELOG.md)。
