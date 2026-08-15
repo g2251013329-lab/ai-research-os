@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import { api } from '../api/client'
 import { useUiStore } from '../store/useUiStore'
-import { relativeTime, todayLabel } from '../utils/time'
+import { relativeTime, parseApiTime, todayLabel } from '../utils/time'
 
 interface Task {
   id: number
@@ -198,7 +198,7 @@ export default function Dashboard() {
                     </span>
                     <span className="shrink-0 font-mono text-[10.5px] text-neutral-400">
                       {task.completed_at
-                        ? new Date(task.completed_at).toLocaleTimeString('zh-CN', {
+                        ? parseApiTime(task.completed_at).toLocaleTimeString('zh-CN', {
                             hour: '2-digit',
                             minute: '2-digit',
                           })

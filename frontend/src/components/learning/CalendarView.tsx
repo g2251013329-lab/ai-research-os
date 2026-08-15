@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { api } from '../../api/client'
 import { useToastStore } from '../../store/useToastStore'
+import { apiDate } from '../../utils/time'
 
 interface CalTask {
   id: number
@@ -139,7 +140,7 @@ export default function CalendarView() {
       ;(map[s.session_date] ??= { tasks: [], sessions: [], focus: [], schedule: [] }).sessions.push(s)
     }
     for (const f of data?.focus ?? []) {
-      const d = f.ended_at.slice(0, 10)
+      const d = apiDate(f.ended_at)
       ;(map[d] ??= { tasks: [], sessions: [], focus: [], schedule: [] }).focus.push(f)
     }
     for (const s of data?.schedule ?? []) {

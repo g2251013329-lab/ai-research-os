@@ -1,7 +1,23 @@
 /** Small time helpers (relative labels for activity feeds). */
 
+/**
+ * Backend timestamps are UTC, serialized without an offset marker
+ * (e.g. "2026-08-15T00:58:15.311122"). Plain `new Date(iso)` would parse
+ * them as LOCAL time and shift the clock by the UTC offset — so parse as
+ * UTC explicitly. Strings that already carry a timezone marker pass through.
+ */
+export function parseApiTime(iso: string): Date {
+  return new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? iso : iso + 'Z')
+}
+
+/** Local calendar date (YYYY-MM-DD) of a backend timestamp. */
+export function apiDate(iso: string): string {
+  const d = parseApiTime(iso)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 export function relativeTime(iso: string): string {
-  const then = new Date(iso).getTime()
+  const then = parseApiTime(iso).getTime()
   const now = Date.now()
   const diff = Math.max(0, now - then)
   const min = Math.floor(diff / 60000)
@@ -12,7 +28,7 @@ export function relativeTime(iso: string): string {
   const days = Math.floor(hours / 24)
   if (days === 1) return '昨天'
   if (days < 7) return `${days} 天前`
-  return new Date(iso).toLocaleDateString()
+  return parseApiTime(iso).toLocaleDateString()
 }
 
 export function todayLabel(): string {
