@@ -5,6 +5,14 @@ import { api } from '../api/client'
 import { useSettingsStore } from '../store/useSettingsStore'
 import { ACCENT_THEMES } from '../theme/themes'
 import { SUBTITLE_COLORS, SUBTITLE_FONTS } from '../theme/subtitle'
+
+const UI_THEMES = [
+  { id: 'laboratory', bg: '#f5f6f7', surface: '#ffffff', desc: '亮 · 实验室' },
+  { id: 'midnight', bg: '#0b1220', surface: '#182236', desc: '暗 · 午夜实验室' },
+  { id: 'graphite', bg: '#e9ebee', surface: '#f4f5f7', desc: '石墨 · 研究' },
+  { id: 'paper', bg: '#f4efe6', surface: '#faf6ee', desc: '纸感 · 编辑' },
+  { id: 'botanical', bg: '#eef1ec', surface: '#f7f9f5', desc: '植物 · 生命科学' },
+]
 import GitPanel from '../components/settings/GitPanel'
 
 export default function SettingsPage() {
@@ -273,7 +281,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Language, theme & accent */}
+        {/* Language, theme & appearance */}
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
             <label className="block text-[13px] font-medium">
@@ -302,6 +310,46 @@ export default function SettingsPage() {
               <option value="light">{t('theme.light')}</option>
               <option value="dark">{t('theme.dark')}</option>
             </select>
+          </div>
+        </div>
+
+        {/* UI theme presets */}
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+          <label className="block text-[13px] font-medium">{t('settings.uiTheme.label')}</label>
+          <p className="mt-0.5 text-[11.5px] text-neutral-400">{t('settings.uiTheme.hint')}</p>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {UI_THEMES.map((th) => {
+              const active = (settings?.ui_theme ?? 'laboratory') === th.id
+              return (
+                <button
+                  key={th.id}
+                  type="button"
+                  onClick={() => void update({ ui_theme: th.id })}
+                  className={`flex items-center gap-2.5 rounded-lg border p-2.5 text-left transition-colors ${
+                    active
+                      ? 'border-accent bg-accent-soft'
+                      : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600'
+                  }`}
+                >
+                  <span
+                    className="h-8 w-8 shrink-0 rounded-md border border-black/10"
+                    style={{ background: `linear-gradient(135deg, ${th.bg}, ${th.surface})` }}
+                  />
+                  <span className="min-w-0">
+                    <span
+                      className={`block truncate text-[12px] ${
+                        active ? 'font-medium text-accent' : 'text-neutral-700 dark:text-neutral-200'
+                      }`}
+                    >
+                      {t(`settings.uiTheme.${th.id}`)}
+                    </span>
+                    <span className="block truncate text-[10.5px] text-neutral-400">
+                      {th.desc}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 

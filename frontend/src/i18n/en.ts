@@ -11,6 +11,8 @@ export default {
     inbox: 'Inbox',
     leisure: 'Leisure',
     settings: 'Settings',
+    space: 'Spaces',
+    system: 'System',
   },
   common: {
     save: 'Save',
@@ -60,6 +62,15 @@ export default {
   },
   settings: {
     title: 'Settings',
+    uiTheme: {
+      label: 'UI Theme',
+      hint: 'Laboratory Light / Midnight / Graphite / Paper / Botanical — semantic tokens apply globally',
+      laboratory: 'Laboratory Light',
+      midnight: 'Midnight Laboratory',
+      graphite: 'Graphite',
+      paper: 'Paper / Editorial',
+      botanical: 'Botanical',
+    },
     vault: {
       label: 'Obsidian Vault Path',
       desc: 'Notes are stored as Markdown files in this vault',
@@ -471,6 +482,7 @@ export default {
   },
   commands: {
     dashboard: 'Open Dashboard',
+    designSystem: 'Open Design System',
     learning: 'Open Learning',
     research: 'Open Research',
     literature: 'Open Literature',
@@ -728,5 +740,9 @@ export default {
   notFound: {
     title: 'Page not found',
     back: 'Back to Dashboard',
+  },
+  design: {
+    title: 'Design System',
+    subtitle: 'Tokens / Typography / Components / Themes preview (dev infrastructure)',
   },
 }

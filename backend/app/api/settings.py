@@ -103,6 +103,7 @@ class SettingsUpdate(BaseModel):
     zotero_path: str | None = None
     language: str | None = None
     theme: str | None = None
+    ui_theme: str | None = None
     accent: str | None = None
     brand_subtitle: str | None = None
     brand_subtitle_font: str | None = None

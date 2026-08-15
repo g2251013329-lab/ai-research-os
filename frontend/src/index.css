@@ -3,29 +3,25 @@
 @import "@fontsource/outfit/500.css";
 @import "@fontsource/outfit/600.css";
 @import "@fontsource/outfit/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/source-serif-4/400.css";
+@import "@fontsource/source-serif-4/600.css";
 @import "@fontsource/great-vibes";
 @import "@fontsource/dancing-script";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ---------- Accent theme system ----------
-   Each accent theme defines --accent / --accent-2 (gradient pair).
-   Tailwind utilities (bg-accent, text-accent, from-accent, ...) are
-   generated from these via @theme below, so they adapt at runtime. */
+/* ══════════════════════════════════════════════════════════════════════
+   Design Tokens — Primitive → Semantic → Theme
+   Naming follows shadcn/ui conventions; semantics follow DESIGN_SYSTEM.md.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ---------- Accent variants (user preference layer) ---------- */
 :root {
   --accent: #3b82f6;
   --accent-2: #6366f1;
-  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
-  --accent-dark: color-mix(in srgb, var(--accent) 82%, #000);
-  --app-bg: #f5f5f5;
 }
-
-.dark {
-  --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
-  --accent-dark: color-mix(in srgb, var(--accent) 72%, #000);
-  --app-bg: #0a0a0a;
-}
-
 [data-accent="ocean"] { --accent: #3b82f6; --accent-2: #6366f1; }
 [data-accent="mint"] { --accent: #10b981; --accent-2: #14b8a6; }
 [data-accent="sakura"] { --accent: #ec4899; --accent-2: #d946ef; }
@@ -35,15 +31,481 @@
 [data-accent="coral"] { --accent: #f43f5e; --accent-2: #fb7185; }
 [data-accent="mono"] { --accent: #525252; --accent-2: #a3a3a3; }
 
+/* ---------- Theme 1 · Laboratory Light (default light) ---------- */
+:root,
+:root[data-theme="laboratory"] {
+  --background: #f5f6f7;
+  --foreground: #171a1f;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-hover: #eff1f3;
+  --border: #e2e5e9;
+  --border-subtle: #ebedf0;
+  --border-strong: #d2d6dc;
+
+  --primary: #1d4ed8;
+  --primary-fg: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 82%, #000);
+
+  --success: #15803d;
+  --success-soft: #e7f3ec;
+  --warning: #b45309;
+  --warning-soft: #fbf1e3;
+  --danger: #b91c1c;
+  --danger-soft: #fbeaea;
+  --info: #2563eb;
+  --info-soft: #e8effc;
+
+  /* workspace domains */
+  --domain-learning: #0d9488;
+  --domain-learning-soft: #e3f5f3;
+  --domain-research: #1d4ed8;
+  --domain-research-soft: #e8effc;
+  --domain-leisure: #b45309;
+  --domain-leisure-soft: #fbf1e3;
+
+  /* scientific objects */
+  --obj-literature: #2563eb;
+  --obj-literature-soft: #e8effc;
+  --obj-experiment: #0d9488;
+  --obj-experiment-soft: #e3f5f3;
+  --obj-question: #b45309;
+  --obj-question-soft: #fbf1e3;
+  --obj-hypothesis: #7c3aed;
+  --obj-hypothesis-soft: #f0eafd;
+  --obj-result: #15803d;
+  --obj-result-soft: #e7f3ec;
+
+  --app-bg: #f5f6f7;
+}
+
+/* ---------- Theme 2 · Midnight Laboratory (default dark) ---------- */
+:root[data-theme="laboratory"].dark,
+:root[data-theme="midnight"],
+:root[data-theme="midnight"].dark {
+  --background: #0b1220;
+  --foreground: #e8ecf2;
+  --surface: #121a2c;
+  --surface-elevated: #182236;
+  --surface-hover: #1c2740;
+  --border: #24304a;
+  --border-subtle: #1b2540;
+  --border-strong: #2e3c5c;
+
+  --primary: #5b8def;
+  --primary-fg: #0b1220;
+  --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 72%, #000);
+
+  --success: #4d9d6f;
+  --success-soft: rgba(77, 157, 111, 0.16);
+  --warning: #d9a05b;
+  --warning-soft: rgba(217, 160, 91, 0.15);
+  --danger: #d97070;
+  --danger-soft: rgba(217, 112, 112, 0.15);
+  --info: #6f9bf0;
+  --info-soft: rgba(111, 155, 240, 0.15);
+
+  --domain-learning: #3ec4b5;
+  --domain-learning-soft: rgba(62, 196, 181, 0.14);
+  --domain-research: #6f9bf0;
+  --domain-research-soft: rgba(111, 155, 240, 0.14);
+  --domain-leisure: #d9a05b;
+  --domain-leisure-soft: rgba(217, 160, 91, 0.14);
+
+  --obj-literature: #6f9bf0;
+  --obj-literature-soft: rgba(111, 155, 240, 0.14);
+  --obj-experiment: #3ec4b5;
+  --obj-experiment-soft: rgba(62, 196, 181, 0.14);
+  --obj-question: #d9a05b;
+  --obj-question-soft: rgba(217, 160, 91, 0.14);
+  --obj-hypothesis: #a78bfa;
+  --obj-hypothesis-soft: rgba(167, 139, 250, 0.14);
+  --obj-result: #4d9d6f;
+  --obj-result-soft: rgba(77, 157, 111, 0.14);
+
+  --app-bg: #0b1220;
+}
+
+/* ---------- Theme 3 · Graphite ---------- */
+:root[data-theme="graphite"] {
+  --background: #e9ebee;
+  --foreground: #1c1f24;
+  --surface: #f4f5f7;
+  --surface-elevated: #fafbfc;
+  --surface-hover: #eceef1;
+  --border: #d5d9df;
+  --border-subtle: #e0e3e8;
+  --border-strong: #c2c8d0;
+
+  --primary: #3f5c7a;
+  --primary-fg: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 82%, #000);
+
+  --success: #4d7a5f;
+  --success-soft: #e9f1ec;
+  --warning: #9a6b2f;
+  --warning-soft: #f6efe4;
+  --danger: #a14d4d;
+  --danger-soft: #f6eaea;
+  --info: #4a6fa5;
+  --info-soft: #e9eff7;
+
+  --domain-learning: #4d7a8a;
+  --domain-learning-soft: #e7f0f3;
+  --domain-research: #3f5c7a;
+  --domain-research-soft: #e9eff5;
+  --domain-leisure: #8a7a4d;
+  --domain-leisure-soft: #f2efe4;
+
+  --obj-literature: #4a6fa5;
+  --obj-literature-soft: #e9eff7;
+  --obj-experiment: #4d7a8a;
+  --obj-experiment-soft: #e7f0f3;
+  --obj-question: #9a6b2f;
+  --obj-question-soft: #f6efe4;
+  --obj-hypothesis: #6d5a8a;
+  --obj-hypothesis-soft: #efebf5;
+  --obj-result: #4d7a5f;
+  --obj-result-soft: #e9f1ec;
+
+  --app-bg: #e9ebee;
+}
+:root[data-theme="graphite"].dark {
+  --background: #171a1f;
+  --foreground: #e3e6ea;
+  --surface: #1e2229;
+  --surface-elevated: #262b34;
+  --surface-hover: #2a303a;
+  --border: #333a45;
+  --border-subtle: #2a303a;
+  --border-strong: #3e4653;
+  --primary: #7d9cc0;
+  --primary-fg: #171a1f;
+  --success: #6f9c81;
+  --success-soft: rgba(111, 156, 129, 0.15);
+  --warning: #c0945e;
+  --warning-soft: rgba(192, 148, 94, 0.15);
+  --danger: #c07a7a;
+  --danger-soft: rgba(192, 122, 122, 0.15);
+  --info: #7d9cc0;
+  --info-soft: rgba(125, 156, 192, 0.15);
+  --domain-learning: #6f9c9c;
+  --domain-learning-soft: rgba(111, 156, 156, 0.14);
+  --domain-research: #7d9cc0;
+  --domain-research-soft: rgba(125, 156, 192, 0.14);
+  --domain-leisure: #c0945e;
+  --domain-leisure-soft: rgba(192, 148, 94, 0.14);
+  --obj-literature: #7d9cc0;
+  --obj-literature-soft: rgba(125, 156, 192, 0.14);
+  --obj-experiment: #6f9c9c;
+  --obj-experiment-soft: rgba(111, 156, 156, 0.14);
+  --obj-question: #c0945e;
+  --obj-question-soft: rgba(192, 148, 94, 0.14);
+  --obj-hypothesis: #9c8ac0;
+  --obj-hypothesis-soft: rgba(156, 138, 192, 0.14);
+  --obj-result: #6f9c81;
+  --obj-result-soft: rgba(111, 156, 129, 0.14);
+  --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 72%, #000);
+  --app-bg: #171a1f;
+}
+
+/* ---------- Theme 4 · Paper / Editorial ---------- */
+:root[data-theme="paper"] {
+  --background: #f4efe6;
+  --foreground: #2a2620;
+  --surface: #faf6ee;
+  --surface-elevated: #fdfaf4;
+  --surface-hover: #f1ebe0;
+  --border: #e2d9c8;
+  --border-subtle: #e9e1d2;
+  --border-strong: #d3c7b0;
+
+  --primary: #6b6b4f;
+  --primary-fg: #faf6ee;
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 82%, #000);
+
+  --success: #6b7a55;
+  --success-soft: #eef1e6;
+  --warning: #a06b35;
+  --warning-soft: #f7efe3;
+  --danger: #9a4f42;
+  --danger-soft: #f7ebe8;
+  --info: #5c6f8f;
+  --info-soft: #eaedf3;
+
+  --domain-learning: #6b8a7a;
+  --domain-learning-soft: #e9f0ec;
+  --domain-research: #5c6f8f;
+  --domain-research-soft: #eaedf3;
+  --domain-leisure: #a06b35;
+  --domain-leisure-soft: #f7efe3;
+
+  --obj-literature: #5c6f8f;
+  --obj-literature-soft: #eaedf3;
+  --obj-experiment: #6b8a7a;
+  --obj-experiment-soft: #e9f0ec;
+  --obj-question: #a06b35;
+  --obj-question-soft: #f7efe3;
+  --obj-hypothesis: #7a6b8f;
+  --obj-hypothesis-soft: #f0edf3;
+  --obj-result: #6b7a55;
+  --obj-result-soft: #eef1e6;
+
+  --app-bg: #f4efe6;
+}
+:root[data-theme="paper"].dark {
+  --background: #201d18;
+  --foreground: #e7e2d8;
+  --surface: #292520;
+  --surface-elevated: #322d26;
+  --surface-hover: #37322a;
+  --border: #453f35;
+  --border-subtle: #37322a;
+  --border-strong: #524b3f;
+  --primary: #a8a882;
+  --primary-fg: #201d18;
+  --success: #98a878;
+  --success-soft: rgba(152, 168, 120, 0.15);
+  --warning: #c4935a;
+  --warning-soft: rgba(196, 147, 90, 0.15);
+  --danger: #c07f70;
+  --danger-soft: rgba(192, 127, 112, 0.15);
+  --info: #93a8c8;
+  --info-soft: rgba(147, 168, 200, 0.15);
+  --domain-learning: #93b8a4;
+  --domain-learning-soft: rgba(147, 184, 164, 0.14);
+  --domain-research: #93a8c8;
+  --domain-research-soft: rgba(147, 168, 200, 0.14);
+  --domain-leisure: #c4935a;
+  --domain-leisure-soft: rgba(196, 147, 90, 0.14);
+  --obj-literature: #93a8c8;
+  --obj-literature-soft: rgba(147, 168, 200, 0.14);
+  --obj-experiment: #93b8a4;
+  --obj-experiment-soft: rgba(147, 184, 164, 0.14);
+  --obj-question: #c4935a;
+  --obj-question-soft: rgba(196, 147, 90, 0.14);
+  --obj-hypothesis: #b49ac8;
+  --obj-hypothesis-soft: rgba(180, 154, 200, 0.14);
+  --obj-result: #98a878;
+  --obj-result-soft: rgba(152, 168, 120, 0.14);
+  --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 72%, #000);
+  --app-bg: #201d18;
+}
+
+/* ---------- Theme 5 · Botanical / Life Science ---------- */
+:root[data-theme="botanical"] {
+  --background: #eef1ec;
+  --foreground: #1f2923;
+  --surface: #f7f9f5;
+  --surface-elevated: #fbfcf9;
+  --surface-hover: #eef2ec;
+  --border: #dbe2d8;
+  --border-subtle: #e4e9e1;
+  --border-strong: #c9d4c6;
+
+  --primary: #3f6b4f;
+  --primary-fg: #f7f9f5;
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 82%, #000);
+
+  --success: #4d7a5f;
+  --success-soft: #e9f1ec;
+  --warning: #9a7b3f;
+  --warning-soft: #f6f1e4;
+  --danger: #9a524a;
+  --danger-soft: #f6eae8;
+  --info: #3f7a8a;
+  --info-soft: #e7f0f3;
+
+  --domain-learning: #3f8a6b;
+  --domain-learning-soft: #e6f3ec;
+  --domain-research: #3f6b8a;
+  --domain-research-soft: #e7eef3;
+  --domain-leisure: #8a7a3f;
+  --domain-leisure-soft: #f3f0e6;
+
+  --obj-literature: #3f7a8a;
+  --obj-literature-soft: #e7f0f3;
+  --obj-experiment: #3f8a6b;
+  --obj-experiment-soft: #e6f3ec;
+  --obj-question: #9a7b3f;
+  --obj-question-soft: #f6f1e4;
+  --obj-hypothesis: #6b5f9a;
+  --obj-hypothesis-soft: #efedf6;
+  --obj-result: #4d7a5f;
+  --obj-result-soft: #e9f1ec;
+
+  --app-bg: #eef1ec;
+}
+:root[data-theme="botanical"].dark {
+  --background: #141c17;
+  --foreground: #e2e8e3;
+  --surface: #1b2620;
+  --surface-elevated: #223028;
+  --surface-hover: #26362c;
+  --border: #33463a;
+  --border-subtle: #29382e;
+  --border-strong: #3d5545;
+  --primary: #86b896;
+  --primary-fg: #141c17;
+  --success: #86b896;
+  --success-soft: rgba(134, 184, 150, 0.15);
+  --warning: #c4a35c;
+  --warning-soft: rgba(196, 163, 92, 0.15);
+  --danger: #c07a70;
+  --danger-soft: rgba(192, 122, 112, 0.15);
+  --info: #6fa3b8;
+  --info-soft: rgba(111, 163, 184, 0.15);
+  --domain-learning: #6fbb8f;
+  --domain-learning-soft: rgba(111, 187, 143, 0.14);
+  --domain-research: #6f9abb;
+  --domain-research-soft: rgba(111, 154, 187, 0.14);
+  --domain-leisure: #c4a35c;
+  --domain-leisure-soft: rgba(196, 163, 92, 0.14);
+  --obj-literature: #6fa3b8;
+  --obj-literature-soft: rgba(111, 163, 184, 0.14);
+  --obj-experiment: #6fbb8f;
+  --obj-experiment-soft: rgba(111, 187, 143, 0.14);
+  --obj-question: #c4a35c;
+  --obj-question-soft: rgba(196, 163, 92, 0.14);
+  --obj-hypothesis: #9a8fc4;
+  --obj-hypothesis-soft: rgba(154, 143, 196, 0.14);
+  --obj-result: #86b896;
+  --obj-result-soft: rgba(134, 184, 150, 0.14);
+  --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 72%, #000);
+  --app-bg: #141c17;
+}
+
+/* Legacy dark fallback (no data-theme but .dark): midnight palette */
+:root.dark:not([data-theme]) {
+  --background: #0b1220;
+  --foreground: #e8ecf2;
+  --surface: #121a2c;
+  --surface-elevated: #182236;
+  --surface-hover: #1c2740;
+  --border: #24304a;
+  --border-subtle: #1b2540;
+  --border-strong: #2e3c5c;
+  --primary: #5b8def;
+  --primary-fg: #0b1220;
+  --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
+  --accent-dark: color-mix(in srgb, var(--accent) 72%, #000);
+  --success: #4d9d6f;
+  --success-soft: rgba(77, 157, 111, 0.16);
+  --warning: #d9a05b;
+  --warning-soft: rgba(217, 160, 91, 0.15);
+  --danger: #d97070;
+  --danger-soft: rgba(217, 112, 112, 0.15);
+  --info: #6f9bf0;
+  --info-soft: rgba(111, 155, 240, 0.15);
+  --domain-learning: #3ec4b5;
+  --domain-learning-soft: rgba(62, 196, 181, 0.14);
+  --domain-research: #6f9bf0;
+  --domain-research-soft: rgba(111, 155, 240, 0.14);
+  --domain-leisure: #d9a05b;
+  --domain-leisure-soft: rgba(217, 160, 91, 0.14);
+  --obj-literature: #6f9bf0;
+  --obj-literature-soft: rgba(111, 155, 240, 0.14);
+  --obj-experiment: #3ec4b5;
+  --obj-experiment-soft: rgba(62, 196, 181, 0.14);
+  --obj-question: #d9a05b;
+  --obj-question-soft: rgba(217, 160, 91, 0.14);
+  --obj-hypothesis: #a78bfa;
+  --obj-hypothesis-soft: rgba(167, 139, 250, 0.14);
+  --obj-result: #4d9d6f;
+  --obj-result-soft: rgba(77, 157, 111, 0.14);
+  --app-bg: #0b1220;
+}
+
+/* ---------- Tailwind theme mapping ---------- */
 @theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
   --color-accent: var(--accent);
   --color-accent-2: var(--accent-2);
   --color-accent-soft: var(--accent-soft);
   --color-accent-dark: var(--accent-dark);
-  --font-sans: "Outfit", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-learning: var(--domain-learning);
+  --color-learning-soft: var(--domain-learning-soft);
+  --color-research: var(--domain-research);
+  --color-research-soft: var(--domain-research-soft);
+  --color-leisure: var(--domain-leisure);
+  --color-leisure-soft: var(--domain-leisure-soft);
+  --color-literature: var(--obj-literature);
+  --color-literature-soft: var(--obj-literature-soft);
+  --color-experiment: var(--obj-experiment);
+  --color-experiment-soft: var(--obj-experiment-soft);
+  --color-question: var(--obj-question);
+  --color-question-soft: var(--obj-question-soft);
+  --color-hypothesis: var(--obj-hypothesis);
+  --color-hypothesis-soft: var(--obj-hypothesis-soft);
+  --color-result: var(--obj-result);
+  --color-result-soft: var(--obj-result-soft);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+  --font-display: "Outfit", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: "Source Serif 4", "Songti SC", "Noto Serif SC", Georgia, serif;
+
+  /* type scale */
+  --text-display: 2rem;
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.02em;
+  --text-h1: 1.625rem;
+  --text-h1--line-height: 1.2;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: 1.25rem;
+  --text-h2--line-height: 1.3;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h3: 0.9375rem;
+  --text-h3--line-height: 1.4;
+  --text-h3--letter-spacing: -0.01em;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.6;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.55;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.45;
+  --text-meta: 0.6875rem;
+  --text-meta--line-height: 1.4;
+  --text-code: 0.8125rem;
+  --text-data: 0.8125rem;
+
+  /* motion */
+  --motion-fast: 120ms;
+  --motion-normal: 200ms;
+  --motion-slow: 320ms;
+
+  /* shadows */
+  --shadow-subtle: 0 1px 2px rgb(0 0 0 / 0.04);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 14px -4px rgb(0 0 0 / 0.07);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.05), 0 10px 28px -8px rgb(0 0 0 / 0.14);
+  --shadow-medium: 0 2px 6px rgb(0 0 0 / 0.06), 0 12px 32px -8px rgb(0 0 0 / 0.16);
+  --shadow-floating: 0 8px 16px rgb(0 0 0 / 0.08), 0 24px 64px -12px rgb(0 0 0 / 0.24);
 }
 
 /* ---------- Base ---------- */
@@ -59,30 +521,33 @@ html {
 
 body {
   margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  background: var(--background);
+  color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-variant-numeric: tabular-nums;
 }
 
-/* Display headings: tighter tracking, heavier presence. */
 h1,
 h2,
 h3 {
-  font-family: "Outfit", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  letter-spacing: -0.015em;
+  font-family: var(--font-display);
 }
 
-/* Ambient background: two soft accent glows over a stable neutral base. */
+/* Ambient background: two soft accent glows over the theme background. */
 .app-bg {
   background:
     radial-gradient(
       1100px 560px at 88% -12%,
-      color-mix(in srgb, var(--accent) 7%, transparent),
+      color-mix(in srgb, var(--accent) 6%, transparent),
       transparent 65%
     ),
     radial-gradient(
       900px 520px at -12% 112%,
-      color-mix(in srgb, var(--accent-2) 5%, transparent),
+      color-mix(in srgb, var(--accent-2) 4%, transparent),
       transparent 60%
     ),
     var(--app-bg);
@@ -97,23 +562,13 @@ h3 {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgb(0 0 0 / 0.16);
+  background: color-mix(in srgb, var(--border-strong) 60%, transparent);
   border-radius: 8px;
   border: 2.5px solid transparent;
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(0 0 0 / 0.28);
-  border: 2.5px solid transparent;
-  background-clip: padding-box;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: rgb(255 255 255 / 0.16);
-  border: 2.5px solid transparent;
-  background-clip: padding-box;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgb(255 255 255 / 0.3);
+  background: color-mix(in srgb, var(--border-strong) 90%, transparent);
   border: 2.5px solid transparent;
   background-clip: padding-box;
 }
@@ -133,6 +588,16 @@ button:not(:disabled) {
 }
 button:not(:disabled):active {
   transform: scale(0.97);
+}
+
+/* ---------- Motion defaults (calm) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ---------- Brand wordmark ---------- */

@@ -8,6 +8,7 @@ export interface AppSettings {
   zotero_path: string
   language: 'zh' | 'en'
   theme: 'light' | 'dark'
+  ui_theme: string
   accent: string
   brand_subtitle: string
   brand_subtitle_font: string
@@ -26,9 +27,10 @@ interface SettingsState {
   refreshKeyStatus: () => Promise<void>
 }
 
-function applyAppearance(theme: 'light' | 'dark', accent: string) {
+function applyAppearance(theme: 'light' | 'dark', uiTheme: string, accent: string) {
   document.documentElement.classList.toggle('dark', theme === 'dark')
   document.documentElement.dataset.accent = accent
+  document.documentElement.dataset.theme = uiTheme || 'laboratory'
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
@@ -40,7 +42,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     try {
       const settings = await api<AppSettings>('/api/settings')
       localStorage.setItem('airos.lang', settings.language)
-      applyAppearance(settings.theme, settings.accent)
+      applyAppearance(settings.theme, settings.ui_theme, settings.accent)
       set({ settings, loading: false })
       void get().refreshKeyStatus()
     } finally {
@@ -54,7 +56,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     })
     localStorage.setItem('airos.lang', settings.language)
     void i18n.changeLanguage(settings.language)
-    applyAppearance(settings.theme, settings.accent)
+    applyAppearance(settings.theme, settings.ui_theme, settings.accent)
     set({ settings })
   },
   refreshKeyStatus: async () => {

@@ -11,6 +11,8 @@ export default {
     inbox: '收件箱',
     leisure: '休闲',
     settings: '设置',
+    space: '空间',
+    system: '系统',
   },
   common: {
     save: '保存',
@@ -60,6 +62,15 @@ export default {
   },
   settings: {
     title: '设置',
+    uiTheme: {
+      label: '界面主题',
+      hint: '实验室亮 / 午夜实验室 / 石墨 / 纸感 / 植物——语义 token 全局生效',
+      laboratory: 'Laboratory Light',
+      midnight: 'Midnight Laboratory',
+      graphite: 'Graphite',
+      paper: 'Paper / Editorial',
+      botanical: 'Botanical',
+    },
     vault: {
       label: 'Obsidian Vault 路径',
       desc: '笔记将存储为该 vault 中的 Markdown 文件',
@@ -464,6 +475,7 @@ export default {
   },
   commands: {
     dashboard: '打开仪表盘',
+    designSystem: '打开设计系统',
     learning: '打开学习空间',
     research: '打开研究空间',
     literature: '打开文献空间',
@@ -719,5 +731,9 @@ export default {
   notFound: {
     title: '页面不存在',
     back: '返回仪表盘',
+  },
+  design: {
+    title: 'Design System',
+    subtitle: 'Token / 字体 / 组件 / 主题预览（开发基础设施）',
   },
 }

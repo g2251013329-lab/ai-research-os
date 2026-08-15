@@ -90,6 +90,7 @@ export default function CommandPalette({
       { id: 'go-inbox', titleKey: 'commands.inbox', groupKey: 'nav', icon: Inbox, available: true, run: nav('/inbox') },
       { id: 'go-leisure', titleKey: 'commands.leisure', groupKey: 'nav', icon: Coffee, available: true, run: nav('/leisure') },
       { id: 'go-settings', titleKey: 'commands.settings', groupKey: 'nav', icon: Settings, available: true, run: nav('/settings') },
+      { id: 'go-design-system', titleKey: 'commands.designSystem', groupKey: 'nav', icon: Palette, available: true, run: nav('/design-system') },
       // appearance
       { id: 'toggle-theme', titleKey: 'commands.toggleTheme', groupKey: 'appearance', icon: SunMoon, available: true, run: () => { deps.toggleTheme(); onClose() } },
       { id: 'toggle-language', titleKey: 'commands.toggleLanguage', groupKey: 'appearance', icon: Languages, available: true, run: () => { deps.toggleLanguage(); onClose() } },
