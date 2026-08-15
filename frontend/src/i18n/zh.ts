@@ -101,6 +101,12 @@ export default {
       label: 'AI 模型',
       model: '模型名称',
       baseUrl: 'Base URL',
+      aiChannels: {
+        label: 'AI 问答通道',
+        desc: 'GPT 网页版与 Claude Science 的入口地址（网页通道仅问答，不参与执行）',
+        gpt: 'GPT 网页版地址（如 https://chatgpt.com）',
+        claudeScience: 'Claude Science 地址（如 https://claude.com/product/claude-science）',
+      },
     },
     key: {
       label: 'DeepSeek API Key',
@@ -230,6 +236,12 @@ export default {
     completedToast: '专注完成，已记录 🎉',
   },
   ai: {
+    channels: {
+      deepseek: { name: 'DeepSeek', tip: '本地 API 问答（执行功能也走此通道）', desc: '本地 DeepSeek API，支持上下文问答与记忆' },
+      gpt: { name: 'GPT 网页版', tip: '打开 ChatGPT 网页，仅问答', desc: '打开 ChatGPT 网页版，在你的浏览器会话中问答', open: '打开 GPT 网页版' },
+      claude_science: { name: 'Claude Science', tip: '打开 Claude Science 科研工作台', desc: '打开 Claude Science——Anthropic 科研工作台', open: '打开 Claude Science' },
+      webOnly: '网页通道仅用于问答，不参与执行（摘要/分类/发现等仍由 DeepSeek API 完成）',
+    },
     thinking: 'AI 思考中…',
     apply: '应用',
     applied: '已应用',

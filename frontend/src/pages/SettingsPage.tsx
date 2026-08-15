@@ -33,6 +33,10 @@ export default function SettingsPage() {
   const [extraVaults, setExtraVaults] = useState(
     (settings?.extra_vaults ?? []).join('\n'),
   )
+  const [gptUrl, setGptUrl] = useState(settings?.ai_gpt_url ?? 'https://chatgpt.com')
+  const [claudeScienceUrl, setClaudeScienceUrl] = useState(
+    settings?.ai_claude_science_url ?? 'https://claude.com/product/claude-science',
+  )
   const [model, setModel] = useState(settings?.deepseek_model ?? 'deepseek-chat')
   const [baseUrl, setBaseUrl] = useState(
     settings?.deepseek_base_url ?? 'https://api.deepseek.com',
@@ -78,7 +82,12 @@ export default function SettingsPage() {
   }
 
   const saveAi = async () => {
-    await update({ deepseek_model: model.trim(), deepseek_base_url: baseUrl.trim() })
+    await update({
+      deepseek_model: model.trim(),
+      deepseek_base_url: baseUrl.trim(),
+      ai_gpt_url: gptUrl.trim(),
+      ai_claude_science_url: claudeScienceUrl.trim(),
+    })
     flashSaved()
   }
 
@@ -412,6 +421,30 @@ export default function SettingsPage() {
             >
               {t('common.save')}
             </button>
+          </div>
+        </div>
+
+        {/* AI web channels */}
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
+          <label className="block text-[13px] font-medium">{t('settings.aiChannels.label')}</label>
+          <p className="mt-0.5 text-[12px] text-foreground/45 dark:text-foreground/55">
+            {t('settings.aiChannels.desc')}
+          </p>
+          <div className="mt-2 space-y-2">
+            <input
+              value={gptUrl}
+              onChange={(e) => setGptUrl(e.target.value)}
+              onBlur={() => void saveAi()}
+              className="w-full rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
+              placeholder={t('settings.aiChannels.gpt')}
+            />
+            <input
+              value={claudeScienceUrl}
+              onChange={(e) => setClaudeScienceUrl(e.target.value)}
+              onBlur={() => void saveAi()}
+              className="w-full rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
+              placeholder={t('settings.aiChannels.claudeScience')}
+            />
           </div>
         </div>
 

@@ -111,6 +111,8 @@ class SettingsUpdate(BaseModel):
     deepseek_model: str | None = None
     deepseek_base_url: str | None = None
     onescholar_base_url: str | None = None
+    ai_gpt_url: str | None = None
+    ai_claude_science_url: str | None = None
 
 
 class DeepSeekKeyIn(BaseModel):

@@ -3,8 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  Atom,
   Brain,
+  ExternalLink,
   Loader2,
+  MessageSquare,
   PanelRightClose,
   PanelRightOpen,
   Plus,
@@ -15,6 +18,7 @@ import {
 import { api } from '../../api/client'
 import { postSSE } from '../../api/stream'
 import { useToastStore } from '../../store/useToastStore'
+import { useSettingsStore } from '../../store/useSettingsStore'
 
 interface Project {
   id: number
@@ -49,6 +53,14 @@ interface ChatMsg {
 
 const MEMORY_KINDS = ['fact', 'finding', 'decision', 'terminology', 'note']
 
+type Channel = 'deepseek' | 'gpt' | 'claude_science'
+
+const CHANNELS: { id: Channel; icon: typeof Sparkles }[] = [
+  { id: 'deepseek', icon: Sparkles },
+  { id: 'gpt', icon: MessageSquare },
+  { id: 'claude_science', icon: Atom },
+]
+
 
 function parseCtx(value: string): { type: string | null; id: number | string | null } {
   if (!value) return { type: null, id: null }
@@ -62,8 +74,10 @@ export default function AiContextPanel() {
   const toast = useToastStore((s) => s.show)
   const queryClient = useQueryClient()
   const location = useLocation()
+  const settings = useSettingsStore((s) => s.settings)
 
   const [open, setOpen] = useState(true)
+  const [channel, setChannel] = useState<Channel>('deepseek')
   const [ctx, setCtx] = useState('')
   const [manual, setManual] = useState(false)
   const [messages, setMessages] = useState<ChatMsg[]>([])
@@ -232,6 +246,30 @@ export default function AiContextPanel() {
 
       {open && (
         <>
+        {/* channel selector */}
+        <div className="shrink-0 border-b border-border p-2">
+          <div className="flex rounded-lg bg-surface-hover p-0.5">
+            {CHANNELS.map(({ id, icon: Icon }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setChannel(id)}
+                className={`flex flex-1 items-center justify-center gap-1 rounded-md px-1.5 py-1 text-[11.5px] transition-colors ${
+                  channel === id
+                    ? 'bg-surface font-medium text-accent shadow-sm'
+                    : 'text-foreground/55 hover:text-foreground'
+                }`}
+                data-tip={t(`ai.channels.${id}.tip`)}
+              >
+                <Icon size={11} />
+                <span className="truncate">{t(`ai.channels.${id}.name`)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {channel === 'deepseek' && (
+        <>
         {/* context selector */}
       <div className="shrink-0 border-b border-neutral-100 p-2.5 dark:border-border">
         <div className="text-[10.5px] font-semibold uppercase tracking-wide text-foreground/45">
@@ -352,6 +390,40 @@ export default function AiContextPanel() {
           </button>
         </div>
       </div>
+
+        </>
+        )}
+
+        {channel !== 'deepseek' && (
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-5 text-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+              {channel === 'gpt' ? <MessageSquare size={24} /> : <Atom size={24} />}
+            </span>
+            <div>
+              <div className="text-[13.5px] font-semibold">
+                {t(`ai.channels.${channel}.name`)}
+              </div>
+              <p className="mt-1 text-[11.5px] leading-relaxed text-foreground/50">
+                {t(`ai.channels.${channel}.desc`)}
+              </p>
+            </div>
+            <a
+              href={
+                channel === 'gpt'
+                  ? settings?.ai_gpt_url || 'https://chatgpt.com'
+                  : settings?.ai_claude_science_url ||
+                    'https://claude.com/product/claude-science'
+              }
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark"
+            >
+              <ExternalLink size={13} />
+              {t(`ai.channels.${channel}.open`)}
+            </a>
+            <p className="text-[10.5px] text-foreground/40">{t('ai.channels.webOnly')}</p>
+          </div>
+        )}
 
       {/* memory */}
       <div className="shrink-0 border-t border-neutral-100 dark:border-border">

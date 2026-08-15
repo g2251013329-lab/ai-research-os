@@ -16,6 +16,8 @@ export interface AppSettings {
   deepseek_model: string
   deepseek_base_url: string
   onescholar_base_url: string
+  ai_gpt_url: string
+  ai_claude_science_url: string
 }
 
 interface SettingsState {

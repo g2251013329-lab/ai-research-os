@@ -101,6 +101,12 @@ export default {
       label: 'AI Model',
       model: 'Model',
       baseUrl: 'Base URL',
+      aiChannels: {
+        label: 'AI Q&A Channels',
+        desc: 'Entry URLs for GPT Web and Claude Science (web channels are Q&A only)',
+        gpt: 'GPT Web URL (e.g. https://chatgpt.com)',
+        claudeScience: 'Claude Science URL (e.g. https://claude.com/product/claude-science)',
+      },
     },
     key: {
       label: 'DeepSeek API Key',
@@ -231,6 +237,12 @@ export default {
     completedToast: 'Focus session recorded 🎉',
   },
   ai: {
+    channels: {
+      deepseek: { name: 'DeepSeek', tip: 'Local API Q&A (execution also uses this channel)', desc: 'Local DeepSeek API with context-aware chat and memory' },
+      gpt: { name: 'GPT Web', tip: 'Open ChatGPT web, Q&A only', desc: 'Open ChatGPT in your browser and ask questions there', open: 'Open GPT Web' },
+      claude_science: { name: 'Claude Science', tip: 'Open the Claude Science workbench', desc: 'Open Claude Science — the Anthropic research workbench', open: 'Open Claude Science' },
+      webOnly: 'Web channels are Q&A only — execution (summaries, classification, discovery) still uses the DeepSeek API',
+    },
     thinking: 'AI is thinking…',
     apply: 'Apply',
     applied: 'Applied',

@@ -25,6 +25,8 @@ PUBLIC_KEYS = (
     "deepseek_model",
     "deepseek_base_url",
     "onescholar_base_url",
+    "ai_gpt_url",
+    "ai_claude_science_url",
 )
 
 DEFAULTS: dict[str, Any] = {
@@ -41,6 +43,8 @@ DEFAULTS: dict[str, Any] = {
     "deepseek_model": app_settings.deepseek_model,
     "deepseek_base_url": app_settings.deepseek_base_url,
     "onescholar_base_url": "https://api.sssam.com",
+    "ai_gpt_url": "https://chatgpt.com",
+    "ai_claude_science_url": "https://claude.com/product/claude-science",
 }
 
 
