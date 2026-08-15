@@ -177,22 +177,76 @@ def _login_link() -> str | None:
         return None
 
 
+def _session_valid() -> bool:
+    """Heuristic: the login token was written AFTER the daemon last started,
+    so the daemon restart did not invalidate the browser session."""
+    tokens = CS_DATA_DIR / ".oauth-tokens"
+    if not tokens.is_dir():
+        return False
+    token_mtime = max(
+        (f.stat().st_mtime for f in tokens.iterdir() if f.is_file()),
+        default=0,
+    )
+    if not token_mtime:
+        return False
+    try:
+        out = subprocess.run(
+            [CS_BIN, "status"],
+            env={**os.environ, "HOME": str(CSSWITCH_SANDBOX_HOME)},
+            capture_output=True, text=True, timeout=10,
+        )
+        pid = int(json.loads(out.stdout or "{}").get("pid") or 0)
+        if not pid:
+            return True  # can't tell — assume logged in
+        ps = subprocess.run(
+            ["ps", "-o", "etime=", "-p", str(pid)],
+            capture_output=True, text=True, timeout=5,
+        )
+        elapsed = _parse_etime(ps.stdout.strip())
+        if elapsed is None:
+            return True
+        daemon_start = time.time() - elapsed
+        return token_mtime >= daemon_start
+    except Exception:  # noqa: BLE001
+        return True
+
+
+def _parse_etime(value: str) -> float | None:
+    """Parse `ps -o etime=` output ([[DD-]HH:]MM:SS) into seconds."""
+    if not value:
+        return None
+    parts = value.split(":")
+    try:
+        if len(parts) == 3:
+            h, m, s = (int(x) for x in parts)
+        elif len(parts) == 2:
+            h, m, s = 0, int(parts[0]), int(parts[1])
+        else:
+            return None
+        if "-" in value:
+            days, hh = value.split("-", 1)
+            h = int(days) * 24 + int(hh.split(":")[0])
+        return float(h * 3600 + m * 60 + s)
+    except Exception:  # noqa: BLE001
+        return None
+
+
 @router.post("/claude-science-open")
 def claude_science_open() -> dict:
-    # The daemon restarts invalidate the browser session, so the reliable
-    # entry is ALWAYS a fresh single-use auth link (same as `claude-science
-    # url`): it shows the sign-in page when needed and passes straight
-    # through when the session is still valid. `direct` is for already
-    # logged-in users who want to skip the auth page.
+    # Open the sandbox directly when the login token predates the current
+    # daemon (session still valid); otherwise hand out a fresh single-use
+    # auth link so the browser can re-sign in — one window either way.
     err = _start_sandbox()
     if err:
         return {"ok": False, "error": err}
     proxy_alive = _start_proxy()
-    link = _login_link()
+    valid = _session_valid()
+    url = "http://localhost:8990" if valid else (_login_link() or "http://localhost:8990")
     return {
         "ok": True,
-        "url": link or "http://localhost:8990",
+        "url": url,
         "direct": "http://localhost:8990",
+        "login_required": not valid,
         "proxy_alive": proxy_alive,
     }
 

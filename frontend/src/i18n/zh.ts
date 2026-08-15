@@ -239,7 +239,7 @@ export default {
     channels: {
       deepseek: { name: 'DeepSeek', tip: '本地 API 问答（执行功能也走此通道）', desc: '本地 DeepSeek API，支持上下文问答与记忆' },
       gpt: { name: 'GPT 网页版', tip: '打开 ChatGPT 网页，仅问答', desc: '打开 ChatGPT 网页版，在你的浏览器会话中问答', open: '打开 GPT 网页版' },
-      claude_science: { name: 'Claude Science', tip: '打开 Claude Science 科研工作台', desc: '一键启动沙箱并打开授权页（daemon 重启后需重新授权）', open: '启动并进入 Claude Science', direct: '已登录？直接打开' },
+      claude_science: { name: 'Claude Science', tip: '打开 Claude Science 科研工作台', desc: '一键启动沙箱并打开授权页（daemon 重启后需重新授权）', open: '启动并进入 Claude Science', direct: '已登录？直接打开', relogin: '会话失效？重新登录' },
       webOnly: '网页通道仅用于问答，不参与执行（摘要/分类/发现等仍由 DeepSeek API 完成）',
     },
     thinking: 'AI 思考中…',

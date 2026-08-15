@@ -240,6 +240,23 @@ export default function AiContextPanel() {
     }
   }
 
+  const forceClaudeScienceLogin = async () => {
+    setCsBusy(true)
+    try {
+      const r = await api<{ url: string }>('/api/system/claude-science-login', {
+        method: 'POST',
+      })
+      await api('/api/system/open-url', {
+        method: 'POST',
+        body: JSON.stringify({ url: r.url, app: 'Safari' }),
+      })
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e))
+    } finally {
+      setCsBusy(false)
+    }
+  }
+
   const openClaudeScience = async () => {
     setCsBusy(true)
     try {
@@ -475,18 +492,29 @@ export default function AiContextPanel() {
                   {t('ai.channels.claude_science.open')}
                 </button>
                 {csDirectUrl && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      void api('/api/system/open-url', {
-                        method: 'POST',
-                        body: JSON.stringify({ url: csDirectUrl, app: 'Safari' }),
-                      }).catch((e) => toast(e instanceof Error ? e.message : String(e)))
-                    }
-                    className="text-[11px] text-foreground/45 underline decoration-dotted underline-offset-2 transition-colors hover:text-accent"
-                  >
-                    {t('ai.channels.claude_science.direct')}
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void api('/api/system/open-url', {
+                          method: 'POST',
+                          body: JSON.stringify({ url: csDirectUrl, app: 'Safari' }),
+                        }).catch((e) => toast(e instanceof Error ? e.message : String(e)))
+                      }
+                      className="text-[11px] text-foreground/45 underline decoration-dotted underline-offset-2 transition-colors hover:text-accent"
+                    >
+                      {t('ai.channels.claude_science.direct')}
+                    </button>
+                    <span className="text-foreground/25">·</span>
+                    <button
+                      type="button"
+                      onClick={() => void forceClaudeScienceLogin()}
+                      disabled={csBusy}
+                      className="text-[11px] text-foreground/45 underline decoration-dotted underline-offset-2 transition-colors hover:text-accent disabled:opacity-50"
+                    >
+                      {t('ai.channels.claude_science.relogin')}
+                    </button>
+                  </>
                 )}
               </>
             )}
