@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -17,6 +18,7 @@ import {
   SquarePen,
   Timer,
   TriangleAlert,
+  X,
 } from 'lucide-react'
 import { api } from '../api/client'
 import { useUiStore } from '../store/useUiStore'
@@ -29,12 +31,14 @@ interface Task {
   status: string
   priority: string
   due_date: string | null
+  completed_at: string | null
   created_at: string
 }
 
 interface DashboardData {
   today_tasks: Task[]
   today_done: number
+  done_today_tasks: Task[]
   focus_minutes_today: number
   learning: {
     streak_days: number
@@ -114,6 +118,24 @@ export default function Dashboard() {
   const learning = data?.learning
   const activity = data?.recent_activity ?? []
 
+  const [showDone, setShowDone] = useState(false)
+  const doneRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (!showDone) return
+    const onDown = (e: MouseEvent) => {
+      if (!doneRef.current?.contains(e.target as Node)) setShowDone(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowDone(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [showDone])
+
   return (
     <div className="mx-auto max-w-6xl p-6">
       {/* header */}
@@ -124,14 +146,69 @@ export default function Dashboard() {
             {todayLabel()}
           </p>
         </div>
-        <div className="flex gap-2 text-[12px]">
-          <span className="rounded-full bg-accent-soft px-2.5 py-1 text-accent">
+        <div className="relative flex gap-2 text-[12px]">
+          <button
+            type="button"
+            onClick={() => setShowDone((v) => !v)}
+            className="flex items-center gap-1 rounded-full bg-accent-soft px-2.5 py-1 text-accent transition-colors hover:bg-accent hover:text-white"
+            data-tip={t('dashboard.doneTodayTip')}
+          >
             ✓ {t('dashboard.doneToday', { n: data?.today_done ?? 0 })}
-          </span>
+          </button>
           <span className="rounded-full bg-accent-soft px-2.5 py-1 text-accent">
             <Timer size={11} className="mr-1 inline" />
             {data?.focus_minutes_today ?? 0}′
           </span>
+          {showDone && (
+            <div
+              ref={doneRef}
+              className="absolute right-0 top-8 z-50 w-72 rounded-lg border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            >
+              <header className="flex items-center justify-between border-b border-neutral-100 px-3 py-2 dark:border-neutral-800">
+                <h3 className="text-[12px] font-semibold">
+                  {t('dashboard.doneTodayTitle')}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowDone(false)}
+                  className="rounded p-0.5 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                >
+                  <X size={12} />
+                </button>
+              </header>
+              <div className="max-h-72 overflow-y-auto py-1">
+                {(data?.done_today_tasks ?? []).length === 0 && (
+                  <p className="px-3 py-5 text-center text-[12px] text-neutral-400">
+                    {t('dashboard.emptyDoneToday')}
+                  </p>
+                )}
+                {(data?.done_today_tasks ?? []).map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center gap-2 px-3 py-1.5 hover:bg-neutral-50 dark:hover:bg-neutral-800/60"
+                  >
+                    <CheckCircle2 size={13} className="shrink-0 text-emerald-500" />
+                    <div className="min-w-0 flex-1 truncate text-[12.5px]" data-tip={task.title}>
+                      {task.title}
+                    </div>
+                    <span
+                      className={`shrink-0 rounded px-1.5 py-px text-[10px] ${KIND_STYLES[task.kind] ?? KIND_STYLES.general}`}
+                    >
+                      {t(`task.kinds.${task.kind}`)}
+                    </span>
+                    <span className="shrink-0 font-mono text-[10.5px] text-neutral-400">
+                      {task.completed_at
+                        ? new Date(task.completed_at).toLocaleTimeString('zh-CN', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

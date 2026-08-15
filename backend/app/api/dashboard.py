@@ -73,6 +73,10 @@ def dashboard(session: Session = Depends(get_session)) -> dict:
     return {
         "today_tasks": [t.model_dump(mode="json") for t in active],
         "today_done": len(done_today),
+        "done_today_tasks": [
+            t.model_dump(mode="json")
+            for t in sorted(done_today, key=lambda x: x.completed_at or x.created_at, reverse=True)
+        ],
         "focus_minutes_today": sum(f.duration_min for f in focus_today),
         "learning": {
             "streak_days": _learning_streak(session),
