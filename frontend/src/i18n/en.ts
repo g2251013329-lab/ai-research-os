@@ -121,9 +121,6 @@ export default {
     streakDays: 'day streak',
     weeklyFocus: 'focus this week',
     conceptProgress: 'Concept progress',
-    phase4Note: 'Projects / papers / experiments arrive in Phase 4',
-    phase3Note: 'Learning roadmap arrives in Phase 3',
-    comingPhase: 'This will be implemented in {{phase}}',
     actions: {
       newTask: 'New Task',
       addInbox: 'Inbox',

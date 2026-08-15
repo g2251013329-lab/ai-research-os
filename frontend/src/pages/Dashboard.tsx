@@ -302,9 +302,6 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-            <p className="mt-2.5 text-[11px] text-neutral-400">
-              {t('dashboard.phase3Note')}
-            </p>
           </section>
         </div>
       </div>

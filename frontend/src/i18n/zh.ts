@@ -120,9 +120,6 @@ export default {
     streakDays: '连续天数',
     weeklyFocus: '本周专注',
     conceptProgress: '概念掌握进度',
-    phase4Note: '项目 / 文献 / 实验将在 Phase 4 接入',
-    phase3Note: '学习路线图将在 Phase 3 接入',
-    comingPhase: '该功能将在 {{phase}} 实现',
     actions: {
       newTask: '新建任务',
       addInbox: '收件箱',
