@@ -64,6 +64,12 @@ export default {
       label: 'Obsidian Vault 路径',
       desc: '笔记将存储为该 vault 中的 Markdown 文件',
     },
+    onescholar: {
+      label: 'One Scholar（期刊分区/IF 查询）',
+      desc: 'AI 文献发现用它查询影响因子与中科院分区；Key 存 Keychain',
+      keyPlaceholder: 'One Scholar API Key (sk-...)',
+      saveKey: '保存 Key',
+    },
     zotero: {
       label: 'Zotero 数据目录',
       desc: '读取该目录下的 zotero.sqlite（只读，不影响 Zotero 本身）',
@@ -551,6 +557,9 @@ export default {
       placeholder: '输入研究主题，如：FUS phase separation ALS',
       search: '搜索',
       scholar: '在 Google Scholar 搜索',
+      zoneOnly: '仅中科院一区',
+      zoneRelaxed: '一区结果不足，已放宽至二区/未收录分区',
+      zoneUnknown: '分区未知',
       aiRanked: '已由 AI 按相关性排序（附理由）',
       empty: '没有找到结果，换个关键词试试',
     },

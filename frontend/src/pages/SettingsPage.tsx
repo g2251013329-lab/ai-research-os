@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, KeyRound, Loader2 } from 'lucide-react'
 import { api } from '../api/client'
@@ -10,6 +10,12 @@ import GitPanel from '../components/settings/GitPanel'
 export default function SettingsPage() {
   const { t } = useTranslation()
   const { settings, update, refreshKeyStatus, keyConfigured } = useSettingsStore()
+  useEffect(() => {
+    void (async () => {
+      const s = await api<{ configured: boolean }>('/api/settings/onescholar-key/status')
+      setOsConfigured(s.configured)
+    })()
+  }, [])
 
   const [vaultPath, setVaultPath] = useState(settings?.vault_path ?? '')
   const [zoteroPath, setZoteroPath] = useState(settings?.zotero_path ?? '~/Zotero')
@@ -25,6 +31,9 @@ export default function SettingsPage() {
   )
   const [apiKey, setApiKey] = useState('')
   const [savingKey, setSavingKey] = useState(false)
+  const [osBase, setOsBase] = useState(settings?.onescholar_base_url ?? 'https://api.sssam.com')
+  const [osKey, setOsKey] = useState('')
+  const [osConfigured, setOsConfigured] = useState<boolean | null>(null)
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null)
   const [savedFlash, setSavedFlash] = useState(false)
@@ -414,6 +423,71 @@ export default function SettingsPage() {
               {testResult.message}
             </p>
           )}
+        </div>
+
+        {/* One Scholar */}
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <label className="block text-[13px] font-medium">{t('settings.onescholar.label')}</label>
+          <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
+            {t('settings.onescholar.desc')}
+          </p>
+          <div className="mt-2 flex gap-2">
+            <input
+              value={osBase}
+              onChange={(e) => setOsBase(e.target.value)}
+              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              placeholder="https://api.sssam.com"
+            />
+            <button
+              type="button"
+              onClick={async () => {
+                await update({ onescholar_base_url: osBase.trim() })
+                flashSaved()
+              }}
+              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+            >
+              {t('common.save')}
+            </button>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <input
+              type="password"
+              value={osKey}
+              onChange={(e) => setOsKey(e.target.value)}
+              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              placeholder={t('settings.onescholar.keyPlaceholder')}
+            />
+            <button
+              type="button"
+              disabled={!osKey.trim()}
+              onClick={async () => {
+                await api('/api/settings/onescholar-key', {
+                  method: 'PUT',
+                  body: JSON.stringify({ api_key: osKey.trim() }),
+                })
+                setOsKey('')
+                const s = await api<{ configured: boolean }>(
+                  '/api/settings/onescholar-key/status',
+                )
+                setOsConfigured(s.configured)
+                flashSaved()
+              }}
+              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+            >
+              {t('settings.onescholar.saveKey')}
+            </button>
+            <span
+              className={`flex items-center rounded-full px-2 py-1 text-[11px] ${
+                osConfigured
+                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                  : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800'
+              }`}
+            >
+              {osConfigured
+                ? t('settings.key.configured')
+                : t('settings.key.notConfigured')}
+            </span>
+          </div>
         </div>
 
         {/* Git sync */}

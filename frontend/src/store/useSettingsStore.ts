@@ -14,6 +14,7 @@ export interface AppSettings {
   brand_subtitle_color: string
   deepseek_model: string
   deepseek_base_url: string
+  onescholar_base_url: string
 }
 
 interface SettingsState {

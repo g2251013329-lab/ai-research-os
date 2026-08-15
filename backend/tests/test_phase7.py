@@ -185,3 +185,133 @@ def test_discover_and_compare(monkeypatch):
 
     client.delete(f"/api/papers/{p1['id']}")
     client.delete(f"/api/papers/{p2['id']}")
+
+
+def test_onescholar_metrics_and_zone_filter():
+    from app.api.ai import _apply_zone_filter, _extract_metrics
+
+    # parsing sample response data (Nature-like)
+    m = _extract_metrics(
+        {"abbr": "Nature", "imf": 48.5, "jcr": "Q1", "cas": "1区", "cas_top": "中科院 Top"}
+    )
+    assert m["if"] == 48.5
+    assert m["zone"] == 1
+    assert m["jcr"] == "Q1"
+    assert m["cas_top"] == "中科院 Top"
+
+    # 3区 parsing
+    m2 = _extract_metrics({"imf": 4.4, "cas": "3区"})
+    assert m2["zone"] == 3
+
+    # unknown
+    m3 = _extract_metrics({"imf": "abc", "cas": ""})
+    assert m3["if"] is None and m3["zone"] is None
+
+    # zone filter: strict 1区
+    items = [
+        {"title": "a", "zone": 1},
+        {"title": "b", "zone": 1},
+        {"title": "c", "zone": 2},
+        {"title": "d", "zone": 3},
+        {"title": "e"},
+    ]
+    f, exact = _apply_zone_filter(items, 1)
+    assert exact is True and [x["title"] for x in f] == ["a", "b"]
+
+    # relax to 2区 when no 1区
+    items2 = [{"title": "x", "zone": 2}, {"title": "y", "zone": 3}]
+    f2, exact2 = _apply_zone_filter(items2, 1)
+    assert exact2 is False and [x["title"] for x in f2] == ["x"]
+
+    # no zone info at all → keep all
+    f3, exact3 = _apply_zone_filter([{"title": "z"}], 1)
+    assert exact3 is False and f3[0]["title"] == "z"
+
+    # min_zone=0 disables filtering
+    f4, exact4 = _apply_zone_filter(items2, 0)
+    assert exact4 is False and len(f4) == 2
+
+
+def test_discover_enriches_with_onescholar(monkeypatch):
+    """Discover results get IF/CAS zone from One Scholar; zone filter applies."""
+    from app.api import ai as ai_api
+
+    fake_epmc = {
+        "resultList": {
+            "result": [
+                {
+                    "title": "FUS paper in Nature",
+                    "authorString": "A",
+                    "pubYear": "2023",
+                    "journalTitle": "Nature",
+                    "doi": "10.1000/nat",
+                    "source": "MED",
+                    "id": "1",
+                },
+                {
+                    "title": "FUS paper in low journal",
+                    "authorString": "B",
+                    "pubYear": "2024",
+                    "journalTitle": "Some Obscure Journal",
+                    "doi": "10.1000/obs",
+                    "source": "MED",
+                    "id": "2",
+                },
+            ]
+        }
+    }
+
+    class FakeResp:
+        def __init__(self, payload):
+            self._payload = payload
+            self.status_code = 200
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return self._payload
+
+        @property
+        def text(self):
+            return ""
+
+    import httpx
+
+    def fake_get(url, **kwargs):
+        if "europepmc" in url:
+            return FakeResp(fake_epmc)
+        if "semanticscholar" in url:
+            return FakeResp({"data": []})
+        if "scholar.google.com" in url:
+            return FakeResp(None)
+        return FakeResp({})
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+    monkeypatch.setattr(ai_api.ai, "is_configured", lambda: False)
+
+    def fake_lookup(journal):
+        if "Nature" in journal:
+            return {"if": 48.5, "zone": 1, "jcr": "Q1", "cas": "1区", "cas_top": "中科院 Top"}
+        return {"if": 1.2, "zone": 4, "jcr": "Q4", "cas": "4区", "cas_top": ""}
+
+    monkeypatch.setattr(ai_api, "_onescholar_lookup", fake_lookup)
+
+    # min_zone=1 → only Nature survives
+    r = client.post(
+        "/api/ai/discover", json={"query": "FUS", "min_zone": 1}
+    )
+    assert r.status_code == 200
+    data = r.json()
+    titles = [x["title"] for x in data["results"]]
+    assert titles == ["FUS paper in Nature"], titles
+    assert data["results"][0]["if"] == 48.5
+    assert data["results"][0]["zone"] == 1
+
+    # min_zone=0 → no filtering
+    r2 = client.post(
+        "/api/ai/discover", json={"query": "FUS", "min_zone": 0}
+    )
+    data2 = r2.json()
+    assert len(data2["results"]) == 2
+    assert data2["zone_filter"] is False

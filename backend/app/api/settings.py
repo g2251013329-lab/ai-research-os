@@ -28,70 +28,71 @@ router = APIRouter(prefix="/api/settings", tags=["settings"])
 
 KEYRING_SERVICE = "ai-research-os"
 KEYRING_USERNAME = "deepseek-api-key"
+ONESCHOLAR_USERNAME = "onescholar-api-key"
 
 
-def _secret_file() -> Path:
-    return app_settings.data_dir / "secrets.json"
+def _secret_file(username: str = KEYRING_USERNAME) -> Path:
+    return app_settings.data_dir / f"secret-{username}.json"
 
 
-def _keychain_store(key: str) -> None:
+def _keychain_store(key: str, username: str = KEYRING_USERNAME) -> None:
     import keyring
 
-    keyring.set_password(KEYRING_SERVICE, KEYRING_USERNAME, key)
+    keyring.set_password(KEYRING_SERVICE, username, key)
 
 
-def _keychain_get() -> str | None:
+def _keychain_get(username: str = KEYRING_USERNAME) -> str | None:
     import keyring
 
-    return keyring.get_password(KEYRING_SERVICE, KEYRING_USERNAME)
+    return keyring.get_password(KEYRING_SERVICE, username)
 
 
-def _keychain_delete() -> None:
+def _keychain_delete(username: str = KEYRING_USERNAME) -> None:
     import keyring
 
-    keyring.delete_password(KEYRING_SERVICE, KEYRING_USERNAME)
+    keyring.delete_password(KEYRING_SERVICE, username)
 
 
-def _file_store(key: str) -> None:
-    f = _secret_file()
+def _file_store(key: str, username: str = KEYRING_USERNAME) -> None:
+    f = _secret_file(username)
     f.parent.mkdir(parents=True, exist_ok=True)
-    f.write_text(json.dumps({"deepseek_api_key": key}), "utf-8")
+    f.write_text(json.dumps({"api_key": key}), "utf-8")
     f.chmod(0o600)
 
 
-def _file_get() -> str | None:
-    f = _secret_file()
+def _file_get(username: str = KEYRING_USERNAME) -> str | None:
+    f = _secret_file(username)
     if f.exists():
         try:
-            return json.loads(f.read_text("utf-8")).get("deepseek_api_key")
+            return json.loads(f.read_text("utf-8")).get("api_key")
         except Exception:
             return None
     return None
 
 
-def store_secret(key: str) -> None:
+def store_secret(key: str, username: str = KEYRING_USERNAME) -> None:
     try:
-        _keychain_store(key)
+        _keychain_store(key, username)
     except Exception:
-        _file_store(key)
+        _file_store(key, username)
 
 
-def get_secret() -> str | None:
+def get_secret(username: str = KEYRING_USERNAME) -> str | None:
     try:
-        val = _keychain_get()
+        val = _keychain_get(username)
         if val:
             return val
     except Exception:
         pass
-    return _file_get()
+    return _file_get(username)
 
 
-def delete_secret() -> None:
+def delete_secret(username: str = KEYRING_USERNAME) -> None:
     try:
-        _keychain_delete()
+        _keychain_delete(username)
     except Exception:
         pass
-    f = _secret_file()
+    f = _secret_file(username)
     if f.exists():
         f.unlink()
 
@@ -108,6 +109,7 @@ class SettingsUpdate(BaseModel):
     brand_subtitle_color: str | None = None
     deepseek_model: str | None = None
     deepseek_base_url: str | None = None
+    onescholar_base_url: str | None = None
 
 
 class DeepSeekKeyIn(BaseModel):
@@ -169,3 +171,29 @@ def test_deepseek_key() -> dict:
         return {"ok": True, "models": models}
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=502, detail=f"DeepSeek API error: {exc}")
+
+
+# ------------------------------------------------------------ One Scholar
+
+class OneScholarKeyIn(BaseModel):
+    api_key: str
+
+
+@router.put("/onescholar-key")
+def set_onescholar_key(body: OneScholarKeyIn) -> dict:
+    key = body.api_key.strip()
+    if not key:
+        raise HTTPException(status_code=400, detail="API key must not be empty")
+    store_secret(key, username=ONESCHOLAR_USERNAME)
+    return {"ok": True}
+
+
+@router.delete("/onescholar-key")
+def delete_onescholar_key() -> dict:
+    delete_secret(username=ONESCHOLAR_USERNAME)
+    return {"ok": True}
+
+
+@router.get("/onescholar-key/status")
+def onescholar_key_status() -> dict:
+    return {"configured": bool(get_secret(username=ONESCHOLAR_USERNAME))}

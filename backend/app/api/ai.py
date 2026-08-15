@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import html as html_mod
 import json
+from pathlib import Path
 import re
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import httpx
@@ -15,7 +18,9 @@ from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from ..core.db import get_session
+from ..core.user_settings import get_user_setting
 from ..models import Experiment, InboxItem, LearningConcept, Paper
+from .settings import ONESCHOLAR_USERNAME, get_secret
 from ..ai import client as ai
 from ..ai.context import build_context
 
@@ -207,6 +212,7 @@ def learning_assist(
 class DiscoverIn(BaseModel):
     query: str
     limit: int = 8
+    min_zone: int = 1  # 中科院分区过滤：1 = 仅一区；0 = 不限
 
 
 def _scholar_search(query: str) -> list[dict[str, Any]]:
@@ -268,6 +274,115 @@ def _scholar_search(query: str) -> list[dict[str, Any]]:
             }
         )
     return out
+
+
+# ------------------------------------------------------------ One Scholar
+
+_METRIC_CACHE: dict[str, dict | None] = {}
+_METRIC_LOCK = threading.Lock()
+_CACHE_SAVE_EVERY = 20
+
+
+def _metric_cache_file() -> Path:
+    from ..core.config import settings as app_settings
+
+    return app_settings.data_dir / "onescholar_cache.json"
+
+
+def _load_metric_cache() -> None:
+    f = _metric_cache_file()
+    if f.exists():
+        try:
+            _METRIC_CACHE.update(json.loads(f.read_text("utf-8")))
+        except Exception:
+            pass
+
+
+def _save_metric_cache() -> None:
+    try:
+        f = _metric_cache_file()
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(
+            json.dumps(_METRIC_CACHE, ensure_ascii=False), "utf-8"
+        )
+    except Exception:
+        pass
+
+
+def _extract_metrics(data: dict) -> dict:
+    """Map One Scholar response data → {if, zone, jcr, cas}."""
+    zone = None
+    m = re.search(r"(\d+)区", str(data.get("cas") or ""))
+    if m:
+        zone = int(m.group(1))
+    imf = data.get("imf")
+    try:
+        imf = float(imf) if imf not in (None, "") else None
+    except (TypeError, ValueError):
+        imf = None
+    return {
+        "if": imf,
+        "zone": zone,
+        "jcr": data.get("jcr"),
+        "cas": data.get("cas"),
+        "cas_top": data.get("cas_top"),
+    }
+
+
+def _onescholar_lookup(journal: str) -> dict | None:
+    """Query One Scholar for journal metrics (cached in memory + on disk)."""
+    if not journal or not journal.strip():
+        return None
+    cache_key = journal.strip().lower()
+    with _METRIC_LOCK:
+        if cache_key in _METRIC_CACHE:
+            return _METRIC_CACHE[cache_key]
+
+    api_key = get_secret(username=ONESCHOLAR_USERNAME)
+    if not api_key:
+        return None
+    base = get_user_setting("onescholar_base_url", "https://api.sssam.com")
+    names = [journal]
+    cleaned = re.sub(r"\s*\(.*?\)\s*$", "", journal).strip()
+    if cleaned and cleaned != journal:
+        names.append(cleaned)
+    try:
+        r = httpx.post(
+            f"{base}/v1/getrank",
+            json={"journal": names},
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=10,
+        )
+        r.raise_for_status()
+        body = r.json()
+        for res in body.get("results", []):
+            d = res.get("data") or {}
+            if "imf" in d or "cas" in d:
+                metrics = _extract_metrics(d)
+                break
+        else:
+            metrics = None
+    except Exception:
+        metrics = None
+
+    with _METRIC_LOCK:
+        _METRIC_CACHE[cache_key] = metrics
+        if len(_METRIC_CACHE) % _CACHE_SAVE_EVERY == 0:
+            _save_metric_cache()
+    return metrics
+
+
+def _apply_zone_filter(items: list[dict], min_zone: int) -> tuple[list[dict], bool]:
+    """Filter by CAS zone; relax to 2区 only if nothing matches. Returns (items, exact)."""
+    if min_zone <= 0:
+        return items, False
+    strict = [i for i in items if i.get("zone") and i["zone"] <= min_zone]
+    if strict:
+        return strict, True
+    relaxed = [i for i in items if i.get("zone") and i["zone"] <= 2]
+    if relaxed:
+        return relaxed, False
+    return items, False
 
 
 def _discover_sources(query: str) -> list[dict[str, Any]]:
@@ -383,11 +498,28 @@ def discover(body: DiscoverIn) -> dict:
         if key and key not in merged:
             merged[key] = item
     items = list(merged.values())[:30]
-    ranked = _ai_rank(query, items)
+    ai_ranked_list = _ai_rank(query, items)
+    ranked = ai_ranked_list or items[: body.limit]
+
+    # enrich with journal metrics (IF / CAS zone / JCR) in parallel, cached
+    journals = [r.get("journal", "") for r in ranked]
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        metrics = list(ex.map(_onescholar_lookup, journals))
+    for r, m in zip(ranked, metrics):
+        if m:
+            r["if"] = m["if"]
+            r["zone"] = m["zone"]
+            r["jcr"] = m["jcr"]
+            r["cas"] = m["cas"]
+            r["cas_top"] = m["cas_top"]
+
+    filtered, exact = _apply_zone_filter(ranked, body.min_zone)
     return {
         "query": query,
-        "results": ranked if ranked else items[: body.limit],
-        "ai_ranked": bool(ranked),
+        "results": filtered[:8],
+        "ai_ranked": bool(ai_ranked_list),
+        "zone_filter": body.min_zone > 0,
+        "zone_relaxed": body.min_zone > 0 and not exact,
     }
 
 

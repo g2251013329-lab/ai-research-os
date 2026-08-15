@@ -64,6 +64,12 @@ export default {
       label: 'Obsidian Vault Path',
       desc: 'Notes are stored as Markdown files in this vault',
     },
+    onescholar: {
+      label: 'One Scholar (journal zone / IF lookup)',
+      desc: 'Used by AI literature discovery for impact factor and CAS zone; key is stored in Keychain',
+      keyPlaceholder: 'One Scholar API Key (sk-...)',
+      saveKey: 'Save Key',
+    },
     zotero: {
       label: 'Zotero Data Directory',
       desc: 'Reads zotero.sqlite from this directory (read-only)',
@@ -559,6 +565,9 @@ export default {
       placeholder: 'Topic, e.g. FUS phase separation ALS',
       search: 'Search',
       scholar: 'Search on Google Scholar',
+      zoneOnly: 'CAS Zone 1 only',
+      zoneRelaxed: 'Not enough Zone 1 results — relaxed to Zone 2/unknown',
+      zoneUnknown: 'Zone unknown',
       aiRanked: 'Ranked by AI relevance (with reasons)',
       empty: 'No results — try different keywords',
     },

@@ -23,6 +23,7 @@ PUBLIC_KEYS = (
     "brand_subtitle_color",
     "deepseek_model",
     "deepseek_base_url",
+    "onescholar_base_url",
 )
 
 DEFAULTS: dict[str, Any] = {
@@ -37,6 +38,7 @@ DEFAULTS: dict[str, Any] = {
     "brand_subtitle_color": "accent",
     "deepseek_model": app_settings.deepseek_model,
     "deepseek_base_url": app_settings.deepseek_base_url,
+    "onescholar_base_url": "https://api.sssam.com",
 }
 
 

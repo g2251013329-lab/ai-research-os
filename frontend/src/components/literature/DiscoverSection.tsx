@@ -14,6 +14,11 @@ interface Hit {
   url: string
   source: string
   reason?: string
+  if?: number | null
+  zone?: number | null
+  jcr?: string | null
+  cas?: string | null
+  cas_top?: string | null
 }
 
 export default function DiscoverSection() {
@@ -25,6 +30,8 @@ export default function DiscoverSection() {
   const [loading, setLoading] = useState(false)
   const [hits, setHits] = useState<Hit[] | null>(null)
   const [aiRanked, setAiRanked] = useState(false)
+  const [minZone, setMinZone] = useState(1)
+  const [zoneRelaxed, setZoneRelaxed] = useState(false)
   const [importing, setImporting] = useState<string | null>(null)
 
   const discover = async () => {
@@ -32,12 +39,18 @@ export default function DiscoverSection() {
     setLoading(true)
     setHits(null)
     try {
-      const r = await api<{ results: Hit[]; ai_ranked: boolean }>('/api/ai/discover', {
+      const r = await api<{
+        results: Hit[]
+        ai_ranked: boolean
+        zone_filter: boolean
+        zone_relaxed: boolean
+      }>('/api/ai/discover', {
         method: 'POST',
-        body: JSON.stringify({ query: query.trim() }),
+        body: JSON.stringify({ query: query.trim(), min_zone: minZone }),
       })
       setHits(r.results)
       setAiRanked(r.ai_ranked)
+      setZoneRelaxed(r.zone_relaxed)
     } catch (e) {
       toast(e instanceof Error ? e.message : String(e))
     } finally {
@@ -114,6 +127,28 @@ export default function DiscoverSection() {
             </a>
           </div>
 
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setMinZone((v) => (v > 0 ? 0 : 1))
+                void discover()
+              }}
+              className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                minZone > 0
+                  ? 'border-accent bg-accent-soft font-medium text-accent'
+                  : 'border-neutral-300 text-neutral-500 hover:border-accent hover:text-accent dark:border-neutral-700 dark:text-neutral-400'
+              }`}
+            >
+              {t('literature.discover.zoneOnly')}
+            </button>
+            {zoneRelaxed && (
+              <span className="text-[11px] text-amber-600 dark:text-amber-400">
+                {t('literature.discover.zoneRelaxed')}
+              </span>
+            )}
+          </div>
+
           {aiRanked && (
             <p className="text-[11px] text-neutral-400">{t('literature.discover.aiRanked')}</p>
           )}
@@ -144,12 +179,41 @@ export default function DiscoverSection() {
                       hit.year,
                       hit.journal,
                       hit.source,
+                      hit.zone != null ? `中科院${hit.zone}区` : '',
+                      hit.if != null ? `IF ${hit.if}` : '',
+                      hit.jcr ?? '',
                       hit.reason ? `💡 ${hit.reason}` : '',
                     ]
                       .filter(Boolean)
                       .join(' · ')}
                   >
                     {[hit.authors, hit.year, hit.journal].filter(Boolean).join(' · ')}
+                    {hit.zone != null && (
+                      <span
+                        className={`ml-1 rounded px-1 py-px text-[10px] ${
+                          hit.zone === 1
+                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                            : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
+                        }`}
+                      >
+                        中科院{hit.zone}区{hit.cas_top ? '·Top' : ''}
+                      </span>
+                    )}
+                    {hit.if != null && (
+                      <span className="ml-1 rounded bg-accent-soft px-1 py-px text-[10px] text-accent">
+                        IF {hit.if}
+                      </span>
+                    )}
+                    {hit.jcr && (
+                      <span className="ml-1 rounded bg-neutral-100 px-1 py-px text-[10px] text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400">
+                        {hit.jcr}
+                      </span>
+                    )}
+                    {hit.zone == null && hit.journal && (
+                      <span className="ml-1 text-[10px] text-neutral-400">
+                        {t('literature.discover.zoneUnknown')}
+                      </span>
+                    )}
                     {hit.reason && (
                       <span className="text-accent"> 💡 {hit.reason}</span>
                     )}
