@@ -41,6 +41,7 @@ const LINK_CARDS = [
     icon: Music2,
     href: 'https://music.163.com',
     labelKey: 'leisure.music.open',
+    launchApp: 'NeteaseMusic', // local NetEase Cloud Music client
     accent: 'bg-rose-50 text-rose-500 dark:bg-rose-950/40 dark:text-rose-300',
   },
   {
@@ -150,6 +151,12 @@ export default function LeisurePage() {
     }
   }
 
+  const launchApp = useMutation({
+    mutationFn: (app: string) =>
+      api('/api/system/launch-app', { method: 'POST', body: JSON.stringify({ app }) }),
+    onError: (e) => toast(e instanceof Error ? e.message : String(e)),
+  })
+
   const field =
     'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
 
@@ -172,14 +179,24 @@ export default function LeisurePage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5">
-          <a
-            href={c.href}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-1 rounded-md border border-neutral-200 px-2.5 py-1.5 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
-          >
-            <ExternalLink size={11} /> {t(c.labelKey)}
-          </a>
+          {c.launchApp ? (
+            <button
+              type="button"
+              onClick={() => launchApp.mutate(c.launchApp!)}
+              className="flex items-center gap-1 rounded-md border border-neutral-200 px-2.5 py-1.5 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+            >
+              <ExternalLink size={11} /> {t(c.labelKey)}
+            </button>
+          ) : (
+            <a
+              href={c.href}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1 rounded-md border border-neutral-200 px-2.5 py-1.5 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+            >
+              <ExternalLink size={11} /> {t(c.labelKey)}
+            </a>
+          )}
           {c.secondary && (
             <a
               href={c.secondary.href}

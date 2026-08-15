@@ -190,7 +190,7 @@ export default {
     delete: 'Delete',
     filters: {
       all: 'All',
-      open: 'Open',
+      open: 'Unprocessed',
       done: 'Done',
     },
     kinds: {
@@ -387,7 +387,7 @@ export default {
     },
     music: {
       title: 'Music',
-      hint: 'NetEase Cloud Music',
+      hint: 'Local NetEase Cloud Music client',
       open: 'Open NetEase Cloud Music',
     },
     video: {

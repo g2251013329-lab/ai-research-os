@@ -380,7 +380,7 @@ export default {
     },
     music: {
       title: '音乐',
-      hint: '网易云音乐',
+      hint: '本机网易云音乐客户端',
       open: '打开网易云音乐',
     },
     video: {
