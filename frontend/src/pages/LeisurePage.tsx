@@ -160,6 +160,13 @@ export default function LeisurePage() {
   const field =
     'rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface'
 
+  const openInSafari = (url: string) => {
+    api('/api/system/open-url', {
+      method: 'POST',
+      body: JSON.stringify({ url, app: 'Safari' }),
+    }).catch((e) => toast(e instanceof Error ? e.message : String(e)))
+  }
+
   const linkCard = (c: (typeof LINK_CARDS)[number]) => {
     const Icon = c.icon
     return (
@@ -188,24 +195,22 @@ export default function LeisurePage() {
               <ExternalLink size={11} /> {t(c.labelKey)}
             </button>
           ) : (
-            <a
-              href={c.href}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => openInSafari(c.href)}
               className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-border"
             >
               <ExternalLink size={11} /> {t(c.labelKey)}
-            </a>
+            </button>
           )}
           {c.secondary && (
-            <a
-              href={c.secondary.href}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => openInSafari(c.secondary.href)}
               className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-border"
             >
               <ExternalLink size={11} /> {t(c.secondary.labelKey)}
-            </a>
+            </button>
           )}
         </div>
       </div>
