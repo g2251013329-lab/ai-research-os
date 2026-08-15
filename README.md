@@ -7,6 +7,8 @@
 
 - 📄 需求文档：[`docs/PRD_v1.0.md`](docs/PRD_v1.0.md)
 - 🏗️ 架构说明：[`docs/architecture.md`](docs/architecture.md)
+- 🛠️ 配置指南（新安装者必读）：[`docs/CONFIGURATION.md`](docs/CONFIGURATION.md)
+- 🚀 自启动说明：[`docs/autostart.md`](docs/autostart.md)
 - 🎯 范围：P0 + P1（P2 明确排除）
 
 ## 技术栈
