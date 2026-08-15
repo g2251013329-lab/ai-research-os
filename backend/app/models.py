@@ -184,9 +184,22 @@ class ScheduleItem(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utcnow)
 
 
+class Book(SQLModel, table=True):
+    """Leisure reading list: title, author, status, reading progress (0-100)."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    title: str = Field(min_length=1, max_length=300)
+    author: str = ""
+    status: str = "planned"  # planned | reading | finished | dropped
+    progress: int = 0  # percent 0-100
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
 TASK_KINDS = ("general", "learning", "research", "experiment")
 TASK_STATUSES = ("todo", "doing", "done")
 TASK_PRIORITIES = ("low", "medium", "high")
+BOOK_STATUSES = ("planned", "reading", "finished", "dropped")
 CONCEPT_STATUSES = ("not_started", "learning", "practiced", "understood", "mastered")
 SESSION_STATUSES = ("completed", "partial", "skipped")
 PROJECT_STATUSES = ("active", "paused", "completed", "archived")

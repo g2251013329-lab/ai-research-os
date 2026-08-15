@@ -67,6 +67,8 @@ const EVENT_ICONS: Record<string, typeof ListTodo> = {
   'task.completed': CheckCircle2,
   'inbox.added': Inbox,
   'focus.completed': Timer,
+  'leisure.book_added': BookOpen,
+  'leisure.note_created': SquarePen,
 }
 
 export default function Dashboard() {
