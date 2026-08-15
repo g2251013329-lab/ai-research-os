@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { api } from '../../api/client'
 import { useToastStore } from '../../store/useToastStore'
-import { apiDate } from '../../utils/time'
+import { apiDate, tzOffsetMinutes } from '../../utils/time'
 
 interface CalTask {
   id: number
@@ -70,14 +70,14 @@ export default function CalendarView() {
   const [confirmDeleteTask, setConfirmDeleteTask] = useState<number | null>(null)
 
   const { data } = useQuery({
-    queryKey: ['learning', 'calendar', month],
+    queryKey: ['learning', 'calendar', month, tzOffsetMinutes()],
     queryFn: () =>
       api<{
         tasks: CalTask[]
         sessions: CalSession[]
         focus: CalFocus[]
         schedule: CalSchedule[]
-      }>(`/api/learning/calendar?month=${month}`),
+      }>(`/api/learning/calendar?month=${month}&tz_offset_minutes=${tzOffsetMinutes()}`),
   })
 
   const invalidateCalendar = () => {

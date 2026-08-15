@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import { api } from '../api/client'
 import { useUiStore } from '../store/useUiStore'
-import { relativeTime, parseApiTime, todayLabel } from '../utils/time'
+import { relativeTime, parseApiTime, todayLabel, tzOffsetMinutes } from '../utils/time'
 
 interface Task {
   id: number
@@ -78,8 +78,8 @@ export default function Dashboard() {
   const queryClient = useQueryClient()
 
   const { data } = useQuery({
-    queryKey: ['dashboard'],
-    queryFn: () => api<DashboardData>('/api/dashboard'),
+    queryKey: ['dashboard', tzOffsetMinutes()],
+    queryFn: () => api<DashboardData>(`/api/dashboard?tz_offset_minutes=${tzOffsetMinutes()}`),
   })
 
   const toggleMutation = useMutation({

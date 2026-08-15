@@ -16,6 +16,11 @@ export function apiDate(iso: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+/** Client UTC offset in minutes (UTC+8 → -480), sent to backend for local-day boundaries. */
+export function tzOffsetMinutes(): number {
+  return new Date().getTimezoneOffset()
+}
+
 export function relativeTime(iso: string): string {
   const then = parseApiTime(iso).getTime()
   const now = Date.now()

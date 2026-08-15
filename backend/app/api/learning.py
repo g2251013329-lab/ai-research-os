@@ -7,11 +7,12 @@ from pathlib import Path
 from typing import Any
 
 import frontmatter
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from ..core.db import get_session
+from ..core.tz import month_bounds_utc
 from ..core.user_settings import get_user_setting
 from ..models import (
     CONCEPT_STATUSES,
@@ -313,7 +314,9 @@ def create_note(
 
 @router.get("/calendar")
 def calendar(
-    month: str, session: Session = Depends(get_session)
+    month: str,
+    tz_offset_minutes: int = Query(0, description="Client UTC offset in minutes (UTC+8 = -480)"),
+    session: Session = Depends(get_session),
 ) -> dict:
     """Events for a YYYY-MM month: tasks by due date, check-ins, focus."""
     tasks = session.exec(
@@ -325,7 +328,7 @@ def calendar(
     schedules = session.exec(
         select(ScheduleItem).where(ScheduleItem.date.startswith(month))
     ).all()
-    start, end = _month_bounds(month)
+    start, end = month_bounds_utc(month, tz_offset_minutes)
     focus = session.exec(
         select(FocusSession).where(
             FocusSession.ended_at >= start, FocusSession.ended_at < end
@@ -338,17 +341,6 @@ def calendar(
         "schedule": [s.model_dump(mode="json") for s in schedules],
         "focus": [f.model_dump(mode="json") for f in focus],
     }
-
-
-def _month_bounds(month: str) -> tuple[datetime, datetime]:
-    y, m = int(month[:4]), int(month[5:7])
-    start = datetime(y, m, 1, tzinfo=timezone.utc)
-    end = (
-        datetime(y + 1, 1, 1, tzinfo=timezone.utc)
-        if m == 12
-        else datetime(y, m + 1, 1, tzinfo=timezone.utc)
-    )
-    return start, end
 
 
 # ---------------------------------------------------------------- overview

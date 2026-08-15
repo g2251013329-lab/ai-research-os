@@ -6,12 +6,13 @@ render empty states today.
 """
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import timedelta
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, select
 
 from ..core.db import get_session
+from ..core.tz import local_day_start_utc, local_today, to_local_date
 from ..models import (
     Experiment,
     FocusSession,
@@ -29,14 +30,15 @@ router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
 
 @router.get("")
-def dashboard(session: Session = Depends(get_session)) -> dict:
+def dashboard(
+    tz_offset_minutes: int = Query(0, description="Client UTC offset in minutes (UTC+8 = -480)"),
+    session: Session = Depends(get_session),
+) -> dict:
     # Today's tasks: anything not done (overdue / due today bubble up)
     active = session.exec(
         select(Task).where(Task.status != "done").order_by(Task.created_at.desc()).limit(20)
     ).all()
-    today_start = datetime.now(timezone.utc).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
+    today_start = local_day_start_utc(tz_offset_minutes)
     done_today = session.exec(
         select(Task).where(
             Task.status == "done", Task.completed_at >= today_start
@@ -46,7 +48,7 @@ def dashboard(session: Session = Depends(get_session)) -> dict:
     focus_today = session.exec(
         select(FocusSession).where(FocusSession.ended_at >= today_start)
     ).all()
-    focus_week_start = datetime.now(timezone.utc) - timedelta(days=7)
+    focus_week_start = today_start - timedelta(days=7)
     focus_week = session.exec(
         select(FocusSession).where(FocusSession.ended_at >= focus_week_start)
     ).all()
@@ -79,7 +81,7 @@ def dashboard(session: Session = Depends(get_session)) -> dict:
         ],
         "focus_minutes_today": sum(f.duration_min for f in focus_today),
         "learning": {
-            "streak_days": _learning_streak(session),
+            "streak_days": _learning_streak(session, tz_offset_minutes),
             "weekly_focus_minutes": sum(f.duration_min for f in focus_week),
             "concepts": {"total": len(concepts), **concept_status},
         },
@@ -94,17 +96,18 @@ def dashboard(session: Session = Depends(get_session)) -> dict:
     }
 
 
-def _learning_streak(session: Session) -> int:
-    """Consecutive days (ending today) with a completed learning task OR a check-in."""
+def _learning_streak(session: Session, offset_minutes: int) -> int:
+    """Consecutive LOCAL days (ending today) with a completed learning task OR a check-in."""
     rows = session.exec(
         select(Task.completed_at).where(
             Task.kind == "learning", Task.status == "done", Task.completed_at.is_not(None)
         )
     ).all()
-    days = {r.date().isoformat() for r in rows if r is not None}
+    days = {to_local_date(r, offset_minutes) for r in rows if r is not None}
     for d in session.exec(select(StudySession.session_date)).all():
         days.add(d)
     streak = 0
-    while (date.today() - timedelta(days=streak)).isoformat() in days:
+    today_local = local_today(offset_minutes)
+    while (today_local - timedelta(days=streak)).isoformat() in days:
         streak += 1
     return streak
