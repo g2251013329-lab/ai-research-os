@@ -311,6 +311,22 @@ export default {
       empty: 'Roadmap is empty',
       changeStatus: 'Change status',
     },
+    links: {
+      button: 'Link to research (papers/projects/experiments/questions/notes)',
+      title: 'Research links',
+      hint: 'Connect knowledge to actual research: where is this concept used?',
+      add: 'Add',
+      selectTarget: 'Choose target…',
+      empty: 'No links yet — pick a type and target above',
+      open: 'Open',
+      kinds: {
+        paper: 'Paper',
+        project: 'Project',
+        experiment: 'Experiment',
+        question: 'Question',
+        note: 'Note',
+      },
+    },
     calendar: {
       today: 'Today',
       selectDay: 'Click a day for details',
@@ -322,6 +338,11 @@ export default {
       scheduleAdded: 'Schedule added',
       deleteTask: 'Delete task',
       confirmDelete: 'Confirm delete?',
+      view: {
+        month: 'Month',
+        week: 'Week',
+        day: 'Day',
+      },
       kinds: {
         general: 'General',
         learning: 'Learning',
@@ -618,6 +639,14 @@ export default {
     mineEmpty: 'No papers yet — drop a PDF above to add one',
     compare: 'Compare papers',
     comparePick: 'Pick the second paper to compare',
+    related: {
+      button: 'Related papers (Semantic Scholar)',
+      title: 'Related papers',
+      import: 'Import',
+      imported: 'Imported to library',
+      existed: 'Already in library',
+      empty: 'No recommendations available',
+    },
     discover: {
       title: 'AI Literature Discovery',
       placeholder: 'Topic, e.g. FUS phase separation ALS',

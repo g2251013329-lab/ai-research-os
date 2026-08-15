@@ -304,6 +304,22 @@ export default {
       empty: '路线图是空的',
       changeStatus: '修改学习状态',
     },
+    links: {
+      button: '关联研究（论文/项目/实验/问题/笔记）',
+      title: '研究关联',
+      hint: '把学到的知识连接到实际研究：这个知识点用在了哪些地方？',
+      add: '添加',
+      selectTarget: '选择关联对象…',
+      empty: '还没有关联，选择上方类型与对象添加',
+      open: '打开',
+      kinds: {
+        paper: '论文',
+        project: '项目',
+        experiment: '实验',
+        question: '研究问题',
+        note: '笔记',
+      },
+    },
     calendar: {
       today: '今天',
       selectDay: '点击日期查看详情',
@@ -315,6 +331,11 @@ export default {
       scheduleAdded: '已添加日程',
       deleteTask: '删除任务',
       confirmDelete: '确认删除？',
+      view: {
+        month: '月',
+        week: '周',
+        day: '日',
+      },
       kinds: {
         general: '一般',
         learning: '学习',
@@ -610,6 +631,14 @@ export default {
     mineEmpty: '还没有文献，把 PDF 拖到上方直接添加',
     compare: '论文对比',
     comparePick: '选择要对比的另一篇文献',
+    related: {
+      button: '相关论文推荐（Semantic Scholar）',
+      title: '相关论文',
+      import: '导入',
+      imported: '已导入文献库',
+      existed: '文献库中已存在',
+      empty: '暂无相关推荐',
+    },
     discover: {
       title: 'AI 文献发现',
       placeholder: '输入研究主题，如：FUS phase separation ALS',

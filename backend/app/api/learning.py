@@ -15,10 +15,16 @@ from ..core.db import get_session
 from ..core.tz import month_bounds_utc
 from ..core.user_settings import get_user_setting
 from ..models import (
+    CONCEPT_LINK_KINDS,
     CONCEPT_STATUSES,
     SESSION_STATUSES,
+    ConceptLink,
+    Experiment,
     FocusSession,
     LearningConcept,
+    Paper,
+    Project,
+    ResearchQuestion,
     ScheduleItem,
     StudySession,
     Task,
@@ -168,7 +174,158 @@ def delete_concept(concept_id: int, session: Session = Depends(get_session)) -> 
         raise HTTPException(
             status_code=422, detail="Delete child concepts first"
         )
+    for link in session.exec(
+        select(ConceptLink).where(ConceptLink.concept_id == concept_id)
+    ).all():
+        session.delete(link)
     session.delete(concept)
+    session.commit()
+    return {"ok": True}
+
+
+# ------------------------------------------------ concept links (PRD §5.6)
+
+
+class ConceptLinkCreate(BaseModel):
+    kind: str
+    ref_id: int | None = None
+    ref_path: str = ""
+
+
+def _resolve_link(session: Session, link: ConceptLink) -> dict:
+    """Resolve a link to a displayable {title, subtitle, url|path} object."""
+    base = {
+        "id": link.id,
+        "kind": link.kind,
+        "created_at": link.created_at.isoformat() if link.created_at else "",
+    }
+    if link.kind == "paper":
+        obj = session.get(Paper, link.ref_id)
+        if not obj:
+            return {**base, "title": "(已删除)", "subtitle": "", "url": "/literature"}
+        return {
+            **base,
+            "title": obj.title,
+            "subtitle": f"{obj.authors} {obj.year}".strip(),
+            "url": "/literature",
+        }
+    if link.kind == "project":
+        obj = session.get(Project, link.ref_id)
+        if not obj:
+            return {**base, "title": "(已删除)", "subtitle": "", "url": "/research"}
+        return {
+            **base,
+            "title": obj.title,
+            "subtitle": obj.description or "",
+            "url": f"/research/projects/{obj.id}",
+        }
+    if link.kind == "experiment":
+        obj = session.get(Experiment, link.ref_id)
+        if not obj:
+            return {**base, "title": "(已删除)", "subtitle": "", "url": "/research"}
+        return {
+            **base,
+            "title": obj.title,
+            "subtitle": obj.objective or "",
+            "url": f"/research/projects/{obj.project_id}" if obj.project_id else "/research",
+        }
+    if link.kind == "question":
+        obj = session.get(ResearchQuestion, link.ref_id)
+        if not obj:
+            return {**base, "title": "(已删除)", "subtitle": "", "url": "/research"}
+        return {
+            **base,
+            "title": obj.title,
+            "subtitle": obj.description or "",
+            "url": f"/research/projects/{obj.project_id}" if obj.project_id else "/research",
+        }
+    # note: vault-relative path
+    if link.ref_path:
+        title = Path(link.ref_path).stem
+        try:
+            meta = frontmatter.loads(
+                (_vault() / link.ref_path).read_text("utf-8", errors="ignore")
+            ).metadata or {}
+            title = str(meta.get("title") or title)
+        except Exception:
+            pass
+        return {
+            **base,
+            "title": title,
+            "subtitle": link.ref_path,
+            "path": link.ref_path,
+        }
+    return {**base, "title": "(已删除)", "subtitle": "", "path": ""}
+
+
+@router.get("/concepts/{concept_id}/links")
+def list_concept_links(
+    concept_id: int, session: Session = Depends(get_session)
+) -> list[dict]:
+    if not session.get(LearningConcept, concept_id):
+        raise HTTPException(status_code=404, detail="Concept not found")
+    links = session.exec(
+        select(ConceptLink)
+        .where(ConceptLink.concept_id == concept_id)
+        .order_by(ConceptLink.created_at.desc())
+    ).all()
+    return [_resolve_link(session, link) for link in links]
+
+
+@router.post("/concepts/{concept_id}/links", status_code=201)
+def create_concept_link(
+    concept_id: int,
+    body: ConceptLinkCreate,
+    session: Session = Depends(get_session),
+) -> dict:
+    if not session.get(LearningConcept, concept_id):
+        raise HTTPException(status_code=404, detail="Concept not found")
+    if body.kind not in CONCEPT_LINK_KINDS:
+        raise HTTPException(status_code=422, detail="invalid kind")
+    if body.kind == "note":
+        if not body.ref_path:
+            raise HTTPException(status_code=422, detail="ref_path required for notes")
+        target_id = None
+    else:
+        if body.ref_id is None:
+            raise HTTPException(status_code=422, detail="ref_id required")
+        target_id = body.ref_id
+        model = {
+            "paper": Paper,
+            "project": Project,
+            "experiment": Experiment,
+            "question": ResearchQuestion,
+        }[body.kind]
+        if not session.get(model, target_id):
+            raise HTTPException(status_code=422, detail=f"{body.kind} not found")
+    dup = session.exec(
+        select(ConceptLink).where(
+            ConceptLink.concept_id == concept_id,
+            ConceptLink.kind == body.kind,
+            ConceptLink.ref_id == target_id,
+            ConceptLink.ref_path == (body.ref_path if body.kind == "note" else ""),
+        )
+    ).first()
+    if dup:
+        raise HTTPException(status_code=409, detail="already linked")
+    link = ConceptLink(
+        concept_id=concept_id,
+        kind=body.kind,
+        ref_id=target_id,
+        ref_path=body.ref_path if body.kind == "note" else "",
+    )
+    session.add(link)
+    session.commit()
+    session.refresh(link)
+    return _resolve_link(session, link)
+
+
+@router.delete("/links/{link_id}")
+def delete_concept_link(link_id: int, session: Session = Depends(get_session)) -> dict:
+    link = session.get(ConceptLink, link_id)
+    if not link:
+        raise HTTPException(status_code=404, detail="Link not found")
+    session.delete(link)
     session.commit()
     return {"ok": True}
 

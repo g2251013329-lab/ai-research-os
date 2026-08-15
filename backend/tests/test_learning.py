@@ -148,3 +148,67 @@ def test_schedule_crud_and_calendar():
     r = client.patch(f"/api/schedule/{sid}", json={"start_time": "11:00"})
     assert r.json()["start_time"] == "11:00"
     assert client.delete(f"/api/schedule/{sid}").status_code == 200
+
+
+def test_concept_links():
+    # cleanup
+    for c in client.get("/api/learning/roadmap").json():
+        if c["title"].startswith("测试概念"):
+            client.delete(f"/api/learning/concepts/{c['id']}")
+    for p in client.get("/api/papers", params={"limit": 100}).json():
+        if p["title"].startswith("测试论文"):
+            client.delete(f"/api/papers/{p['id']}")
+
+    concept = client.post(
+        "/api/learning/concepts", json={"title": "测试概念链接"}
+    ).json()
+    paper = client.post(
+        "/api/papers/from-discovery",
+        json={"title": "测试论文 FRAP", "authors": "Tester", "year": "2026"},
+    ).json()["paper"]
+
+    try:
+        # link paper
+        r = client.post(
+            f"/api/learning/concepts/{concept['id']}/links",
+            json={"kind": "paper", "ref_id": paper["id"]},
+        )
+        assert r.status_code == 201
+        link = r.json()
+        assert link["title"] == "测试论文 FRAP"
+
+        # duplicate rejected
+        assert (
+            client.post(
+                f"/api/learning/concepts/{concept['id']}/links",
+                json={"kind": "paper", "ref_id": paper["id"]},
+            ).status_code
+            == 409
+        )
+
+        # invalid kind / missing ref rejected
+        assert (
+            client.post(
+                f"/api/learning/concepts/{concept['id']}/links",
+                json={"kind": "bogus", "ref_id": 1},
+            ).status_code
+            == 422
+        )
+        assert (
+            client.post(
+                f"/api/learning/concepts/{concept['id']}/links",
+                json={"kind": "paper"},
+            ).status_code
+            == 422
+        )
+
+        # list shows resolved link
+        links = client.get(f"/api/learning/concepts/{concept['id']}/links").json()
+        assert any(l["kind"] == "paper" and l["title"] == "测试论文 FRAP" for l in links)
+
+        # delete
+        assert client.delete(f"/api/learning/links/{link['id']}").json() == {"ok": True}
+        assert client.get(f"/api/learning/concepts/{concept['id']}/links").json() == []
+    finally:
+        client.delete(f"/api/learning/concepts/{concept['id']}")
+        client.delete(f"/api/papers/{paper['id']}")

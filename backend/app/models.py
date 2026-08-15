@@ -62,6 +62,21 @@ class LearningConcept(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=utcnow)
 
 
+class ConceptLink(SQLModel, table=True):
+    """Learning ↔ Research connection (PRD §5.6): a concept links to
+    papers / projects / experiments / research questions / vault notes."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    concept_id: int = Field(index=True)
+    kind: str  # paper | project | experiment | question | note
+    ref_id: int | None = None  # paper/project/experiment/question ids
+    ref_path: str = ""  # vault-relative path for note links
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+CONCEPT_LINK_KINDS = ("paper", "project", "experiment", "question", "note")
+
+
 class StudySession(SQLModel, table=True):
     """Daily check-in (PRD §5.4)."""
 

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ChevronDown,
   ChevronRight,
+  Link2,
   Loader2,
   Plus,
   Sparkles,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react'
 import { api } from '../../api/client'
 import AiModal from '../ai/AiModal'
+import ConceptLinksModal from './ConceptLinksModal'
 import FlashcardsModal from './FlashcardsModal'
 
 export interface Concept {
@@ -47,6 +49,7 @@ export default function RoadmapView() {
   const [newTitle, setNewTitle] = useState('')
   const [aiNode, setAiNode] = useState<Concept | null>(null)
   const [aiMode, setAiMode] = useState('explain')
+  const [linkNode, setLinkNode] = useState<Concept | null>(null)
 
   const AI_MODES = [
     { id: 'explain', label: t('learning.ai.explain') },
@@ -160,6 +163,14 @@ export default function RoadmapView() {
           >
             <Sparkles size={13} />
           </button>
+          <button
+            type="button"
+            onClick={() => setLinkNode(node)}
+            className="rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-neutral-600"
+            data-tip={t('learning.links.button')}
+          >
+            <Link2 size={13} />
+          </button>
           {!hasChildren && (
             <button
               type="button"
@@ -245,8 +256,7 @@ export default function RoadmapView() {
       </div>
 
       {/* AI concept explainer */}
-      {aiNode && (
-        <>
+      {aiNode && (        <>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {AI_MODES.map((m) => (
               <button
@@ -287,6 +297,9 @@ export default function RoadmapView() {
           )}
         </>
       )}
+
+      {/* concept ↔ research links */}
+      {linkNode && <ConceptLinksModal concept={linkNode} onClose={() => setLinkNode(null)} />}
     </div>
   )
 }

@@ -523,6 +523,100 @@ def discover(body: DiscoverIn) -> dict:
     }
 
 
+# ------------------------------------------------- related-paper recommendations
+# Uses the Semantic Scholar Recommendations API (existing service, no custom recommender).
+
+class RecommendIn(BaseModel):
+    paper_id: int
+
+
+def _s2_paper_id(title: str, doi: str) -> str | None:
+    """Resolve a paper to a Semantic Scholar paperId (DOI first, title fallback)."""
+    try:
+        if doi:
+            r = httpx.get(
+                f"https://api.semanticscholar.org/graph/v1/paper/DOI:{doi}",
+                params={"fields": "paperId,title"},
+                timeout=10,
+            )
+            if r.status_code == 200:
+                return (r.json() or {}).get("paperId")
+        r = httpx.get(
+            "https://api.semanticscholar.org/graph/v1/paper/search",
+            params={"query": title[:200], "limit": 1, "fields": "paperId,title"},
+            timeout=10,
+        )
+        if r.status_code == 200:
+            data = r.json().get("data") or []
+            if data:
+                return data[0].get("paperId")
+    except Exception:
+        pass
+    return None
+
+
+def _s2_recommendations(paper_id: str) -> list[dict]:
+    # Recommendations API lives at its own base URL (not /graph/v1).
+    try:
+        r = httpx.get(
+            f"https://api.semanticscholar.org/recommendations/v1/papers/forpaper/{paper_id}",
+            params={
+                "fields": "title,authors,year,externalIds,journal,abstract",
+                "limit": 8,
+            },
+            timeout=15,
+        )
+        if r.status_code == 429:
+            import time
+
+            time.sleep(1.5)
+            r = httpx.get(
+                f"https://api.semanticscholar.org/recommendations/v1/papers/forpaper/{paper_id}",
+                params={
+                    "fields": "title,authors,year,externalIds,journal,abstract",
+                    "limit": 8,
+                },
+                timeout=15,
+            )
+        r.raise_for_status()
+        out = []
+        for hit in r.json().get("recommendedPapers", [])[:8]:
+            doi = (hit.get("externalIds") or {}).get("DOI") or ""
+            out.append(
+                {
+                    "title": hit.get("title") or "",
+                    "authors": "; ".join(
+                        a.get("name", "") for a in hit.get("authors", [])[:6]
+                    ),
+                    "year": str(hit.get("year") or ""),
+                    "journal": ((hit.get("journal") or {}).get("name") or ""),
+                    "doi": doi,
+                    "url": f"https://doi.org/{doi}" if doi else "",
+                    "abstract": (hit.get("abstract") or "")[:300],
+                    "source": "Semantic Scholar 推荐",
+                }
+            )
+        return out
+    except Exception:
+        return []
+
+
+@router.post("/paper-recommendations")
+def paper_recommendations(
+    body: RecommendIn, session: Session = Depends(get_session)
+) -> dict:
+    paper = session.get(Paper, body.paper_id)
+    if not paper:
+        raise HTTPException(status_code=404, detail="Paper not found")
+    s2_id = _s2_paper_id(paper.title, paper.doi or "")
+    if not s2_id:
+        return {"recommendations": [], "note": "无法在 Semantic Scholar 定位该论文"}
+    recs = _s2_recommendations(s2_id)
+    if not recs:
+        return {"recommendations": [], "note": "Semantic Scholar 暂无推荐（可能限流）"}
+    return {"recommendations": recs, "note": ""}
+
+
 # ------------------------------------------------------------ comparison
 
 class CompareIn(BaseModel):

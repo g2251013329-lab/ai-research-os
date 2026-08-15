@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CalendarClock,
+  CalendarDays,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Clock3,
   Plus,
   Timer,
   Trash2,
@@ -13,7 +15,7 @@ import {
 } from 'lucide-react'
 import { api } from '../../api/client'
 import { useToastStore } from '../../store/useToastStore'
-import { apiDate, tzOffsetMinutes } from '../../utils/time'
+import { apiDate, parseApiTime, tzOffsetMinutes } from '../../utils/time'
 
 interface CalTask {
   id: number
@@ -52,14 +54,40 @@ interface DayEvents {
   schedule: CalSchedule[]
 }
 
+type ViewMode = 'month' | 'week' | 'day'
+
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
 const SCHEDULE_KINDS = ['general', 'learning', 'research', 'experiment', 'leisure']
+const DAY_START_HOUR = 7
+const DAY_END_HOUR = 23
+const HOUR_PX = 44
+
+const SCHEDULE_COLORS: Record<string, string> = {
+  general: 'bg-neutral-200/70 text-neutral-700 dark:bg-neutral-700/70 dark:text-neutral-200',
+  learning: 'bg-sky-100 text-sky-800 dark:bg-sky-900/70 dark:text-sky-200',
+  research: 'bg-violet-100 text-violet-800 dark:bg-violet-900/70 dark:text-violet-200',
+  experiment: 'bg-amber-100 text-amber-800 dark:bg-amber-900/70 dark:text-amber-200',
+  leisure: 'bg-rose-100 text-rose-800 dark:bg-rose-900/70 dark:text-rose-200',
+}
+
+function addDays(dateStr: string, days: number): string {
+  const d = parseApiTime(dateStr)
+  d.setDate(d.getDate() + days)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function fmtDay(dateStr: string): string {
+  const d = parseApiTime(dateStr)
+  return `${d.getMonth() + 1}月${d.getDate()}日`
+}
 
 export default function CalendarView() {
   const { t } = useTranslation()
   const toast = useToastStore((s) => s.show)
   const queryClient = useQueryClient()
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7))
+  const today = new Date().toISOString().slice(0, 10)
+  const [view, setView] = useState<ViewMode>('month')
+  const [cursor, setCursor] = useState(today)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
 
   // schedule add form
@@ -69,15 +97,40 @@ export default function CalendarView() {
   const [sKind, setSKind] = useState('general')
   const [confirmDeleteTask, setConfirmDeleteTask] = useState<number | null>(null)
 
+  // months needed for the current view (week may span two months)
+  const months = useMemo(() => {
+    const list = new Set<string>()
+    const push = (d: string) => list.add(d.slice(0, 7))
+    if (view === 'month') {
+      push(cursor)
+    } else if (view === 'week') {
+      const dow = (parseApiTime(cursor).getDay() + 6) % 7
+      push(addDays(cursor, -dow))
+      push(addDays(cursor, -dow + 6))
+    } else {
+      push(cursor)
+    }
+    return [...list].sort()
+  }, [view, cursor])
+
   const { data } = useQuery({
-    queryKey: ['learning', 'calendar', month, tzOffsetMinutes()],
+    queryKey: ['learning', 'calendar', months.join(','), tzOffsetMinutes()],
     queryFn: () =>
-      api<{
-        tasks: CalTask[]
-        sessions: CalSession[]
-        focus: CalFocus[]
-        schedule: CalSchedule[]
-      }>(`/api/learning/calendar?month=${month}&tz_offset_minutes=${tzOffsetMinutes()}`),
+      Promise.all(
+        months.map((m) =>
+          api<{
+            tasks: CalTask[]
+            sessions: CalSession[]
+            focus: CalFocus[]
+            schedule: CalSchedule[]
+          }>(`/api/learning/calendar?month=${m}&tz_offset_minutes=${tzOffsetMinutes()}`),
+        ),
+      ).then((parts) => ({
+        tasks: parts.flatMap((p) => p.tasks),
+        sessions: parts.flatMap((p) => p.sessions),
+        focus: parts.flatMap((p) => p.focus),
+        schedule: parts.flatMap((p) => p.schedule),
+      })),
   })
 
   const invalidateCalendar = () => {
@@ -104,7 +157,7 @@ export default function CalendarView() {
       api('/api/schedule', {
         method: 'POST',
         body: JSON.stringify({
-          date: selectedDay,
+          date: view === 'day' ? cursor : selectedDay,
           start_time: sStart,
           end_time: sEnd,
           title: sTitle.trim(),
@@ -123,11 +176,6 @@ export default function CalendarView() {
     mutationFn: (id: number) => api(`/api/schedule/${id}`, { method: 'DELETE' }),
     onSuccess: invalidateCalendar,
   })
-
-  const [year, mon] = month.split('-').map(Number)
-  const daysInMonth = new Date(year, mon, 0).getDate()
-  const firstWeekday = (new Date(year, mon - 1, 1).getDay() + 6) % 7 // Monday=0
-  const today = new Date().toISOString().slice(0, 10)
 
   const eventsByDay = useMemo(() => {
     const map: Record<string, DayEvents> = {}
@@ -152,141 +200,344 @@ export default function CalendarView() {
     return map
   }, [data])
 
-  const cells: (string | null)[] = [
+  // ----- navigation -----
+  const nav = (dir: number) => {
+    if (view === 'month') {
+      const [y, m] = cursor.slice(0, 7).split('-').map(Number)
+      const d = new Date(y, m - 1 + dir, 1)
+      setCursor(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`)
+    } else if (view === 'week') {
+      const dow = (parseApiTime(cursor).getDay() + 6) % 7
+      setCursor(addDays(cursor, -dow + dir * 7))
+    } else {
+      setCursor(addDays(cursor, dir))
+    }
+  }
+
+  const goToday = () => {
+    setCursor(today)
+    setSelectedDay(today)
+  }
+
+  // ----- month grid -----
+  const [year, mon] = cursor.slice(0, 7).split('-').map(Number)
+  const daysInMonth = new Date(year, mon, 0).getDate()
+  const firstWeekday = (new Date(year, mon - 1, 1).getDay() + 6) % 7 // Monday=0
+  const monthCells: (string | null)[] = [
     ...Array.from({ length: firstWeekday }, () => null),
     ...Array.from({ length: daysInMonth }, (_, i) => {
       const d = String(i + 1).padStart(2, '0')
-      return `${month}-${d}`
+      return `${cursor.slice(0, 7)}-${d}`
     }),
   ]
 
+  // ----- week grid -----
+  const weekDow = (parseApiTime(cursor).getDay() + 6) % 7
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(cursor, -weekDow + i))
+
   const selected = selectedDay ? eventsByDay[selectedDay] : null
+  const dayEvents = cursor ? eventsByDay[cursor] : null
+
+  // ----- day view time strip -----
+  const stripHeight = (DAY_END_HOUR - DAY_START_HOUR) * HOUR_PX
+  const timeTop = (hhmm: string) => {
+    const [h, m] = hhmm.split(':').map(Number)
+    return (h - DAY_START_HOUR) * HOUR_PX + (m / 60) * HOUR_PX
+  }
+
+  const headerLabel = useMemo(() => {
+    if (view === 'month') return `${year} 年 ${mon} 月`
+    if (view === 'week') {
+      const start = weekDays[0]
+      const end = weekDays[6]
+      if (start.slice(0, 7) === end.slice(0, 7)) return fmtDay(start) + ' – ' + fmtDay(end)
+      return `${fmtDay(start)} – ${fmtDay(end)}`
+    }
+    return fmtDay(cursor)
+  }, [view, cursor, weekDays, year, mon])
 
   const field =
     'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
 
+  const dayCellChips = (day: string) => {
+    const ev = eventsByDay[day]
+    return (
+      <>
+        {ev?.schedule.map((s) => (
+          <span
+            key={`s${s.id}`}
+            data-tip={`${s.start_time}${s.end_time ? '–' + s.end_time : ''} ${s.title}`}
+            className="mt-0.5 w-full truncate rounded bg-violet-50 px-1 text-[10px] text-violet-700 dark:bg-violet-950/60 dark:text-violet-300"
+          >
+            {s.start_time} {s.title}
+          </span>
+        ))}
+        {ev?.tasks.map((task) => (
+          <span
+            key={`t${task.id}`}
+            data-tip={task.title}
+            className="mt-0.5 w-full truncate rounded bg-blue-50 px-1 text-[10px] text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
+          >
+            {task.title}
+          </span>
+        ))}
+        {ev?.sessions.map((s) => (
+          <span
+            key={`cs${s.id}`}
+            data-tip={s.topic}
+            className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-emerald-50 px-1 text-[10px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+          >
+            <CheckCircle2 size={9} /> {s.topic}
+          </span>
+        ))}
+        {ev?.focus.map((f) => (
+          <span
+            key={`f${f.id}`}
+            data-tip={`${t('learning.calendar.focus')} ${f.duration_min}′`}
+            className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-amber-50 px-1 text-[10px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
+          >
+            <Timer size={9} /> {f.duration_min}′
+          </span>
+        ))}
+      </>
+    )
+  }
+
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-      {/* month grid */}
       <div>
-        <div className="flex items-center justify-between">
+        {/* toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => {
-                const d = new Date(year, mon - 2, 1)
-                setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
-              }}
+              onClick={() => nav(-1)}
               className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               <ChevronLeft size={15} />
             </button>
             <button
               type="button"
-              onClick={() => {
-                const d = new Date(year, mon, 1)
-                setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
-              }}
+              onClick={() => nav(1)}
               className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               <ChevronRight size={15} />
             </button>
-            <span className="px-1 text-[14px] font-semibold">
-              {year} 年 {mon} 月
-            </span>
+            <span className="px-1 text-[14px] font-semibold">{headerLabel}</span>
+            <button
+              type="button"
+              onClick={goToday}
+              className="ml-1 rounded-md border border-neutral-200 px-2.5 py-1 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+            >
+              {t('learning.calendar.today')}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              const d = new Date()
-              setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
-              setSelectedDay(new Date().toISOString().slice(0, 10))
-            }}
-            className="rounded-md border border-neutral-200 px-2.5 py-1 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
-          >
-            {t('learning.calendar.today')}
-          </button>
-        </div>
-
-        <div className="mt-3 grid grid-cols-7 gap-1">
-          {WEEKDAYS.map((w) => (
-            <div key={w} className="py-1 text-center text-[11px] text-neutral-400">
-              {w}
-            </div>
-          ))}
-          {cells.map((day, i) => {
-            if (!day) return <div key={`empty-${i}`} />
-            const ev = eventsByDay[day]
-            const isToday = day === today
-            return (
+          <div className="flex rounded-md border border-neutral-200 p-0.5 dark:border-neutral-700">
+            {(['month', 'week', 'day'] as const).map((v) => (
               <button
-                key={day}
+                key={v}
                 type="button"
-                onClick={() => setSelectedDay(day)}
-                className={`flex min-h-[56px] flex-col items-start rounded-md border p-1.5 text-left text-[12px] transition-colors ${
-                  selectedDay === day
-                    ? 'border-accent bg-accent-soft'
-                    : isToday
-                      ? 'border-accent/60 bg-accent-soft/40'
-                      : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-800 dark:hover:border-neutral-700'
+                onClick={() => setView(v)}
+                className={`rounded px-2.5 py-1 text-[12px] transition-colors ${
+                  view === v
+                    ? 'bg-accent-soft font-medium text-accent'
+                    : 'text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
                 }`}
               >
-                <span
-                  className={`ml-auto flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
-                    isToday ? 'bg-accent font-semibold text-white' : ''
+                {t(`learning.calendar.view.${v}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* month grid */}
+        {view === 'month' && (
+          <div className="mt-3 grid grid-cols-7 gap-1">
+            {WEEKDAYS.map((w) => (
+              <div key={w} className="py-1 text-center text-[11px] text-neutral-400">
+                {w}
+              </div>
+            ))}
+            {monthCells.map((day, i) => {
+              if (!day) return <div key={`empty-${i}`} />
+              const isToday = day === today
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => setSelectedDay(day)}
+                  className={`flex min-h-[56px] flex-col items-start rounded-md border p-1.5 text-left text-[12px] transition-colors ${
+                    selectedDay === day
+                      ? 'border-accent bg-accent-soft'
+                      : isToday
+                        ? 'border-accent/60 bg-accent-soft/40'
+                        : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-800 dark:hover:border-neutral-700'
                   }`}
                 >
-                  {day.slice(8)}
+                  <span
+                    className={`ml-auto flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
+                      isToday ? 'bg-accent font-semibold text-white' : ''
+                    }`}
+                  >
+                    {day.slice(8)}
+                  </span>
+                  {dayCellChips(day)}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* week grid */}
+        {view === 'week' && (
+          <div className="mt-3 grid grid-cols-7 gap-1">
+            {weekDays.map((day) => {
+              const d = parseApiTime(day)
+              return (
+                <div key={day} className="py-1 text-center text-[11px] text-neutral-400">
+                  周{WEEKDAYS[(d.getDay() + 6) % 7]}
+                </div>
+              )
+            })}
+            {weekDays.map((day) => {
+              const isToday = day === today
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => setSelectedDay(day)}
+                  className={`flex min-h-[96px] flex-col items-start rounded-md border p-1.5 text-left text-[12px] transition-colors ${
+                    selectedDay === day
+                      ? 'border-accent bg-accent-soft'
+                      : isToday
+                        ? 'border-accent/60 bg-accent-soft/40'
+                        : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-800 dark:hover:border-neutral-700'
+                  }`}
+                >
+                  <span
+                    className={`ml-auto flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
+                      isToday ? 'bg-accent font-semibold text-white' : ''
+                    }`}
+                  >
+                    {day.slice(8)}
+                  </span>
+                  {dayCellChips(day)}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* day view: time strip */}
+        {view === 'day' && (
+          <div className="mt-3 overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
+            <div className="flex items-center gap-1.5 border-b border-neutral-100 bg-neutral-50/60 px-3 py-2 text-[12.5px] font-medium dark:border-neutral-800 dark:bg-neutral-900">
+              <CalendarDays size={13} className="text-accent" />
+              {fmtDay(cursor)}
+              {cursor === today && (
+                <span className="rounded bg-accent px-1.5 py-px text-[10.5px] font-semibold text-white">
+                  {t('learning.calendar.today')}
                 </span>
-                {ev?.schedule.map((s) => (
-                  <span
-                    key={`s${s.id}`}
-                    data-tip={`${s.start_time}${s.end_time ? '–' + s.end_time : ''} ${s.title}`}
-                    className="mt-0.5 w-full truncate rounded bg-violet-50 px-1 text-[10px] text-violet-700 dark:bg-violet-950/60 dark:text-violet-300"
+              )}
+            </div>
+            <div className="relative flex" style={{ height: stripHeight }}>
+              {/* hour labels */}
+              <div className="w-11 shrink-0 border-r border-neutral-100 dark:border-neutral-800">
+                {Array.from(
+                  { length: DAY_END_HOUR - DAY_START_HOUR + 1 },
+                  (_, i) => DAY_START_HOUR + i,
+                ).map((h) => (
+                  <div
+                    key={h}
+                    className="pr-1.5 text-right font-mono text-[10px] leading-[44px] text-neutral-400"
+                    style={{ height: HOUR_PX }}
                   >
-                    {s.start_time} {s.title}
-                  </span>
+                    {h}:00
+                  </div>
                 ))}
-                {ev?.tasks.map((task) => (
-                  <span
-                    key={`t${task.id}`}
-                    data-tip={task.title}
-                    className="mt-0.5 w-full truncate rounded bg-blue-50 px-1 text-[10px] text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
-                  >
-                    {task.title}
-                  </span>
+              </div>
+              {/* grid + schedules */}
+              <div className="relative flex-1">
+                {Array.from(
+                  { length: DAY_END_HOUR - DAY_START_HOUR + 1 },
+                  (_, i) => DAY_START_HOUR + i,
+                ).map((h) => (
+                  <div
+                    key={h}
+                    className="border-b border-neutral-100 dark:border-neutral-800/60"
+                    style={{ height: HOUR_PX }}
+                  />
                 ))}
-                {ev?.sessions.map((s) => (
-                  <span
-                    key={`cs${s.id}`}
-                    data-tip={s.topic}
-                    className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-emerald-50 px-1 text-[10px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
-                  >
-                    <CheckCircle2 size={9} /> {s.topic}
+                {(dayEvents?.schedule ?? []).map((s) => {
+                  const top = timeTop(s.start_time)
+                  const end = s.end_time && s.end_time > s.start_time ? s.end_time : ''
+                  const height = end
+                    ? Math.max(20, timeTop(end) - top)
+                    : HOUR_PX - 4
+                  return (
+                    <div
+                      key={s.id}
+                      data-tip={`${s.start_time}${end ? '–' + end : ''} ${s.title}`}
+                      className={`absolute left-1 right-1 overflow-hidden rounded-md px-2 py-0.5 text-[11px] leading-tight ${SCHEDULE_COLORS[s.kind] ?? SCHEDULE_COLORS.general}`}
+                      style={{ top: top + 2, height: height - 4 }}
+                    >
+                      <span className="font-mono text-[10px]">{s.start_time}</span>{' '}
+                      <span className="truncate">{s.title}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+            {/* non-time-blocked items */}
+            <div className="flex flex-wrap gap-1.5 border-t border-neutral-100 px-3 py-2 dark:border-neutral-800">
+              {dayEvents?.tasks.map((task) => (
+                <span
+                  key={`t${task.id}`}
+                  data-tip={task.title}
+                  className="truncate rounded bg-blue-50 px-2 py-1 text-[11px] text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
+                >
+                  {task.title}
+                </span>
+              ))}
+              {dayEvents?.sessions.map((s) => (
+                <span
+                  key={`cs${s.id}`}
+                  data-tip={s.topic}
+                  className="flex items-center gap-1 truncate rounded bg-emerald-50 px-2 py-1 text-[11px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+                >
+                  <CheckCircle2 size={10} /> {s.topic}
+                </span>
+              ))}
+              {dayEvents?.focus.map((f) => (
+                <span
+                  key={`cf${f.id}`}
+                  data-tip={`${t('learning.calendar.focus')} ${f.duration_min}′`}
+                  className="flex items-center gap-1 truncate rounded bg-amber-50 px-2 py-1 text-[11px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
+                >
+                  <Timer size={10} /> {f.duration_min}′
+                </span>
+              ))}
+              {!dayEvents?.tasks.length &&
+                !dayEvents?.sessions.length &&
+                !dayEvents?.focus.length &&
+                !dayEvents?.schedule.length && (
+                  <span className="text-[11.5px] text-neutral-400">
+                    {t('learning.calendar.noEvents')}
                   </span>
-                ))}
-                {ev?.focus.map((f) => (
-                  <span
-                    key={`f${f.id}`}
-                    data-tip={`${t('learning.calendar.focus')} ${f.duration_min}′`}
-                    className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-amber-50 px-1 text-[10px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
-                  >
-                    <Timer size={9} /> {f.duration_min}′
-                  </span>
-                ))}
-              </button>
-            )
-          })}
-        </div>
+                )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* day panel */}
+      {/* side panel */}
       <div className="rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="text-[13px] font-semibold">
-          {selectedDay ?? t('learning.calendar.selectDay')}
+        <div className="flex items-center gap-1.5 text-[13px] font-semibold">
+          <Clock3 size={13} className="text-neutral-400" />
+          {view === 'day' ? fmtDay(cursor) : (selectedDay ?? t('learning.calendar.selectDay'))}
         </div>
 
-        {selectedDay && (
+        {(view === 'day' ? cursor : selectedDay) && (
           <div className="mt-2 space-y-3">
             {/* schedule add */}
             <div className="rounded-md border border-violet-100 bg-violet-50/50 p-2 dark:border-violet-900/40 dark:bg-violet-950/20">
@@ -341,7 +592,7 @@ export default function CalendarView() {
             </div>
 
             {/* schedule list */}
-            {selected?.schedule.map((s) => (
+            {(view === 'day' ? dayEvents : selected)?.schedule.map((s) => (
               <div
                 key={s.id}
                 className="flex items-center gap-1.5 rounded-md bg-violet-50 p-2 text-[12px] text-violet-700 dark:bg-violet-950/60 dark:text-violet-300"
@@ -365,7 +616,7 @@ export default function CalendarView() {
             ))}
 
             {/* tasks */}
-            {selected?.tasks.map((task) => (
+            {(view === 'day' ? dayEvents : selected)?.tasks.map((task) => (
               <div key={task.id} className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
                 <div className="flex items-center gap-1.5">
                   <div data-tip={task.title} className="min-w-0 flex-1 truncate text-[12px]">
@@ -409,7 +660,7 @@ export default function CalendarView() {
             ))}
 
             {/* check-ins & focus */}
-            {selected?.sessions.map((s) => (
+            {(view === 'day' ? dayEvents : selected)?.sessions.map((s) => (
               <div
                 key={`cs${s.id}`}
                 className="flex items-center gap-1.5 rounded-md bg-emerald-50 p-2 text-[12px] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
@@ -419,7 +670,7 @@ export default function CalendarView() {
                 <span className="ml-auto shrink-0 text-[11px]">{s.duration_min}′</span>
               </div>
             ))}
-            {selected?.focus.map((f) => (
+            {(view === 'day' ? dayEvents : selected)?.focus.map((f) => (
               <div
                 key={`cf${f.id}`}
                 className="flex items-center gap-1.5 rounded-md bg-amber-50 p-2 text-[12px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
@@ -430,13 +681,16 @@ export default function CalendarView() {
               </div>
             ))}
 
-            {!selected && (
+            {!(view === 'day' ? dayEvents : selected) && (
               <p className="text-[12px] text-neutral-400">{t('learning.calendar.noEvents')}</p>
             )}
-            {selected && !selected.tasks.length && !selected.sessions.length &&
-              !selected.focus.length && !selected.schedule.length && (
-              <p className="text-[12px] text-neutral-400">{t('learning.calendar.noEvents')}</p>
-            )}
+            {(view === 'day' ? dayEvents : selected) &&
+              !(view === 'day' ? dayEvents : selected)!.tasks.length &&
+              !(view === 'day' ? dayEvents : selected)!.sessions.length &&
+              !(view === 'day' ? dayEvents : selected)!.focus.length &&
+              !(view === 'day' ? dayEvents : selected)!.schedule.length && (
+                <p className="text-[12px] text-neutral-400">{t('learning.calendar.noEvents')}</p>
+              )}
           </div>
         )}
       </div>

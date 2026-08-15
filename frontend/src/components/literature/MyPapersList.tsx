@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ExternalLink,
   FileUp,
+  GitBranch,
   Loader2,
   Pencil,
   Scale,
@@ -14,6 +15,7 @@ import {
 import { api, uploadFile } from '../../api/client'
 import { useToastStore } from '../../store/useToastStore'
 import AiModal from '../ai/AiModal'
+import RelatedPapersModal from './RelatedPapersModal'
 
 interface Paper {
   id: number
@@ -44,6 +46,7 @@ export default function MyPapersList() {
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [aiPaper, setAiPaper] = useState<Paper | null>(null)
+  const [relatedPaper, setRelatedPaper] = useState<Paper | null>(null)
   const [editing, setEditing] = useState<Paper | null>(null)
   const [compareFrom, setCompareFrom] = useState<Paper | null>(null)
   const [compareWith, setCompareWith] = useState<Paper | null>(null)
@@ -269,6 +272,14 @@ export default function MyPapersList() {
             </button>
             <button
               type="button"
+              onClick={() => setRelatedPaper(p)}
+              className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
+              data-tip={t('literature.related.button')}
+            >
+              <GitBranch size={13} />
+            </button>
+            <button
+              type="button"
               onClick={() => openEdit(p)}
               className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
               data-tip={t('research.paper.edit')}
@@ -301,6 +312,9 @@ export default function MyPapersList() {
           onClose={() => setAiPaper(null)}
         />
       )}
+
+      {/* related papers modal */}
+      {relatedPaper && <RelatedPapersModal paper={relatedPaper} onClose={() => setRelatedPaper(null)} />}
 
       {/* edit modal */}
       {editing && (
