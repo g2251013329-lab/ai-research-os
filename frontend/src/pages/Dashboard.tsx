@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -147,7 +148,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-xl font-semibold tracking-tight">{t('dashboard.title')}</h1>
           <p className="mt-0.5 text-[13px] text-foreground/55 dark:text-foreground/55">
-            {todayLabel()}
+            {todayLabel(i18n.language.startsWith('zh') ? 'zh-CN' : 'en-US')}
           </p>
         </div>
         <div className="relative flex gap-2 text-[12px]">
@@ -213,7 +214,7 @@ export default function Dashboard() {
       </div>
 
       {/* quick actions */}
-      <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {quickActions.map(({ key, icon: Icon, run }) => (
           <button
             key={key}

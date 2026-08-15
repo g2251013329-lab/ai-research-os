@@ -36,8 +36,8 @@ export function relativeTime(iso: string): string {
   return parseApiTime(iso).toLocaleDateString()
 }
 
-export function todayLabel(): string {
-  return new Date().toLocaleDateString('zh-CN', {
+export function todayLabel(locale: string = 'zh-CN'): string {
+  return new Date().toLocaleDateString(locale, {
     month: 'long',
     day: 'numeric',
     weekday: 'long',

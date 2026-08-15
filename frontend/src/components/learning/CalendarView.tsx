@@ -239,7 +239,9 @@ export default function CalendarView() {
   const dayEvents = cursor ? eventsByDay[cursor] : null
 
   // ----- day view time strip -----
-  const stripHeight = (DAY_END_HOUR - DAY_START_HOUR) * HOUR_PX
+  // one row per hour label (7:00..23:00 inclusive) so the last label
+  // never spills out of the strip into the unscheduled section below
+  const stripHeight = (DAY_END_HOUR - DAY_START_HOUR + 1) * HOUR_PX
   const timeTop = (hhmm: string) => {
     const [h, m] = hhmm.split(':').map(Number)
     return (h - DAY_START_HOUR) * HOUR_PX + (m / 60) * HOUR_PX
