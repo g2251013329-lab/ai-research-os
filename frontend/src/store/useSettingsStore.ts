@@ -44,6 +44,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     try {
       const settings = await api<AppSettings>('/api/settings')
       localStorage.setItem('airos.lang', settings.language)
+      void i18n.changeLanguage(settings.language)
       applyAppearance(settings.theme, settings.ui_theme, settings.accent)
       set({ settings, loading: false })
       void get().refreshKeyStatus()

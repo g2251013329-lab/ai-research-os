@@ -56,7 +56,6 @@ interface DayEvents {
 
 type ViewMode = 'month' | 'week' | 'day'
 
-const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
 const SCHEDULE_KINDS = ['general', 'learning', 'research', 'experiment', 'leisure']
 const DAY_START_HOUR = 7
 const DAY_END_HOUR = 23
@@ -76,14 +75,20 @@ function addDays(dateStr: string, days: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function fmtDay(dateStr: string): string {
-  const d = parseApiTime(dateStr)
-  return `${d.getMonth() + 1}月${d.getDate()}日`
+function fmtDay(dateStr: string, locale: string): string {
+  return parseApiTime(dateStr).toLocaleDateString(locale, {
+    month: 'long',
+    day: 'numeric',
+  })
 }
 
 export default function CalendarView() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const toast = useToastStore((s) => s.show)
+  const locale = i18n.language.startsWith('zh') ? 'zh-CN' : 'en-US'
+  const weekdayLabels = Array.from({ length: 7 }, (_, i) =>
+    new Date(2026, 0, 5 + i).toLocaleDateString(locale, { weekday: 'narrow' }),
+  )
   const queryClient = useQueryClient()
   const today = new Date().toISOString().slice(0, 10)
   const [view, setView] = useState<ViewMode>('month')
@@ -248,15 +253,19 @@ export default function CalendarView() {
   }
 
   const headerLabel = useMemo(() => {
-    if (view === 'month') return `${year} 年 ${mon} 月`
+    if (view === 'month')
+      return new Date(year, mon - 1, 1).toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'long',
+      })
     if (view === 'week') {
       const start = weekDays[0]
       const end = weekDays[6]
-      if (start.slice(0, 7) === end.slice(0, 7)) return fmtDay(start) + ' – ' + fmtDay(end)
-      return `${fmtDay(start)} – ${fmtDay(end)}`
+      if (start.slice(0, 7) === end.slice(0, 7)) return fmtDay(start, locale) + ' – ' + fmtDay(end, locale)
+      return `${fmtDay(start, locale)} – ${fmtDay(end, locale)}`
     }
-    return fmtDay(cursor)
-  }, [view, cursor, weekDays, year, mon])
+    return fmtDay(cursor, locale)
+  }, [view, cursor, weekDays, year, mon, locale])
 
   const field =
     'rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface'
@@ -355,7 +364,7 @@ export default function CalendarView() {
         {/* month grid */}
         {view === 'month' && (
           <div className="mt-3 grid grid-cols-7 gap-1">
-            {WEEKDAYS.map((w) => (
+            {weekdayLabels.map((w) => (
               <div key={w} className="py-1 text-center text-[11px] text-foreground/45">
                 {w}
               </div>
@@ -393,14 +402,11 @@ export default function CalendarView() {
         {/* week grid */}
         {view === 'week' && (
           <div className="mt-3 grid grid-cols-7 gap-1">
-            {weekDays.map((day) => {
-              const d = parseApiTime(day)
-              return (
-                <div key={day} className="py-1 text-center text-[11px] text-foreground/45">
-                  周{WEEKDAYS[(d.getDay() + 6) % 7]}
-                </div>
-              )
-            })}
+            {weekDays.map((day) => (
+              <div key={day} className="py-1 text-center text-[11px] text-foreground/45">
+                {parseApiTime(day).toLocaleDateString(locale, { weekday: 'short' })}
+              </div>
+            ))}
             {weekDays.map((day) => {
               const isToday = day === today
               return (
@@ -435,7 +441,7 @@ export default function CalendarView() {
           <div className="mt-3 overflow-hidden rounded-lg border border-border dark:border-border">
             <div className="flex items-center gap-1.5 border-b border-neutral-100 bg-surface-hover/60 px-3 py-2 text-[12.5px] font-medium dark:border-border dark:bg-surface">
               <CalendarDays size={13} className="text-accent" />
-              {fmtDay(cursor)}
+              {fmtDay(cursor, locale)}
               {cursor === today && (
                 <span className="rounded bg-accent px-1.5 py-px text-[10.5px] font-semibold text-white">
                   {t('learning.calendar.today')}
@@ -541,7 +547,7 @@ export default function CalendarView() {
       <div className="rounded-lg border border-border bg-surface p-3 shadow-card dark:border-border dark:bg-surface">
         <div className="flex items-center gap-1.5 text-[13px] font-semibold">
           <Clock3 size={13} className="text-foreground/45" />
-          {view === 'day' ? fmtDay(cursor) : (selectedDay ?? t('learning.calendar.selectDay'))}
+          {view === 'day' ? fmtDay(cursor, locale) : (selectedDay ?? t('learning.calendar.selectDay'))}
         </div>
 
         {(view === 'day' ? cursor : selectedDay) && (
