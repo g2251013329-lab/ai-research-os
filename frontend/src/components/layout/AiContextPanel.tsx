@@ -79,7 +79,7 @@ export default function AiContextPanel() {
   const [open, setOpen] = useState(true)
   const [channel, setChannel] = useState<Channel>('deepseek')
   const [csBusy, setCsBusy] = useState(false)
-  const [csLoginRequired, setCsLoginRequired] = useState(false)
+  const [csDirectUrl, setCsDirectUrl] = useState<string | null>(null)
   const [ctx, setCtx] = useState('')
   const [manual, setManual] = useState(false)
   const [messages, setMessages] = useState<ChatMsg[]>([])
@@ -223,18 +223,18 @@ export default function AiContextPanel() {
     }
   }
 
-  const openClaudeScience = async (forceLogin: boolean) => {
+  const openClaudeScience = async () => {
     setCsBusy(true)
     try {
-      const r = await api<{ url: string; login_required: boolean; error?: string }>(
-        forceLogin ? '/api/system/claude-science-login' : '/api/system/claude-science-open',
+      const r = await api<{ url: string; direct?: string; error?: string }>(
+        '/api/system/claude-science-open',
         { method: 'POST' },
       )
       if (r.error) {
         toast(r.error)
         return
       }
-      setCsLoginRequired(Boolean(r.login_required))
+      setCsDirectUrl(r.direct ?? null)
       window.open(r.url, '_blank', 'noopener')
     } catch (e) {
       toast(e instanceof Error ? e.message : String(e))
@@ -443,7 +443,7 @@ export default function AiContextPanel() {
               <>
                 <button
                   type="button"
-                  onClick={() => void openClaudeScience(false)}
+                  onClick={() => void openClaudeScience()}
                   disabled={csBusy}
                   className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-60"
                 >
@@ -454,15 +454,15 @@ export default function AiContextPanel() {
                   )}
                   {t('ai.channels.claude_science.open')}
                 </button>
-                {csLoginRequired && (
-                  <button
-                    type="button"
-                    onClick={() => void openClaudeScience(true)}
-                    disabled={csBusy}
+                {csDirectUrl && (
+                  <a
+                    href={csDirectUrl}
+                    target="_blank"
+                    rel="noreferrer"
                     className="text-[11px] text-foreground/45 underline decoration-dotted underline-offset-2 transition-colors hover:text-accent"
                   >
-                    {t('ai.channels.claude_science.relogin')}
-                  </button>
+                    {t('ai.channels.claude_science.direct')}
+                  </a>
                 )}
               </>
             )}

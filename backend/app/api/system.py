@@ -158,16 +158,20 @@ def _login_link() -> str | None:
 
 @router.post("/claude-science-open")
 def claude_science_open() -> dict:
+    # The daemon restarts invalidate the browser session, so the reliable
+    # entry is ALWAYS a fresh single-use auth link (same as `claude-science
+    # url`): it shows the sign-in page when needed and passes straight
+    # through when the session is still valid. `direct` is for already
+    # logged-in users who want to skip the auth page.
     err = _start_sandbox()
     if err:
         return {"ok": False, "error": err}
     proxy_alive = _start_proxy()
-    logged_in = (CS_DATA_DIR / ".oauth-tokens").exists()
-    url = "http://localhost:8990" if logged_in else (_login_link() or "http://localhost:8990")
+    link = _login_link()
     return {
         "ok": True,
-        "url": url,
-        "login_required": not logged_in,
+        "url": link or "http://localhost:8990",
+        "direct": "http://localhost:8990",
         "proxy_alive": proxy_alive,
     }
 

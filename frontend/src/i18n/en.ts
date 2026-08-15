@@ -240,7 +240,7 @@ export default {
     channels: {
       deepseek: { name: 'DeepSeek', tip: 'Local API Q&A (execution also uses this channel)', desc: 'Local DeepSeek API with context-aware chat and memory' },
       gpt: { name: 'GPT Web', tip: 'Open ChatGPT web, Q&A only', desc: 'Open ChatGPT in your browser and ask questions there', open: 'Open GPT Web' },
-      claude_science: { name: 'Claude Science', tip: 'Open the Claude Science workbench', desc: 'One-click start the sandbox and open Claude Science (DeepSeek inference proxy)', open: 'Start & Open Claude Science', relogin: 'Session expired? Re-login' },
+      claude_science: { name: 'Claude Science', tip: 'Open the Claude Science workbench', desc: 'One-click start the sandbox and open the auth page (re-auth needed after daemon restarts)', open: 'Start & Enter Claude Science', direct: 'Already logged in? Open directly' },
       webOnly: 'Web channels are Q&A only — execution (summaries, classification, discovery) still uses the DeepSeek API',
     },
     thinking: 'AI is thinking…',
