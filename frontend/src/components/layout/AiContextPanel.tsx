@@ -252,7 +252,10 @@ export default function AiContextPanel() {
         return
       }
       setCsDirectUrl(r.direct ?? null)
-      window.open(r.url, '_blank', 'noopener')
+      await api('/api/system/open-url', {
+        method: 'POST',
+        body: JSON.stringify({ url: r.url, app: 'Safari' }),
+      })
     } catch (e) {
       toast(e instanceof Error ? e.message : String(e))
     } finally {
@@ -472,14 +475,18 @@ export default function AiContextPanel() {
                   {t('ai.channels.claude_science.open')}
                 </button>
                 {csDirectUrl && (
-                  <a
-                    href={csDirectUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void api('/api/system/open-url', {
+                        method: 'POST',
+                        body: JSON.stringify({ url: csDirectUrl, app: 'Safari' }),
+                      }).catch((e) => toast(e instanceof Error ? e.message : String(e)))
+                    }
                     className="text-[11px] text-foreground/45 underline decoration-dotted underline-offset-2 transition-colors hover:text-accent"
                   >
                     {t('ai.channels.claude_science.direct')}
-                  </a>
+                  </button>
                 )}
               </>
             )}
