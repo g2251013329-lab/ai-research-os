@@ -87,7 +87,7 @@ export default function CalendarView() {
   const toast = useToastStore((s) => s.show)
   const locale = i18n.language.startsWith('zh') ? 'zh-CN' : 'en-US'
   const weekdayLabels = Array.from({ length: 7 }, (_, i) =>
-    new Date(2026, 0, 5 + i).toLocaleDateString(locale, { weekday: 'narrow' }),
+    new Date(2026, 0, 5 + i).toLocaleDateString(locale, { weekday: 'short' }),
   )
   const queryClient = useQueryClient()
   const today = new Date().toISOString().slice(0, 10)
