@@ -54,6 +54,27 @@ def launch_app(body: LaunchAppIn) -> dict:
         )
 
 
+class OpenUrlIn(BaseModel):
+    url: str
+    app: str | None = None  # e.g. "Safari" — open in that app instead of default
+
+
+@router.post("/open-url")
+def open_url(body: OpenUrlIn) -> dict:
+    if not body.url.startswith(("http://", "https://")):
+        raise HTTPException(status_code=422, detail="url must be http(s)")
+    try:
+        if body.app:
+            subprocess.run(
+                ["open", "-a", body.app, body.url], check=True, timeout=10
+            )
+        else:
+            subprocess.run(["open", body.url], check=True, timeout=10)
+        return {"ok": True}
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"Failed to open: {exc}")
+
+
 # ------------------------------------------------------------ Claude Science
 # One-click entry to the local Claude Science sandbox managed by CS Switch:
 #   1. start the sandbox daemon (:8990) if it is down

@@ -223,6 +223,23 @@ export default function AiContextPanel() {
     }
   }
 
+  const openGptWeb = async () => {
+    setCsBusy(true)
+    try {
+      await api('/api/system/open-url', {
+        method: 'POST',
+        body: JSON.stringify({
+          url: settings?.ai_gpt_url || 'https://chatgpt.com',
+          app: 'Safari',
+        }),
+      })
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e))
+    } finally {
+      setCsBusy(false)
+    }
+  }
+
   const openClaudeScience = async () => {
     setCsBusy(true)
     try {
@@ -430,15 +447,15 @@ export default function AiContextPanel() {
               </p>
             </div>
             {channel === 'gpt' ? (
-              <a
-                href={settings?.ai_gpt_url || 'https://chatgpt.com'}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark"
+              <button
+                type="button"
+                onClick={() => void openGptWeb()}
+                disabled={csBusy}
+                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-60"
               >
-                <ExternalLink size={13} />
+                {csBusy ? <Loader2 size={13} className="animate-spin" /> : <ExternalLink size={13} />}
                 {t('ai.channels.gpt.open')}
-              </a>
+              </button>
             ) : (
               <>
                 <button
