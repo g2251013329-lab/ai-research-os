@@ -152,7 +152,7 @@ export default function ConceptLinksModal({
             type="button"
             disabled={!target || addLink.isPending}
             onClick={() => addLink.mutate()}
-            className="flex items-center gap-1 rounded-md bg-accent px-2.5 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+            className="flex items-center gap-1 rounded-lg bg-accent px-2.5 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
           >
             {addLink.isPending ? (
               <Loader2 size={12} className="animate-spin" />

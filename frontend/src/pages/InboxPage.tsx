@@ -128,7 +128,7 @@ export default function InboxPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-6">
-      <h1 className="text-lg font-semibold">{t('inbox.title')}</h1>
+      <h1 className="text-xl font-semibold tracking-tight">{t('inbox.title')}</h1>
       <p className="mt-0.5 text-[13px] text-neutral-500 dark:text-neutral-400">
         {t('inbox.subtitle')}
       </p>
@@ -173,7 +173,7 @@ export default function InboxPage() {
             setSaving(true)
             addMutation.mutate(undefined, { onSettled: () => setSaving(false) })
           }}
-          className="flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+          className="flex items-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
         >
           {saving ? <Loader2 size={13} className="animate-spin" /> : <Inbox size={13} />}
           {t('inbox.add')}
@@ -199,7 +199,7 @@ export default function InboxPage() {
       </div>
 
       {/* list */}
-      <div className="mt-3 divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white dark:divide-neutral-800 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="mt-3 divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white shadow-card dark:divide-neutral-800 dark:border-neutral-800 dark:bg-neutral-900">
         {(items ?? []).length === 0 && (
           <p className="px-4 py-10 text-center text-[12.5px] text-neutral-400">
             {t('inbox.empty')}
@@ -333,7 +333,7 @@ export default function InboxPage() {
                 <button
                   type="button"
                   onClick={() => void applyKind(aiSuggestion.kind ?? 'other')}
-                  className="flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+                  className="flex items-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
                 >
                   <Check size={13} /> {t('ai.applyKind')}
                 </button>

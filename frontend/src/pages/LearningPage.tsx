@@ -52,7 +52,7 @@ export default function LearningPage() {
     <div className="mx-auto max-w-6xl p-6">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-lg font-semibold">{t('learning.title')}</h1>
+          <h1 className="text-xl font-semibold tracking-tight">{t('learning.title')}</h1>
           <p className="mt-0.5 text-[13px] text-neutral-500 dark:text-neutral-400">
             {t('learning.subtitle')}
           </p>
@@ -73,7 +73,7 @@ export default function LearningPage() {
         <button
           type="button"
           onClick={() => setCheckinOpen(true)}
-          className="flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+          className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
         >
           <CheckCircle2 size={13} /> {t('learning.quick.checkin')}
         </button>

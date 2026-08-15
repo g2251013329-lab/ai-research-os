@@ -132,7 +132,7 @@ export default function ZoteroImport() {
                 type="button"
                 onClick={() => void importOne(item)}
                 disabled={importing === item.key}
-                className="flex shrink-0 items-center gap-1 rounded-md bg-accent px-2 py-1 text-[11px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+                className="flex shrink-0 items-center gap-1 rounded-lg bg-accent px-2 py-1 text-[11px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
               >
                 {importing === item.key ? (
                   <Loader2 size={11} className="animate-spin" />

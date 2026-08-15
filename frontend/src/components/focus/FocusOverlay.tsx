@@ -182,7 +182,7 @@ export default function FocusOverlay() {
                 setRemaining(minutes * 60)
                 setRunning(true)
               }}
-              className="flex items-center gap-1.5 rounded-md bg-accent px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+              className="flex items-center gap-1.5 rounded-lg bg-accent px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               <Play size={13} /> {t('focus.start')}
             </button>
@@ -191,7 +191,7 @@ export default function FocusOverlay() {
               <button
                 type="button"
                 onClick={() => setRunning((v) => !v)}
-                className="flex items-center gap-1.5 rounded-md bg-accent px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+                className="flex items-center gap-1.5 rounded-lg bg-accent px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
               >
                 {running ? <Pause size={13} /> : <Play size={13} />}
                 {running ? t('focus.pause') : t('focus.resume')}

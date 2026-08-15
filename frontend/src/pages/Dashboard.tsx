@@ -143,7 +143,7 @@ export default function Dashboard() {
       {/* header */}
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-lg font-semibold">{t('dashboard.title')}</h1>
+          <h1 className="text-xl font-semibold tracking-tight">{t('dashboard.title')}</h1>
           <p className="mt-0.5 text-[13px] text-neutral-500 dark:text-neutral-400">
             {todayLabel()}
           </p>
@@ -231,7 +231,7 @@ export default function Dashboard() {
 
       <div className="mt-4 grid grid-cols-3 gap-4">
         {/* Today */}
-        <section className="col-span-3 rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900 lg:col-span-2">
+        <section className="col-span-3 rounded-lg border border-neutral-200 bg-white shadow-card dark:border-neutral-800 dark:bg-neutral-900 lg:col-span-2">
           <header className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5 dark:border-neutral-800">
             <h2 className="flex items-center gap-1.5 text-[13px] font-semibold">
               <ListTodo size={14} className="text-accent" />
@@ -299,7 +299,7 @@ export default function Dashboard() {
         {/* right column */}
         <div className="col-span-3 space-y-4 lg:col-span-1">
           {/* research overview */}
-          <section className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <section className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
             <button
               type="button"
               onClick={() => navigate('/research')}
@@ -340,7 +340,7 @@ export default function Dashboard() {
           </section>
 
           {/* learning overview */}
-          <section className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <section className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
             <h2 className="flex items-center gap-1.5 text-[13px] font-semibold">
               <SquarePen size={14} className="text-accent" />
               {t('dashboard.learningOverview')}
@@ -386,7 +386,7 @@ export default function Dashboard() {
       </div>
 
       {/* recent activity */}
-      <section className="mt-4 rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+      <section className="mt-4 rounded-lg border border-neutral-200 bg-white shadow-card dark:border-neutral-800 dark:bg-neutral-900">
         <header className="border-b border-neutral-100 px-4 py-2.5 dark:border-neutral-800">
           <h2 className="text-[13px] font-semibold">{t('dashboard.recentActivity')}</h2>
         </header>

@@ -134,7 +134,7 @@ export default function TaskModal() {
             type="button"
             onClick={() => void submit()}
             disabled={!title.trim() || saving}
-            className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+            className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
           >
             {saving ? <Loader2 size={13} className="animate-spin" /> : t('task.create')}
           </button>

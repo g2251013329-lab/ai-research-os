@@ -345,7 +345,7 @@ export default function AiContextPanel() {
             type="button"
             onClick={() => void send()}
             disabled={!input.trim() || streaming}
-            className="rounded-md bg-accent px-2 text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+            className="rounded-lg bg-accent px-2 text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
             aria-label="send"
           >
             {streaming ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
@@ -391,7 +391,7 @@ export default function AiContextPanel() {
                 type="button"
                 onClick={() => void addMemory()}
                 disabled={!memText.trim()}
-                className="rounded-md bg-accent px-1.5 text-white disabled:opacity-40"
+                className="rounded-lg bg-accent px-1.5 text-white disabled:opacity-40"
               >
                 <Plus size={12} />
               </button>

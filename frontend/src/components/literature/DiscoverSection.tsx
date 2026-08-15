@@ -112,7 +112,7 @@ export default function DiscoverSection() {
               type="button"
               onClick={() => void discover()}
               disabled={!query.trim() || loading}
-              className="flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+              className="flex items-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
             >
               {loading ? <Loader2 size={13} className="animate-spin" /> : <Search size={13} />}
               {t('literature.discover.search')}
@@ -223,7 +223,7 @@ export default function DiscoverSection() {
                   type="button"
                   onClick={() => void importHit(hit)}
                   disabled={importing === (hit.doi || hit.title)}
-                  className="flex shrink-0 items-center gap-1 rounded-md bg-accent px-2 py-1 text-[11px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+                  className="flex shrink-0 items-center gap-1 rounded-lg bg-accent px-2 py-1 text-[11px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
                 >
                   {importing === (hit.doi || hit.title) ? (
                     <Loader2 size={11} className="animate-spin" />

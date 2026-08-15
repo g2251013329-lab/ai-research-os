@@ -531,7 +531,7 @@ export default function CalendarView() {
       </div>
 
       {/* side panel */}
-      <div className="rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="rounded-lg border border-neutral-200 bg-white p-3 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
         <div className="flex items-center gap-1.5 text-[13px] font-semibold">
           <Clock3 size={13} className="text-neutral-400" />
           {view === 'day' ? fmtDay(cursor) : (selectedDay ?? t('learning.calendar.selectDay'))}
@@ -583,7 +583,7 @@ export default function CalendarView() {
                   type="button"
                   disabled={!sTitle.trim()}
                   onClick={() => addScheduleMutation.mutate()}
-                  className="rounded-md bg-accent px-2 py-1.5 text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+                  className="rounded-lg bg-accent px-2 py-1.5 text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
                   aria-label="add"
                 >
                   <Plus size={13} />

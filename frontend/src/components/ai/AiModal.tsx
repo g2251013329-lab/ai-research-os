@@ -81,7 +81,7 @@ export default function AiModal({ title, fetcher, onApply, children, onClose }: 
                   setApplied(true)
                 }}
                 disabled={applied || !result}
-                className="flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
               >
                 {applied ? <Check size={12} /> : null}
                 {applied ? t('ai.applied') : t('ai.apply')}

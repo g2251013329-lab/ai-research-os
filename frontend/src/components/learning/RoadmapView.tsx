@@ -239,7 +239,7 @@ export default function RoadmapView() {
           <button
             type="button"
             onClick={() => newTitle.trim() && createMutation.mutate(null)}
-            className="rounded-md bg-accent px-2.5 py-1 text-[12px] font-medium text-white"
+            className="rounded-lg bg-accent px-2.5 py-1 text-[12px] font-medium text-white"
           >
             {t('common.save')}
           </button>

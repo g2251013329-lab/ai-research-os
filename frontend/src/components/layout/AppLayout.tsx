@@ -56,39 +56,43 @@ export default function AppLayout() {
   }, [])
 
   return (
-    <div className="flex h-full bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+    <div className="app-bg flex h-full text-neutral-900 dark:text-neutral-100">
       {/* Sidebar */}
-      <aside className="flex w-52 shrink-0 flex-col border-r border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
+      <aside className="flex w-56 shrink-0 flex-col border-r border-neutral-200/90 bg-white/80 backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/70">
+        <div className="border-b border-neutral-200/80 px-4 py-3.5 dark:border-neutral-800">
           <BrandMark />
         </div>
-        <nav className="flex-1 space-y-0.5 overflow-y-auto p-2">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto p-2 pt-3">
           {navItems.map(({ to, key, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${
+                `group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
                   isActive
                     ? 'bg-accent-soft font-medium text-accent'
-                    : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100'
+                    : 'text-neutral-600 hover:bg-neutral-100/80 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/70 dark:hover:text-neutral-100'
                 }`
               }
             >
-              <Icon size={15} strokeWidth={1.8} />
+              <Icon
+                size={15}
+                strokeWidth={1.8}
+                className="transition-transform group-hover:scale-110"
+              />
               {t(key)}
             </NavLink>
           ))}
         </nav>
-        <div className="border-t border-neutral-200 p-2 dark:border-neutral-800">
+        <div className="border-t border-neutral-200/80 p-2 dark:border-neutral-800">
           <NavLink
             to="/settings"
             className={({ isActive }) =>
-              `flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${
+              `flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
                 isActive
                   ? 'bg-accent-soft font-medium text-accent'
-                  : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                  : 'text-neutral-600 hover:bg-neutral-100/80 dark:text-neutral-400 dark:hover:bg-neutral-800/70'
               }`
             }
           >

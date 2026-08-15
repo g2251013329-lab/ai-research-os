@@ -165,7 +165,7 @@ export default function LeisurePage() {
     return (
       <div
         key={c.key}
-        className="flex flex-col justify-between gap-3 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+        className="flex flex-col justify-between gap-3 rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900"
       >
         <div className="flex items-start gap-3">
           <span className={`rounded-md p-2 ${c.accent}`}>
@@ -214,14 +214,14 @@ export default function LeisurePage() {
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <h1 className="text-lg font-semibold">{t('leisure.title')}</h1>
+      <h1 className="text-xl font-semibold tracking-tight">{t('leisure.title')}</h1>
       <p className="mt-0.5 text-[13px] text-neutral-500 dark:text-neutral-400">
         {t('leisure.subtitle')}
       </p>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         {/* reading module */}
-        <section className="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900 lg:col-span-2">
+        <section className="rounded-lg border border-neutral-200 bg-white shadow-card dark:border-neutral-800 dark:bg-neutral-900 lg:col-span-2">
           <header className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5 dark:border-neutral-800">
             <h2 className="flex items-center gap-1.5 text-[13px] font-semibold">
               <BookOpen size={14} className="text-accent" />
@@ -264,7 +264,7 @@ export default function LeisurePage() {
               type="button"
               disabled={!bTitle.trim()}
               onClick={() => addBook.mutate()}
-              className="flex items-center gap-1 rounded-md bg-accent px-2.5 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+              className="flex items-center gap-1 rounded-lg bg-accent px-2.5 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
             >
               <Plus size={12} /> {t('leisure.reading.addBook')}
             </button>
@@ -472,7 +472,7 @@ export default function LeisurePage() {
                 type="button"
                 onClick={() => void createNote()}
                 disabled={!nTitle.trim() || saving}
-                className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+                className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
               >
                 {saving ? <Loader2 size={13} className="animate-spin" /> : t('leisure.reading.createNote')}
               </button>

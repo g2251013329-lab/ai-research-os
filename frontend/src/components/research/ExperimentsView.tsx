@@ -103,7 +103,7 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="flex items-center gap-1 rounded-md bg-accent px-2.5 py-1 text-[12px] font-medium text-white transition-colors hover:bg-accent-dark"
+          className="flex items-center gap-1 rounded-lg bg-accent px-2.5 py-1 text-[12px] font-medium text-white transition-colors hover:bg-accent-dark"
         >
           <Plus size={12} /> {t('research.experiment.new')}
         </button>
@@ -267,7 +267,7 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
                   createMutation.mutate(undefined, { onSettled: () => setSaving(false) })
                 }}
                 disabled={!title.trim() || saving}
-                className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+                className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
               >
                 {saving ? <Loader2 size={13} className="animate-spin" /> : t('research.create')}
               </button>

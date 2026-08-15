@@ -103,7 +103,7 @@ export default function ProjectDetailPage() {
 
       <div className="mt-2 flex items-center gap-2.5">
         <FolderKanban size={18} className="text-accent" />
-        <h1 className="truncate text-lg font-semibold" data-tip={project.title}>
+        <h1 className="truncate text-xl font-semibold tracking-tight" data-tip={project.title}>
           {project.title}
         </h1>
         <button

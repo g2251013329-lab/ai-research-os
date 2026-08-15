@@ -30,7 +30,7 @@ export default function LiteraturePage() {
     <div className="mx-auto max-w-6xl p-6">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-lg font-semibold">{t('literature.title')}</h1>
+          <h1 className="text-xl font-semibold tracking-tight">{t('literature.title')}</h1>
           <p className="mt-0.5 text-[13px] text-neutral-500 dark:text-neutral-400">
             {t('literature.subtitle')}
           </p>

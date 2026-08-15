@@ -173,7 +173,7 @@ export default function GitPanel() {
                   api<{ steps: string[] }>('/api/git/sync', { method: 'POST' }),
                 )
               }
-              className="rounded-md bg-accent px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
             >
               {busy === 'sync' ? <Loader2 size={12} className="animate-spin" /> : null}
               {t('git.sync')}

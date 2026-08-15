@@ -177,7 +177,7 @@ export default function MyPapersList() {
       </div>
 
       {/* compact rows */}
-      <div className="divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white dark:divide-neutral-800 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white shadow-card dark:divide-neutral-800 dark:border-neutral-800 dark:bg-neutral-900">
         {(papers ?? []).length === 0 && (
           <p className="px-4 py-8 text-center text-[12.5px] text-neutral-400">
             {t('literature.mineEmpty')}
@@ -398,7 +398,7 @@ export default function MyPapersList() {
                   patchMutation.mutate({ id: editing.id, patch: editForm }, { onSuccess: () => setEditing(null) })
                 }
                 disabled={!editForm.title.trim()}
-                className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+                className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
               >
                 {t('common.save')}
               </button>

@@ -100,7 +100,7 @@ export default function ResearchPage() {
     <div className="mx-auto max-w-6xl p-6">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-lg font-semibold">{t('research.title')}</h1>
+          <h1 className="text-xl font-semibold tracking-tight">{t('research.title')}</h1>
           <p className="mt-0.5 text-[13px] text-neutral-500 dark:text-neutral-400">
             {t('research.subtitle')}
           </p>
@@ -108,7 +108,7 @@ export default function ResearchPage() {
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+          className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
         >
           <Plus size={14} /> {t('research.newProject')}
         </button>
@@ -182,7 +182,7 @@ export default function ResearchPage() {
             key={p.id}
             type="button"
             onClick={() => navigate(`/research/projects/${p.id}`)}
-            className="group rounded-lg border border-neutral-200 bg-white p-4 text-left transition-colors hover:border-accent dark:border-neutral-800 dark:bg-neutral-900"
+            className="group rounded-lg border border-neutral-200 bg-white p-4 text-left shadow-card transition-all hover:border-accent hover:shadow-lift dark:border-neutral-800 dark:bg-neutral-900"
           >
             <div className="flex items-center justify-between">
               <FolderKanban size={17} className="text-accent" />
@@ -277,7 +277,7 @@ export default function ResearchPage() {
                   createMutation.mutate(undefined, { onSettled: () => setSaving(false) })
                 }}
                 disabled={!title.trim() || saving}
-                className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+                className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
               >
                 {saving ? <Loader2 size={13} className="animate-spin" /> : t('research.create')}
               </button>

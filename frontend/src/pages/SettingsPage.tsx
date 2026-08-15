@@ -109,11 +109,11 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl p-6">
-      <h1 className="text-lg font-semibold">{t('settings.title')}</h1>
+      <h1 className="text-xl font-semibold tracking-tight">{t('settings.title')}</h1>
 
       <section className="mt-6 space-y-4">
         {/* Vault */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
           <label className="block text-[13px] font-medium">{t('settings.vault.label')}</label>
           <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
             {t('settings.vault.desc')}
@@ -128,7 +128,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => void saveVault()}
-              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               {t('common.save')}
             </button>
@@ -136,7 +136,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Zotero path */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
           <label className="block text-[13px] font-medium">{t('settings.zotero.label')}</label>
           <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
             {t('settings.zotero.desc')}
@@ -151,7 +151,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => void saveZotero()}
-              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               {t('common.save')}
             </button>
@@ -159,7 +159,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Extra search vaults */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
           <label className="block text-[13px] font-medium">
             {t('settings.vaults.extra')}
           </label>
@@ -177,7 +177,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => void saveExtraVaults()}
-              className="h-fit rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+              className="h-fit rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               {t('common.save')}
             </button>
@@ -185,7 +185,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Brand subtitle */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
           <label className="block text-[13px] font-medium">{t('settings.brand.label')}</label>
           <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
             {t('settings.brand.desc')}
@@ -200,7 +200,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => void saveBrand()}
-              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               {t('common.save')}
             </button>
@@ -275,7 +275,7 @@ export default function SettingsPage() {
 
         {/* Language, theme & accent */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
             <label className="block text-[13px] font-medium">
               {t('settings.language.label')}
             </label>
@@ -290,7 +290,7 @@ export default function SettingsPage() {
               <option value="en">{t('language.en')}</option>
             </select>
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
             <label className="block text-[13px] font-medium">{t('settings.theme.label')}</label>
             <select
               value={settings?.theme ?? 'dark'}
@@ -306,7 +306,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Accent themes */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
           <label className="block text-[13px] font-medium">{t('themes.label')}</label>
           <div className="mt-3 grid grid-cols-4 gap-2">
             {ACCENT_THEMES.map((th) => {
@@ -344,7 +344,7 @@ export default function SettingsPage() {
         </div>
 
         {/* AI model */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
           <label className="block text-[13px] font-medium">{t('settings.ai.label')}</label>
           <div className="mt-2 grid grid-cols-[1fr_1.5fr_auto] gap-2">
             <input
@@ -362,7 +362,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => void saveAi()}
-              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               {t('common.save')}
             </button>
@@ -370,7 +370,7 @@ export default function SettingsPage() {
         </div>
 
         {/* DeepSeek key */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
           <div className="flex items-center gap-2">
             <KeyRound size={14} className="text-neutral-400" />
             <label className="text-[13px] font-medium">{t('settings.key.label')}</label>
@@ -396,7 +396,7 @@ export default function SettingsPage() {
               type="button"
               onClick={() => void saveKey()}
               disabled={savingKey || !apiKey.trim()}
-              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
             >
               {savingKey ? <Loader2 size={13} className="animate-spin" /> : t('settings.key.save')}
             </button>
@@ -426,7 +426,7 @@ export default function SettingsPage() {
         </div>
 
         {/* One Scholar */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
           <label className="block text-[13px] font-medium">{t('settings.onescholar.label')}</label>
           <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
             {t('settings.onescholar.desc')}
@@ -444,7 +444,7 @@ export default function SettingsPage() {
                 await update({ onescholar_base_url: osBase.trim() })
                 flashSaved()
               }}
-              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark"
             >
               {t('common.save')}
             </button>
@@ -472,7 +472,7 @@ export default function SettingsPage() {
                 setOsConfigured(s.configured)
                 flashSaved()
               }}
-              className="rounded-md bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-50"
             >
               {t('settings.onescholar.saveKey')}
             </button>
