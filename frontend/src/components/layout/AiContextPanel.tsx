@@ -78,6 +78,8 @@ export default function AiContextPanel() {
 
   const [open, setOpen] = useState(true)
   const [channel, setChannel] = useState<Channel>('deepseek')
+  const [csBusy, setCsBusy] = useState(false)
+  const [csLoginRequired, setCsLoginRequired] = useState(false)
   const [ctx, setCtx] = useState('')
   const [manual, setManual] = useState(false)
   const [messages, setMessages] = useState<ChatMsg[]>([])
@@ -218,6 +220,26 @@ export default function AiContextPanel() {
       toast(t('ai.remembered'))
     } catch (e) {
       toast(e instanceof Error ? e.message : String(e))
+    }
+  }
+
+  const openClaudeScience = async (forceLogin: boolean) => {
+    setCsBusy(true)
+    try {
+      const r = await api<{ url: string; login_required: boolean; error?: string }>(
+        forceLogin ? '/api/system/claude-science-login' : '/api/system/claude-science-open',
+        { method: 'POST' },
+      )
+      if (r.error) {
+        toast(r.error)
+        return
+      }
+      setCsLoginRequired(Boolean(r.login_required))
+      window.open(r.url, '_blank', 'noopener')
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e))
+    } finally {
+      setCsBusy(false)
     }
   }
 
@@ -407,20 +429,43 @@ export default function AiContextPanel() {
                 {t(`ai.channels.${channel}.desc`)}
               </p>
             </div>
-            <a
-              href={
-                channel === 'gpt'
-                  ? settings?.ai_gpt_url || 'https://chatgpt.com'
-                  : settings?.ai_claude_science_url ||
-                    'https://claude.com/product/claude-science'
-              }
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark"
-            >
-              <ExternalLink size={13} />
-              {t(`ai.channels.${channel}.open`)}
-            </a>
+            {channel === 'gpt' ? (
+              <a
+                href={settings?.ai_gpt_url || 'https://chatgpt.com'}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark"
+              >
+                <ExternalLink size={13} />
+                {t('ai.channels.gpt.open')}
+              </a>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => void openClaudeScience(false)}
+                  disabled={csBusy}
+                  className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-dark disabled:opacity-60"
+                >
+                  {csBusy ? (
+                    <Loader2 size={13} className="animate-spin" />
+                  ) : (
+                    <ExternalLink size={13} />
+                  )}
+                  {t('ai.channels.claude_science.open')}
+                </button>
+                {csLoginRequired && (
+                  <button
+                    type="button"
+                    onClick={() => void openClaudeScience(true)}
+                    disabled={csBusy}
+                    className="text-[11px] text-foreground/45 underline decoration-dotted underline-offset-2 transition-colors hover:text-accent"
+                  >
+                    {t('ai.channels.claude_science.relogin')}
+                  </button>
+                )}
+              </>
+            )}
             <p className="text-[10.5px] text-foreground/40">{t('ai.channels.webOnly')}</p>
           </div>
         )}
