@@ -37,14 +37,12 @@ const navGroups: {
       { to: '/research', key: 'nav.research', icon: FlaskConical, end: false, dot: 'bg-research' },
       { to: '/literature', key: 'nav.literature', icon: BookOpen, end: false, dot: 'bg-literature' },
       { to: '/leisure', key: 'nav.leisure', icon: Coffee, end: false, dot: 'bg-leisure' },
+      { to: '/inbox', key: 'nav.inbox', icon: Inbox, end: false, dot: null },
     ],
   },
   {
     labelKey: 'nav.system',
-    items: [
-      { to: '/inbox', key: 'nav.inbox', icon: Inbox, end: false, dot: null },
-      { to: '/settings', key: 'nav.settings', icon: Settings, end: false, dot: null },
-    ],
+    items: [{ to: '/settings', key: 'nav.settings', icon: Settings, end: false, dot: null }],
   },
 ]
 

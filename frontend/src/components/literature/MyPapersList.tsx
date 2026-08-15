@@ -289,7 +289,7 @@ export default function MyPapersList() {
             </select>
 
             {/* icon actions */}
-            <div className="flex shrink-0 items-center gap-0.5">
+            <div className="flex w-[168px] shrink-0 items-center gap-0.5">
             <button
               type="button"
               onClick={() => void openInReader(p)}
