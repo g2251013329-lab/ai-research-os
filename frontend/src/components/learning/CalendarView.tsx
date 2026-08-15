@@ -63,7 +63,7 @@ const DAY_END_HOUR = 23
 const HOUR_PX = 44
 
 const SCHEDULE_COLORS: Record<string, string> = {
-  general: 'bg-neutral-200/70 text-neutral-700 dark:bg-neutral-700/70 dark:text-neutral-200',
+  general: 'bg-neutral-200/70 text-foreground/75 dark:bg-neutral-700/70 dark:text-foreground/85',
   learning: 'bg-sky-100 text-sky-800 dark:bg-sky-900/70 dark:text-sky-200',
   research: 'bg-violet-100 text-violet-800 dark:bg-violet-900/70 dark:text-violet-200',
   experiment: 'bg-amber-100 text-amber-800 dark:bg-amber-900/70 dark:text-amber-200',
@@ -257,7 +257,7 @@ export default function CalendarView() {
   }, [view, cursor, weekDays, year, mon])
 
   const field =
-    'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
+    'rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface'
 
   const dayCellChips = (day: string) => {
     const ev = eventsByDay[day]
@@ -312,14 +312,14 @@ export default function CalendarView() {
             <button
               type="button"
               onClick={() => nav(-1)}
-              className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              className="rounded-md p-1.5 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
             >
               <ChevronLeft size={15} />
             </button>
             <button
               type="button"
               onClick={() => nav(1)}
-              className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              className="rounded-md p-1.5 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
             >
               <ChevronRight size={15} />
             </button>
@@ -327,12 +327,12 @@ export default function CalendarView() {
             <button
               type="button"
               onClick={goToday}
-              className="ml-1 rounded-md border border-neutral-200 px-2.5 py-1 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+              className="ml-1 rounded-md border border-border px-2.5 py-1 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-border"
             >
               {t('learning.calendar.today')}
             </button>
           </div>
-          <div className="flex rounded-md border border-neutral-200 p-0.5 dark:border-neutral-700">
+          <div className="flex rounded-md border border-border p-0.5 dark:border-border">
             {(['month', 'week', 'day'] as const).map((v) => (
               <button
                 key={v}
@@ -341,7 +341,7 @@ export default function CalendarView() {
                 className={`rounded px-2.5 py-1 text-[12px] transition-colors ${
                   view === v
                     ? 'bg-accent-soft font-medium text-accent'
-                    : 'text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                    : 'text-foreground/55 hover:bg-surface-hover dark:text-foreground/55 dark:hover:bg-neutral-800'
                 }`}
               >
                 {t(`learning.calendar.view.${v}`)}
@@ -354,7 +354,7 @@ export default function CalendarView() {
         {view === 'month' && (
           <div className="mt-3 grid grid-cols-7 gap-1">
             {WEEKDAYS.map((w) => (
-              <div key={w} className="py-1 text-center text-[11px] text-neutral-400">
+              <div key={w} className="py-1 text-center text-[11px] text-foreground/45">
                 {w}
               </div>
             ))}
@@ -371,7 +371,7 @@ export default function CalendarView() {
                       ? 'border-accent bg-accent-soft'
                       : isToday
                         ? 'border-accent/60 bg-accent-soft/40'
-                        : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-800 dark:hover:border-neutral-700'
+                        : 'border-border hover:border-border dark:border-border dark:hover:border-neutral-700'
                   }`}
                 >
                   <span
@@ -394,7 +394,7 @@ export default function CalendarView() {
             {weekDays.map((day) => {
               const d = parseApiTime(day)
               return (
-                <div key={day} className="py-1 text-center text-[11px] text-neutral-400">
+                <div key={day} className="py-1 text-center text-[11px] text-foreground/45">
                   周{WEEKDAYS[(d.getDay() + 6) % 7]}
                 </div>
               )
@@ -411,7 +411,7 @@ export default function CalendarView() {
                       ? 'border-accent bg-accent-soft'
                       : isToday
                         ? 'border-accent/60 bg-accent-soft/40'
-                        : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-800 dark:hover:border-neutral-700'
+                        : 'border-border hover:border-border dark:border-border dark:hover:border-neutral-700'
                   }`}
                 >
                   <span
@@ -430,8 +430,8 @@ export default function CalendarView() {
 
         {/* day view: time strip */}
         {view === 'day' && (
-          <div className="mt-3 overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
-            <div className="flex items-center gap-1.5 border-b border-neutral-100 bg-neutral-50/60 px-3 py-2 text-[12.5px] font-medium dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="mt-3 overflow-hidden rounded-lg border border-border dark:border-border">
+            <div className="flex items-center gap-1.5 border-b border-neutral-100 bg-surface-hover/60 px-3 py-2 text-[12.5px] font-medium dark:border-border dark:bg-surface">
               <CalendarDays size={13} className="text-accent" />
               {fmtDay(cursor)}
               {cursor === today && (
@@ -442,14 +442,14 @@ export default function CalendarView() {
             </div>
             <div className="relative flex" style={{ height: stripHeight }}>
               {/* hour labels */}
-              <div className="w-11 shrink-0 border-r border-neutral-100 dark:border-neutral-800">
+              <div className="w-11 shrink-0 border-r border-neutral-100 dark:border-border">
                 {Array.from(
                   { length: DAY_END_HOUR - DAY_START_HOUR + 1 },
                   (_, i) => DAY_START_HOUR + i,
                 ).map((h) => (
                   <div
                     key={h}
-                    className="pr-1.5 text-right font-mono text-[10px] leading-[44px] text-neutral-400"
+                    className="pr-1.5 text-right font-mono text-[10px] leading-[44px] text-foreground/45"
                     style={{ height: HOUR_PX }}
                   >
                     {h}:00
@@ -464,7 +464,7 @@ export default function CalendarView() {
                 ).map((h) => (
                   <div
                     key={h}
-                    className="border-b border-neutral-100 dark:border-neutral-800/60"
+                    className="border-b border-neutral-100 dark:border-border/60"
                     style={{ height: HOUR_PX }}
                   />
                 ))}
@@ -488,8 +488,8 @@ export default function CalendarView() {
               </div>
             </div>
             {/* non-time-blocked items */}
-            <div className="border-t border-neutral-100 bg-neutral-50/60 px-3 py-2 dark:border-neutral-800 dark:bg-neutral-900/40">
-              <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-neutral-400">
+            <div className="border-t border-neutral-100 bg-surface-hover/60 px-3 py-2 dark:border-border dark:bg-surface/40">
+              <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-foreground/45">
                 <CalendarClock size={11} />
                 {t('learning.calendar.unscheduled')}
               </div>
@@ -525,7 +525,7 @@ export default function CalendarView() {
                   !dayEvents?.sessions.length &&
                   !dayEvents?.focus.length &&
                   !dayEvents?.schedule.length && (
-                    <span className="text-[11.5px] text-neutral-400">
+                    <span className="text-[11.5px] text-foreground/45">
                       {t('learning.calendar.noEvents')}
                     </span>
                   )}
@@ -536,9 +536,9 @@ export default function CalendarView() {
       </div>
 
       {/* side panel */}
-      <div className="rounded-lg border border-neutral-200 bg-white p-3 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="rounded-lg border border-border bg-surface p-3 shadow-card dark:border-border dark:bg-surface">
         <div className="flex items-center gap-1.5 text-[13px] font-semibold">
-          <Clock3 size={13} className="text-neutral-400" />
+          <Clock3 size={13} className="text-foreground/45" />
           {view === 'day' ? fmtDay(cursor) : (selectedDay ?? t('learning.calendar.selectDay'))}
         </div>
 
@@ -566,7 +566,7 @@ export default function CalendarView() {
                   onChange={(e) => setSStart(e.target.value)}
                   className={`w-[86px] text-[12px] ${field}`}
                 />
-                <span className="text-[11px] text-neutral-400">–</span>
+                <span className="text-[11px] text-foreground/45">–</span>
                 <input
                   type="time"
                   value={sEnd}
@@ -622,7 +622,7 @@ export default function CalendarView() {
 
             {/* tasks */}
             {(view === 'day' ? dayEvents : selected)?.tasks.map((task) => (
-              <div key={task.id} className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
+              <div key={task.id} className="rounded-md bg-surface-hover p-2 dark:bg-neutral-800/60">
                 <div className="flex items-center gap-1.5">
                   <div data-tip={task.title} className="min-w-0 flex-1 truncate text-[12px]">
                     {task.title}
@@ -640,7 +640,7 @@ export default function CalendarView() {
                     className={`shrink-0 rounded px-1.5 py-0.5 text-[10.5px] transition-colors ${
                       confirmDeleteTask === task.id
                         ? 'bg-red-500 text-white'
-                        : 'text-neutral-400 hover:text-red-500'
+                        : 'text-foreground/45 hover:text-red-500'
                     }`}
                     data-tip={t('learning.calendar.deleteTask')}
                   >
@@ -658,7 +658,7 @@ export default function CalendarView() {
                     e.target.value &&
                     rescheduleMutation.mutate({ id: task.id, due: e.target.value })
                   }
-                  className="mt-1 w-full rounded border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded border border-border bg-surface px-1.5 py-0.5 text-[11px] outline-none dark:border-border dark:bg-surface"
                   data-tip={t('learning.calendar.reschedule')}
                 />
               </div>
@@ -687,14 +687,14 @@ export default function CalendarView() {
             ))}
 
             {!(view === 'day' ? dayEvents : selected) && (
-              <p className="text-[12px] text-neutral-400">{t('learning.calendar.noEvents')}</p>
+              <p className="text-[12px] text-foreground/45">{t('learning.calendar.noEvents')}</p>
             )}
             {(view === 'day' ? dayEvents : selected) &&
               !(view === 'day' ? dayEvents : selected)!.tasks.length &&
               !(view === 'day' ? dayEvents : selected)!.sessions.length &&
               !(view === 'day' ? dayEvents : selected)!.focus.length &&
               !(view === 'day' ? dayEvents : selected)!.schedule.length && (
-                <p className="text-[12px] text-neutral-400">{t('learning.calendar.noEvents')}</p>
+                <p className="text-[12px] text-foreground/45">{t('learning.calendar.noEvents')}</p>
               )}
           </div>
         )}

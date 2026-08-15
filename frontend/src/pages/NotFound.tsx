@@ -5,10 +5,10 @@ export default function NotFound() {
   const { t } = useTranslation()
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3">
-      <p className="text-[28px] font-bold tracking-tight text-neutral-300 dark:text-neutral-700">
+      <p className="text-[28px] font-bold tracking-tight text-foreground/35 dark:text-foreground/75">
         404
       </p>
-      <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
+      <p className="text-[13px] text-foreground/55 dark:text-foreground/55">
         {t('notFound.title')}
       </p>
       <Link

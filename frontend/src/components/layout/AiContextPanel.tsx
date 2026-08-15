@@ -209,13 +209,13 @@ export default function AiContextPanel() {
 
   return (
     <aside
-      className={`flex shrink-0 flex-col border-l border-neutral-200 bg-white transition-[width] dark:border-neutral-800 dark:bg-neutral-900 ${
+      className={`flex shrink-0 flex-col border-l border-border bg-surface transition-[width] dark:border-border dark:bg-surface ${
         open ? 'w-80' : 'w-9'
       }`}
     >
-      <div className="flex h-11 items-center justify-between border-b border-neutral-200 px-2 dark:border-neutral-800">
+      <div className="flex h-11 items-center justify-between border-b border-border px-2 dark:border-border">
         {open && (
-          <span className="flex items-center gap-1.5 text-[12px] font-medium text-neutral-600 dark:text-neutral-300">
+          <span className="flex items-center gap-1.5 text-[12px] font-medium text-foreground/65 dark:text-foreground/75">
             <Sparkles size={13} className="text-accent" />
             {t('aiPanel.title')}
           </span>
@@ -223,7 +223,7 @@ export default function AiContextPanel() {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          className="rounded-md p-1.5 text-foreground/45 transition-colors hover:bg-surface-hover dark:hover:bg-neutral-800"
           aria-label={open ? 'collapse' : 'expand'}
         >
           {open ? <PanelRightClose size={15} /> : <PanelRightOpen size={15} />}
@@ -233,8 +233,8 @@ export default function AiContextPanel() {
       {open && (
         <>
         {/* context selector */}
-      <div className="shrink-0 border-b border-neutral-100 p-2.5 dark:border-neutral-800">
-        <div className="text-[10.5px] font-semibold uppercase tracking-wide text-neutral-400">
+      <div className="shrink-0 border-b border-neutral-100 p-2.5 dark:border-border">
+        <div className="text-[10.5px] font-semibold uppercase tracking-wide text-foreground/45">
           {t('ai.context')}
         </div>
         <select
@@ -243,7 +243,7 @@ export default function AiContextPanel() {
             setCtx(e.target.value)
             setManual(Boolean(e.target.value))
           }}
-          className="mt-1 w-full rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-[12px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+          className="mt-1 w-full rounded-md border border-border bg-surface px-2 py-1.5 text-[12px] outline-none focus:border-accent dark:border-border dark:bg-surface"
         >
           <option value="">{t('ai.noContext')}</option>
           {(projects ?? []).length > 0 && (
@@ -285,7 +285,7 @@ export default function AiContextPanel() {
                 type="button"
                 onClick={run}
                 disabled={streaming}
-                className="flex-1 rounded-md border border-neutral-200 px-1.5 py-1 text-[10.5px] text-neutral-500 transition-colors hover:border-accent hover:text-accent disabled:opacity-40 dark:border-neutral-700"
+                className="flex-1 rounded-md border border-border px-1.5 py-1 text-[10.5px] text-foreground/55 transition-colors hover:border-accent hover:text-accent disabled:opacity-40 dark:border-border"
               >
                 {t(`ai.quick.${key}`)}
               </button>
@@ -298,7 +298,7 @@ export default function AiContextPanel() {
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-2.5">
           {messages.length === 0 && (
-            <p className="px-1 pt-2 text-[11.5px] leading-relaxed text-neutral-400">
+            <p className="px-1 pt-2 text-[11.5px] leading-relaxed text-foreground/45">
               {t('ai.chatHint')}
             </p>
           )}
@@ -310,7 +310,7 @@ export default function AiContextPanel() {
                     ? 'ml-8 bg-accent-soft text-neutral-800 dark:text-neutral-100'
                     : msg.error
                       ? 'mr-2 bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300'
-                      : 'mr-2 bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200'
+                      : 'mr-2 bg-surface-hover text-foreground/75 dark:bg-neutral-800 dark:text-foreground/85'
                 }`}
               >
                 {msg.text}
@@ -322,7 +322,7 @@ export default function AiContextPanel() {
                 <button
                   type="button"
                   onClick={() => void remember(msg.text)}
-                  className="mt-0.5 ml-1 flex items-center gap-1 text-[10.5px] text-neutral-400 transition-colors hover:text-accent"
+                  className="mt-0.5 ml-1 flex items-center gap-1 text-[10.5px] text-foreground/45 transition-colors hover:text-accent"
                 >
                   <Brain size={10} /> {t('ai.remember')}
                 </button>
@@ -331,7 +331,7 @@ export default function AiContextPanel() {
           ))}
           <div ref={chatEndRef} />
         </div>
-        <div className="flex shrink-0 gap-1.5 border-t border-neutral-100 p-2 dark:border-neutral-800">
+        <div className="flex shrink-0 gap-1.5 border-t border-neutral-100 p-2 dark:border-border">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -339,7 +339,7 @@ export default function AiContextPanel() {
               if (e.key === 'Enter') void send()
             }}
             placeholder={t('ai.chatPlaceholder')}
-            className="min-w-0 flex-1 rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-[12px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+            className="min-w-0 flex-1 rounded-md border border-border bg-surface px-2 py-1.5 text-[12px] outline-none focus:border-accent dark:border-border dark:bg-surface"
           />
           <button
             type="button"
@@ -354,15 +354,15 @@ export default function AiContextPanel() {
       </div>
 
       {/* memory */}
-      <div className="shrink-0 border-t border-neutral-100 dark:border-neutral-800">
+      <div className="shrink-0 border-t border-neutral-100 dark:border-border">
         <button
           type="button"
           onClick={() => setMemOpen((v) => !v)}
-          className="flex w-full items-center gap-1.5 px-2.5 py-2 text-[11.5px] font-medium text-neutral-500 transition-colors hover:text-accent dark:text-neutral-400"
+          className="flex w-full items-center gap-1.5 px-2.5 py-2 text-[11.5px] font-medium text-foreground/55 transition-colors hover:text-accent dark:text-foreground/55"
         >
           <Brain size={12} className="text-accent" />
           {t('ai.memory')} ({memory?.length ?? 0})
-          <span className="ml-auto text-neutral-300">{memOpen ? '−' : '+'}</span>
+          <span className="ml-auto text-foreground/35">{memOpen ? '−' : '+'}</span>
         </button>
         {memOpen && (
           <div className="space-y-1.5 px-2.5 pb-2.5">
@@ -370,7 +370,7 @@ export default function AiContextPanel() {
               <select
                 value={memKind}
                 onChange={(e) => setMemKind(e.target.value)}
-                className="rounded-md border border-neutral-200 bg-white px-1.5 py-1 text-[11px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
+                className="rounded-md border border-border bg-surface px-1.5 py-1 text-[11px] outline-none dark:border-border dark:bg-surface"
               >
                 {MEMORY_KINDS.map((k) => (
                   <option key={k} value={k}>
@@ -385,7 +385,7 @@ export default function AiContextPanel() {
                   if (e.key === 'Enter') void addMemory()
                 }}
                 placeholder={t('ai.memoryPlaceholder')}
-                className="min-w-0 flex-1 rounded-md border border-neutral-200 bg-white px-2 py-1 text-[11.5px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+                className="min-w-0 flex-1 rounded-md border border-border bg-surface px-2 py-1 text-[11.5px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               />
               <button
                 type="button"
@@ -400,13 +400,13 @@ export default function AiContextPanel() {
               {(memory ?? []).map((m) => (
                 <div
                   key={m.id}
-                  className="group flex items-start gap-1.5 rounded-md bg-neutral-50 p-1.5 dark:bg-neutral-800/60"
+                  className="group flex items-start gap-1.5 rounded-md bg-surface-hover p-1.5 dark:bg-neutral-800/60"
                 >
                   <span className="shrink-0 rounded bg-accent-soft px-1 text-[9.5px] text-accent">
                     {t(`ai.memoryKinds.${m.kind}`)}
                   </span>
                   <span
-                    className="min-w-0 flex-1 text-[11px] leading-snug text-neutral-600 dark:text-neutral-300"
+                    className="min-w-0 flex-1 text-[11px] leading-snug text-foreground/65 dark:text-foreground/75"
                     data-tip={m.content}
                   >
                     {m.content}
@@ -419,14 +419,14 @@ export default function AiContextPanel() {
                         void queryClient.invalidateQueries({ queryKey: ['memory'] })
                       })()
                     }
-                    className="shrink-0 rounded p-0.5 text-neutral-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100 dark:text-neutral-600"
+                    className="shrink-0 rounded p-0.5 text-foreground/35 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100 dark:text-foreground/65"
                   >
                     <Trash2 size={11} />
                   </button>
                 </div>
               ))}
               {(memory ?? []).length === 0 && (
-                <p className="text-[11px] text-neutral-400">{t('ai.memoryEmpty')}</p>
+                <p className="text-[11px] text-foreground/45">{t('ai.memoryEmpty')}</p>
               )}
             </div>
           </div>

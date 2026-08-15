@@ -50,6 +50,8 @@ export default function MyPapersList() {
   const [editing, setEditing] = useState<Paper | null>(null)
   const [compareFrom, setCompareFrom] = useState<Paper | null>(null)
   const [compareWith, setCompareWith] = useState<Paper | null>(null)
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [query, setQuery] = useState('')
   const [editForm, setEditForm] = useState({
     title: '',
     authors: '',
@@ -136,7 +138,7 @@ export default function MyPapersList() {
   }
 
   const field =
-    'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
+    'rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface'
 
   return (
     <div className="space-y-2">
@@ -157,7 +159,7 @@ export default function MyPapersList() {
         className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed px-3 py-1.5 text-[11.5px] transition-colors ${
           dragging
             ? 'border-accent bg-accent-soft text-accent'
-            : 'border-neutral-300 text-neutral-400 hover:border-accent hover:text-accent dark:border-neutral-700'
+            : 'border-border text-foreground/45 hover:border-accent hover:text-accent dark:border-border'
         }`}
       >
         <FileUp size={13} />
@@ -176,15 +178,56 @@ export default function MyPapersList() {
         {uploading && <Loader2 size={12} className="animate-spin" />}
       </div>
 
-      {/* compact rows */}
-      <div className="divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white shadow-card dark:divide-neutral-800 dark:border-neutral-800 dark:bg-neutral-900">
+      {/* toolbar: search + status filter */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('literature.mineSearchPlaceholder')}
+          className="w-52 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-[12.5px] outline-none transition-colors focus:border-accent"
+        />
+        {['all', 'unread', 'reading', 'read'].map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setStatusFilter(s)}
+            className={`rounded-md px-2.5 py-1 text-[12px] transition-colors ${
+              statusFilter === s
+                ? 'bg-accent-soft font-medium text-accent'
+                : 'text-foreground/55 hover:bg-surface-hover'
+            }`}
+          >
+            {s === 'all' ? t('literature.filterAll') : t(`research.paper.statuses.${s}`)}
+          </button>
+        ))}
+      </div>
+
+      {/* database-style rows */}
+      <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
+        {/* column header */}
+        <div className="grid grid-cols-[minmax(0,1fr)_120px_90px_auto] items-center gap-2 border-b border-border bg-surface-hover/60 px-3 py-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-foreground/40">
+          <span>{t('literature.colPaper')}</span>
+          <span>{t('research.paper.assignProject')}</span>
+          <span>{t('literature.colStatus')}</span>
+          <span className="w-[168px]">{t('literature.colActions')}</span>
+        </div>
+        <div className="divide-y divide-border-subtle">
         {(papers ?? []).length === 0 && (
-          <p className="px-4 py-8 text-center text-[12.5px] text-neutral-400">
+          <p className="px-4 py-8 text-center text-[12.5px] text-foreground/45">
             {t('literature.mineEmpty')}
           </p>
         )}
-        {(papers ?? []).map((p) => (
-          <div key={p.id} className="flex items-center gap-2 px-3 py-2">
+        {(papers ?? [])
+          .filter((p) => statusFilter === 'all' || p.status === statusFilter)
+          .filter((p) => {
+            if (!query.trim()) return true
+            const q = query.trim().toLowerCase()
+            return [p.title, p.authors, p.journal, p.doi].some((v) =>
+              v.toLowerCase().includes(q),
+            )
+          })
+          .map((p) => (
+          <div key={p.id} className="grid grid-cols-[minmax(0,1fr)_120px_90px_auto] items-center gap-2 px-3 py-2">
             <div className="min-w-0 flex-1">
               <div
                 className="truncate text-[13px] font-medium"
@@ -193,7 +236,7 @@ export default function MyPapersList() {
                 {p.title}
               </div>
               <div
-                className="mt-0.5 flex items-center gap-1.5 truncate text-[11px] text-neutral-400"
+                className="mt-0.5 flex items-center gap-1.5 truncate text-[11px] text-foreground/45"
                 data-tip={[p.authors, p.year, p.journal].filter(Boolean).join(' · ')}
               >
                 <span className="truncate">
@@ -215,7 +258,7 @@ export default function MyPapersList() {
             <select
               value={p.status}
               onChange={(e) => patchMutation.mutate({ id: p.id, patch: { status: e.target.value } })}
-              className="w-[74px] shrink-0 rounded border border-neutral-200 bg-white px-1 py-1 text-[11px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
+              className="w-[74px] shrink-0 rounded border border-border bg-surface px-1 py-1 text-[11px] outline-none dark:border-border dark:bg-surface"
               data-tip={t('research.paper.statusTip')}
             >
               {STATUSES.map((s) => (
@@ -234,7 +277,7 @@ export default function MyPapersList() {
                   patch: { project_id: e.target.value ? Number(e.target.value) : null },
                 })
               }
-              className="w-[110px] shrink-0 rounded border border-neutral-200 bg-white px-1 py-1 text-[11px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
+              className="w-[110px] shrink-0 rounded border border-border bg-surface px-1 py-1 text-[11px] outline-none dark:border-border dark:bg-surface"
               data-tip={t('research.paper.assignProject')}
             >
               <option value="">{t('research.paper.unassigned')}</option>
@@ -249,7 +292,7 @@ export default function MyPapersList() {
             <button
               type="button"
               onClick={() => void openInReader(p)}
-              className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
+              className="shrink-0 rounded p-1.5 text-foreground/45 transition-colors hover:bg-surface-hover hover:text-accent dark:hover:bg-neutral-800"
               data-tip={t('literature.openReader')}
             >
               <ExternalLink size={13} />
@@ -257,7 +300,7 @@ export default function MyPapersList() {
             <button
               type="button"
               onClick={() => setCompareFrom(p)}
-              className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
+              className="shrink-0 rounded p-1.5 text-foreground/45 transition-colors hover:bg-surface-hover hover:text-accent dark:hover:bg-neutral-800"
               data-tip={t('literature.compare')}
             >
               <Scale size={13} />
@@ -265,7 +308,7 @@ export default function MyPapersList() {
             <button
               type="button"
               onClick={() => setAiPaper(p)}
-              className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
+              className="shrink-0 rounded p-1.5 text-foreground/45 transition-colors hover:bg-surface-hover hover:text-accent dark:hover:bg-neutral-800"
               data-tip={t('ai.summarizePaper')}
             >
               <Sparkles size={13} />
@@ -273,7 +316,7 @@ export default function MyPapersList() {
             <button
               type="button"
               onClick={() => setRelatedPaper(p)}
-              className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
+              className="shrink-0 rounded p-1.5 text-foreground/45 transition-colors hover:bg-surface-hover hover:text-accent dark:hover:bg-neutral-800"
               data-tip={t('literature.related.button')}
             >
               <GitBranch size={13} />
@@ -281,7 +324,7 @@ export default function MyPapersList() {
             <button
               type="button"
               onClick={() => openEdit(p)}
-              className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
+              className="shrink-0 rounded p-1.5 text-foreground/45 transition-colors hover:bg-surface-hover hover:text-accent dark:hover:bg-neutral-800"
               data-tip={t('research.paper.edit')}
             >
               <Pencil size={13} />
@@ -289,13 +332,14 @@ export default function MyPapersList() {
             <button
               type="button"
               onClick={() => deleteMutation.mutate(p.id)}
-              className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
+              className="shrink-0 rounded p-1.5 text-foreground/45 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
               data-tip={t('inbox.delete')}
             >
               <Trash2 size={13} />
             </button>
           </div>
         ))}
+        </div>
       </div>
 
       {/* AI summary modal */}
@@ -324,7 +368,7 @@ export default function MyPapersList() {
             if (e.target === e.currentTarget) setEditing(null)
           }}
         >
-          <div className="w-[520px] max-w-[92vw] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="w-[520px] max-w-[92vw] rounded-xl border border-border bg-surface p-4 shadow-2xl dark:border-border dark:bg-surface">
             <div className="flex items-center justify-between">
               <h2 className="truncate text-[14px] font-semibold" data-tip={editing.title}>
                 {t('research.paper.edit')}
@@ -332,7 +376,7 @@ export default function MyPapersList() {
               <button
                 type="button"
                 onClick={() => setEditing(null)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
               >
                 <X size={15} />
               </button>
@@ -388,7 +432,7 @@ export default function MyPapersList() {
               <button
                 type="button"
                 onClick={() => setEditing(null)}
-                className="rounded-md border border-neutral-300 px-3 py-1.5 text-[13px] transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                className="rounded-md border border-border px-3 py-1.5 text-[13px] transition-colors hover:bg-surface-hover dark:border-border dark:hover:bg-neutral-800"
               >
                 {t('common.cancel')}
               </button>
@@ -415,7 +459,7 @@ export default function MyPapersList() {
             if (e.target === e.currentTarget) setCompareFrom(null)
           }}
         >
-          <div className="w-[480px] max-w-[92vw] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="w-[480px] max-w-[92vw] rounded-xl border border-border bg-surface p-4 shadow-2xl dark:border-border dark:bg-surface">
             <div className="flex items-center justify-between">
               <h2 className="truncate text-[14px] font-semibold" data-tip={compareFrom.title}>
                 {t('literature.comparePick')}
@@ -423,7 +467,7 @@ export default function MyPapersList() {
               <button
                 type="button"
                 onClick={() => setCompareFrom(null)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
               >
                 <X size={15} />
               </button>
@@ -436,7 +480,7 @@ export default function MyPapersList() {
                     key={x.id}
                     type="button"
                     onClick={() => setCompareWith(x)}
-                    className="w-full truncate rounded-md px-2.5 py-2 text-left text-[13px] transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    className="w-full truncate rounded-md px-2.5 py-2 text-left text-[13px] transition-colors hover:bg-surface-hover dark:hover:bg-neutral-800"
                     data-tip={x.title}
                   >
                     {x.title}

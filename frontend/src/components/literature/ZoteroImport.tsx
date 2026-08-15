@@ -87,11 +87,11 @@ export default function ZoteroImport() {
   }
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="rounded-lg border border-border bg-surface dark:border-border dark:bg-surface">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-neutral-600 transition-colors hover:text-accent dark:text-neutral-300"
+        className="flex w-full items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-foreground/65 transition-colors hover:text-accent dark:text-foreground/75"
       >
         {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         {t('literature.zoteroImport.title')}
@@ -101,9 +101,9 @@ export default function ZoteroImport() {
       </button>
 
       {open && (
-        <div className="divide-y divide-neutral-100 border-t border-neutral-100 dark:divide-neutral-800 dark:border-neutral-800">
+        <div className="divide-y divide-border-subtle border-t border-neutral-100 dark:divide-border-subtle dark:border-border">
           {pending.length === 0 && (
-            <p className="px-3 py-4 text-center text-[11.5px] text-neutral-400">
+            <p className="px-3 py-4 text-center text-[11.5px] text-foreground/45">
               {t('literature.zoteroImport.empty')}
             </p>
           )}
@@ -114,7 +114,7 @@ export default function ZoteroImport() {
                   {item.title || t('literature.zoteroImport.untitled')}
                 </div>
                 <div
-                  className="truncate text-[10.5px] text-neutral-400"
+                  className="truncate text-[10.5px] text-foreground/45"
                   data-tip={[item.authors, item.year, item.journal].filter(Boolean).join(' · ')}
                 >
                   {[item.authors, item.year, item.journal].filter(Boolean).join(' · ')}
@@ -123,7 +123,7 @@ export default function ZoteroImport() {
               <button
                 type="button"
                 onClick={() => void openInReader(item)}
-                className="shrink-0 rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-accent dark:hover:bg-neutral-800"
+                className="shrink-0 rounded p-1.5 text-foreground/45 transition-colors hover:bg-surface-hover hover:text-accent dark:hover:bg-neutral-800"
                 data-tip={t('literature.openReader')}
               >
                 <ExternalLink size={12} />

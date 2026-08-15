@@ -45,15 +45,15 @@ export default function FlashcardsModal({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="flex max-h-[80vh] w-[560px] max-w-[92vw] flex-col rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3 dark:border-neutral-800">
+      <div className="flex max-h-[80vh] w-[560px] max-w-[92vw] flex-col rounded-xl border border-border bg-surface shadow-2xl dark:border-border dark:bg-surface">
+        <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3 dark:border-border">
           <h2 className="text-[13.5px] font-semibold">
             {t('learning.ai.flashcards')}: {concept.title}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
           >
             <X size={15} />
           </button>
@@ -61,7 +61,7 @@ export default function FlashcardsModal({
 
         <div className="min-h-[200px] flex-1 space-y-2 overflow-y-auto p-4">
           {isLoading && (
-            <div className="flex items-center justify-center gap-2 py-10 text-neutral-400">
+            <div className="flex items-center justify-center gap-2 py-10 text-foreground/45">
               <Loader2 size={16} className="animate-spin" /> {t('ai.thinking')}
             </div>
           )}
@@ -83,16 +83,16 @@ export default function FlashcardsModal({
                 className={`w-full rounded-lg border p-3 text-left transition-colors ${
                   shown
                     ? 'border-accent bg-accent-soft'
-                    : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600'
+                    : 'border-border hover:border-border dark:border-border dark:hover:border-neutral-600'
                 }`}
               >
                 <div className="text-[13px] font-medium">{card.q}</div>
                 {shown ? (
-                  <div className="mt-2 text-[12.5px] leading-relaxed text-neutral-600 dark:text-neutral-300">
+                  <div className="mt-2 text-[12.5px] leading-relaxed text-foreground/65 dark:text-foreground/75">
                     {card.a}
                   </div>
                 ) : (
-                  <div className="mt-2 text-[11.5px] text-neutral-400">
+                  <div className="mt-2 text-[11.5px] text-foreground/45">
                     {t('learning.ai.flashcardReveal')}
                   </div>
                 )}

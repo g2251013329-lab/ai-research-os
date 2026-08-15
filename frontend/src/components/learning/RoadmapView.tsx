@@ -27,7 +27,7 @@ export interface Concept {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  not_started: 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400',
+  not_started: 'bg-surface-hover text-foreground/55 dark:bg-neutral-800 dark:text-foreground/55',
   learning: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300',
   practiced: 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300',
   understood: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
@@ -99,7 +99,7 @@ export default function RoadmapView() {
     return (
       <div key={node.id}>
         <div
-          className="group flex items-center gap-1.5 rounded-md px-2 py-1.5 hover:bg-neutral-50 dark:hover:bg-neutral-800/60"
+          className="group flex items-center gap-1.5 rounded-md px-2 py-1.5 hover:bg-surface-hover dark:hover:bg-neutral-800/60"
           style={{ marginLeft: depth * 18 }}
         >
           <button
@@ -112,7 +112,7 @@ export default function RoadmapView() {
                 return next
               })
             }
-            className={`rounded p-0.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 ${
+            className={`rounded p-0.5 text-foreground/45 hover:text-foreground/65 dark:hover:text-neutral-200 ${
               hasChildren ? '' : 'invisible'
             }`}
           >
@@ -133,7 +133,7 @@ export default function RoadmapView() {
           <select
             value={node.status}
             onChange={(e) => statusMutation.mutate({ id: node.id, status: e.target.value })}
-            className="rounded border border-transparent bg-transparent px-1 py-0.5 text-[11px] text-neutral-400 outline-none hover:border-neutral-200 dark:hover:border-neutral-700"
+            className="rounded border border-transparent bg-transparent px-1 py-0.5 text-[11px] text-foreground/45 outline-none hover:border-border dark:hover:border-neutral-700"
             data-tip={t('learning.roadmap.changeStatus')}
           >
             {STATUSES.map((s) => (
@@ -149,7 +149,7 @@ export default function RoadmapView() {
               setAddingUnder(node.id)
               setNewTitle('')
             }}
-            className="rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-neutral-600"
+            className="rounded p-1 text-foreground/35 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-foreground/65"
             data-tip={t('learning.roadmap.addChild')}
           >
             <Plus size={13} />
@@ -160,7 +160,7 @@ export default function RoadmapView() {
               setAiNode(node)
               setAiMode('explain')
             }}
-            className="rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-neutral-600"
+            className="rounded p-1 text-foreground/35 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-foreground/65"
             data-tip={t('learning.ai.explain')}
           >
             <Sparkles size={13} />
@@ -168,7 +168,7 @@ export default function RoadmapView() {
           <button
             type="button"
             onClick={() => setLinkNode(node)}
-            className="relative rounded p-1 text-neutral-300 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-neutral-600"
+            className="relative rounded p-1 text-foreground/35 opacity-0 transition-opacity hover:text-accent group-hover:opacity-100 dark:text-foreground/65"
             data-tip={t('learning.links.button')}
           >
             <Link2 size={13} />
@@ -194,7 +194,7 @@ export default function RoadmapView() {
                 setTimeout(() => setConfirmDelete(null), 2500)
               }
             }}
-            className={`rounded p-1 text-neutral-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-neutral-600 ${
+            className={`rounded p-1 text-foreground/35 opacity-0 transition-opacity group-hover:opacity-100 dark:text-foreground/65 ${
               confirmDelete === node.id
                 ? 'bg-red-500 text-white opacity-100'
                 : 'hover:text-red-500'
@@ -228,10 +228,10 @@ export default function RoadmapView() {
                   if (e.key === 'Escape') setAddingUnder(null)
                 }}
                 placeholder={t('learning.roadmap.newChild')}
-                className="w-40 rounded-md border border-accent bg-white px-2 py-0.5 text-[12px] outline-none dark:bg-neutral-950"
+                className="w-40 rounded-md border border-accent bg-surface px-2 py-0.5 text-[12px] outline-none dark:bg-surface"
               />
               {createMutation.isPending && (
-                <Loader2 size={12} className="animate-spin text-neutral-400" />
+                <Loader2 size={12} className="animate-spin text-foreground/45" />
               )}
             </span>
           )}
@@ -244,14 +244,14 @@ export default function RoadmapView() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <p className="text-[12px] text-neutral-400">{t('learning.roadmap.hint')}</p>
+        <p className="text-[12px] text-foreground/45">{t('learning.roadmap.hint')}</p>
         <button
           type="button"
           onClick={() => {
             setAddingUnder(-1)
             setNewTitle('')
           }}
-          className="flex items-center gap-1 rounded-md border border-neutral-200 px-2.5 py-1 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+          className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-[12px] transition-colors hover:border-accent hover:text-accent dark:border-border"
         >
           <Plus size={12} /> {t('learning.roadmap.addRoot')}
         </button>
@@ -268,7 +268,7 @@ export default function RoadmapView() {
               if (e.key === 'Escape') setAddingUnder(null)
             }}
             placeholder={t('learning.roadmap.newRoot')}
-            className="w-64 rounded-md border border-accent bg-white px-2 py-1 text-[12px] outline-none dark:bg-neutral-950"
+            className="w-64 rounded-md border border-accent bg-surface px-2 py-1 text-[12px] outline-none dark:bg-surface"
           />
           <button
             type="button"
@@ -280,9 +280,9 @@ export default function RoadmapView() {
         </div>
       )}
 
-      <div className="mt-3 rounded-lg border border-neutral-200 bg-white py-2 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="mt-3 rounded-lg border border-border bg-surface py-2 dark:border-border dark:bg-surface">
         {(tree ?? []).length === 0 && (
-          <p className="px-4 py-8 text-center text-[12.5px] text-neutral-400">
+          <p className="px-4 py-8 text-center text-[12.5px] text-foreground/45">
             {t('learning.roadmap.empty')}
           </p>
         )}
@@ -300,7 +300,7 @@ export default function RoadmapView() {
                 className={`rounded-md border px-2.5 py-1 text-[12px] transition-colors ${
                   aiMode === m.id
                     ? 'border-accent bg-accent-soft text-accent'
-                    : 'border-neutral-200 text-neutral-500 hover:border-neutral-300 dark:border-neutral-700'
+                    : 'border-border text-foreground/55 hover:border-border dark:border-border'
                 }`}
               >
                 {m.label}
@@ -309,7 +309,7 @@ export default function RoadmapView() {
             <button
               type="button"
               onClick={() => setAiNode(null)}
-              className="ml-auto rounded-md border border-neutral-200 px-2.5 py-1 text-[12px] text-neutral-400 transition-colors hover:border-neutral-300 dark:border-neutral-700"
+              className="ml-auto rounded-md border border-border px-2.5 py-1 text-[12px] text-foreground/45 transition-colors hover:border-border dark:border-border"
             >
               ✕
             </button>

@@ -652,6 +652,11 @@ export default {
       mine: '我的文献',
     },
     mineEmpty: '还没有文献，把 PDF 拖到上方直接添加',
+    mineSearchPlaceholder: '搜索标题 / 作者 / 期刊 / DOI',
+    filterAll: '全部',
+    colPaper: '文献',
+    colStatus: '状态',
+    colActions: '操作',
     compare: '论文对比',
     comparePick: '选择要对比的另一篇文献',
     related: {

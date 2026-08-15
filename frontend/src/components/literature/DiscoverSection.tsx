@@ -82,22 +82,22 @@ export default function DiscoverSection() {
   }
 
   const field =
-    'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
+    'rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface'
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="rounded-lg border border-border bg-surface dark:border-border dark:bg-surface">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-neutral-600 transition-colors hover:text-accent dark:text-neutral-300"
+        className="flex w-full items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-foreground/65 transition-colors hover:text-accent dark:text-foreground/75"
       >
         <Sparkles size={14} className="text-accent" />
         {t('literature.discover.title')}
-        <span className="ml-auto text-neutral-400">{open ? '−' : '+'}</span>
+        <span className="ml-auto text-foreground/45">{open ? '−' : '+'}</span>
       </button>
 
       {open && (
-        <div className="space-y-2 border-t border-neutral-100 p-3 dark:border-neutral-800">
+        <div className="space-y-2 border-t border-neutral-100 p-3 dark:border-border">
           <div className="flex gap-2">
             <input
               value={query}
@@ -121,7 +121,7 @@ export default function DiscoverSection() {
               href={`https://scholar.google.com/scholar?q=${encodeURIComponent(query.trim() || '')}`}
               target="_blank"
               rel="noreferrer"
-              className="flex shrink-0 items-center gap-1 rounded-md border border-neutral-300 px-3 py-1.5 text-[12.5px] text-neutral-600 transition-colors hover:border-accent hover:text-accent dark:border-neutral-700 dark:text-neutral-300"
+              className="flex shrink-0 items-center gap-1 rounded-md border border-border px-3 py-1.5 text-[12.5px] text-foreground/65 transition-colors hover:border-accent hover:text-accent dark:border-border dark:text-foreground/75"
             >
               {t('literature.discover.scholar')} ↗
             </a>
@@ -137,7 +137,7 @@ export default function DiscoverSection() {
               className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                 minZone > 0
                   ? 'border-accent bg-accent-soft font-medium text-accent'
-                  : 'border-neutral-300 text-neutral-500 hover:border-accent hover:text-accent dark:border-neutral-700 dark:text-neutral-400'
+                  : 'border-border text-foreground/55 hover:border-accent hover:text-accent dark:border-border dark:text-foreground/55'
               }`}
             >
               {t('literature.discover.zoneOnly')}
@@ -150,16 +150,16 @@ export default function DiscoverSection() {
           </div>
 
           {aiRanked && (
-            <p className="text-[11px] text-neutral-400">{t('literature.discover.aiRanked')}</p>
+            <p className="text-[11px] text-foreground/45">{t('literature.discover.aiRanked')}</p>
           )}
 
           {hits && hits.length === 0 && (
-            <p className="py-4 text-center text-[12px] text-neutral-400">
+            <p className="py-4 text-center text-[12px] text-foreground/45">
               {t('literature.discover.empty')}
             </p>
           )}
 
-          <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+          <div className="divide-y divide-border-subtle dark:divide-border-subtle">
             {hits?.map((hit) => (
               <div key={hit.doi || hit.title} className="flex items-center gap-2 py-1.5">
                 <div className="min-w-0 flex-1">
@@ -173,7 +173,7 @@ export default function DiscoverSection() {
                     {hit.title}
                   </a>
                   <div
-                    className="truncate text-[10.5px] text-neutral-400"
+                    className="truncate text-[10.5px] text-foreground/45"
                     data-tip={[
                       hit.authors,
                       hit.year,
@@ -193,7 +193,7 @@ export default function DiscoverSection() {
                         className={`ml-1 rounded px-1 py-px text-[10px] ${
                           hit.zone === 1
                             ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                            : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
+                            : 'bg-surface-hover text-foreground/55 dark:bg-neutral-800 dark:text-foreground/55'
                         }`}
                       >
                         中科院{hit.zone}区{hit.cas_top ? '·Top' : ''}
@@ -205,12 +205,12 @@ export default function DiscoverSection() {
                       </span>
                     )}
                     {hit.jcr && (
-                      <span className="ml-1 rounded bg-neutral-100 px-1 py-px text-[10px] text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400">
+                      <span className="ml-1 rounded bg-surface-hover px-1 py-px text-[10px] text-foreground/55 dark:bg-neutral-800 dark:text-foreground/55">
                         {hit.jcr}
                       </span>
                     )}
                     {hit.zone == null && hit.journal && (
-                      <span className="ml-1 text-[10px] text-neutral-400">
+                      <span className="ml-1 text-[10px] text-foreground/45">
                         {t('literature.discover.zoneUnknown')}
                       </span>
                     )}

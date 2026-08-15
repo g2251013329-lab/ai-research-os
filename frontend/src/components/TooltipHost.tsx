@@ -78,7 +78,7 @@ export default function TooltipHost() {
 
   return createPortal(
     <div
-      className="pointer-events-none fixed z-[100] max-w-[420px] rounded-md bg-neutral-900 px-2.5 py-1.5 text-[12px] leading-snug text-white shadow-lg dark:bg-neutral-100 dark:text-neutral-900"
+      className="pointer-events-none fixed z-[100] max-w-[420px] rounded-md bg-neutral-900 px-2.5 py-1.5 text-[12px] leading-snug text-white shadow-lg dark:bg-surface-hover dark:text-neutral-900"
       style={{
         left: tip.x,
         top: tip.below ? tip.y + 10 : tip.y - 10,

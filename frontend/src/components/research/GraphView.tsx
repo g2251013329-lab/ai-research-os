@@ -146,12 +146,12 @@ export default function GraphView({ onOpenProject }: { onOpenProject: (id: numbe
       // zoom controls (+ / − / reset)
       const controls = document.createElement('div')
       controls.className =
-        'absolute right-2 top-2 z-10 flex gap-1 rounded-md border border-neutral-200 bg-white/90 p-0.5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90'
+        'absolute right-2 top-2 z-10 flex gap-1 rounded-md border border-border bg-surface/90 p-0.5 shadow-sm dark:border-border dark:bg-surface/90'
       const mk = (label: string, fn: () => void) => {
         const b = document.createElement('button')
         b.textContent = label
         b.className =
-          'h-6 w-6 rounded text-[12px] leading-none text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-accent dark:text-neutral-300 dark:hover:bg-neutral-800'
+          'h-6 w-6 rounded text-[12px] leading-none text-foreground/55 transition-colors hover:bg-surface-hover hover:text-accent dark:text-foreground/75 dark:hover:bg-neutral-800'
         b.addEventListener('click', fn)
         controls.appendChild(b)
       }
@@ -176,7 +176,7 @@ export default function GraphView({ onOpenProject }: { onOpenProject: (id: numbe
     <div>
       <div className="flex flex-wrap items-center gap-3">
         {TYPE_KEYS.map((k) => (
-          <span key={k} className="flex items-center gap-1.5 text-[11px] text-neutral-500 dark:text-neutral-400">
+          <span key={k} className="flex items-center gap-1.5 text-[11px] text-foreground/55 dark:text-foreground/55">
             <span
               className="h-2.5 w-2.5 rounded-full"
               style={{ background: TYPE_COLORS[k] }}
@@ -184,11 +184,11 @@ export default function GraphView({ onOpenProject }: { onOpenProject: (id: numbe
             {t(`graph.types.${k}`)}
           </span>
         ))}
-        <span className="text-[11px] text-neutral-400">{t('graph.hint')}</span>
+        <span className="text-[11px] text-foreground/45">{t('graph.hint')}</span>
       </div>
       <div
         ref={ref}
-        className="relative mt-2 rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+        className="relative mt-2 rounded-lg border border-border bg-surface dark:border-border dark:bg-surface"
       />
     </div>
   )

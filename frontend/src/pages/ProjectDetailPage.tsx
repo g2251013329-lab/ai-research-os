@@ -90,13 +90,13 @@ export default function ProjectDetailPage() {
     { key: 'experiments', icon: FlaskConical, value: experiments?.length ?? 0 },
   ]
 
-  if (!project) return <p className="p-8 text-center text-[13px] text-neutral-400">…</p>
+  if (!project) return <p className="p-8 text-center text-[13px] text-foreground/45">…</p>
 
   return (
     <div className="mx-auto max-w-6xl p-6">
       <Link
         to="/research"
-        className="flex items-center gap-1 text-[12px] text-neutral-400 transition-colors hover:text-accent"
+        className="flex items-center gap-1 text-[12px] text-foreground/45 transition-colors hover:text-accent"
       >
         <ArrowLeft size={13} /> {t('research.back')}
       </Link>
@@ -109,14 +109,14 @@ export default function ProjectDetailPage() {
         <button
           type="button"
           onClick={() => setConfirmDelete(true)}
-          className="ml-auto flex shrink-0 items-center gap-1 rounded-md border border-neutral-200 px-2 py-1 text-[12px] text-neutral-400 transition-colors hover:border-red-300 hover:text-red-500 dark:border-neutral-700"
+          className="ml-auto flex shrink-0 items-center gap-1 rounded-md border border-border px-2 py-1 text-[12px] text-foreground/45 transition-colors hover:border-red-300 hover:text-red-500 dark:border-border"
           data-tip={t('research.deleteProject')}
         >
           <Trash2 size={12} /> {t('research.deleteProject')}
         </button>
       </div>
       {project.description && (
-        <p className="mt-1 max-w-3xl text-[13px] leading-relaxed text-neutral-500 dark:text-neutral-400" data-tip={project.description}>
+        <p className="mt-1 max-w-3xl text-[13px] leading-relaxed text-foreground/55 dark:text-foreground/55" data-tip={project.description}>
           {project.description}
         </p>
       )}
@@ -129,18 +129,18 @@ export default function ProjectDetailPage() {
               key={key}
               type="button"
               onClick={() => setTab(key === 'hypotheses' ? 'questions' : (key as (typeof TABS)[number]))}
-              className="rounded-lg border border-neutral-200 bg-white p-4 text-center transition-colors hover:border-accent dark:border-neutral-800 dark:bg-neutral-900"
+              className="rounded-lg border border-border bg-surface p-4 text-center transition-colors hover:border-accent dark:border-border dark:bg-surface"
             >
               <Icon size={16} className="mx-auto text-accent" />
               <div className="mt-1.5 text-[20px] font-semibold leading-none">{value}</div>
-              <div className="mt-1 text-[11.5px] text-neutral-400">{t(`research.stats.${key}`)}</div>
+              <div className="mt-1 text-[11.5px] text-foreground/45">{t(`research.stats.${key}`)}</div>
             </button>
           ))}
         </div>
       )}
 
       {/* tabs */}
-      <div className="mt-5 flex gap-1 overflow-x-auto border-b border-neutral-200 dark:border-neutral-800">
+      <div className="mt-5 flex gap-1 overflow-x-auto border-b border-border dark:border-border">
         {TABS.map((tb) => (
           <button
             key={tb}
@@ -149,7 +149,7 @@ export default function ProjectDetailPage() {
             className={`flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2 text-[13px] transition-colors ${
               tab === tb
                 ? 'border-accent font-medium text-accent'
-                : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
+                : 'border-transparent text-foreground/55 hover:text-neutral-800 dark:text-foreground/55 dark:hover:text-neutral-200'
             }`}
           >
             {tb === 'overview' && <FolderKanban size={13} />}
@@ -180,21 +180,21 @@ export default function ProjectDetailPage() {
             if (e.target === e.currentTarget) setConfirmDelete(false)
           }}
         >
-          <div className="w-[420px] max-w-[92vw] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="w-[420px] max-w-[92vw] rounded-xl border border-border bg-surface p-4 shadow-2xl dark:border-border dark:bg-surface">
             <div className="flex items-center gap-2 text-red-500">
               <TriangleAlert size={16} />
               <h2 className="text-[14px] font-semibold">
                 {t('research.deleteConfirmTitle')}
               </h2>
             </div>
-            <p className="mt-2.5 text-[13px] leading-relaxed text-neutral-500 dark:text-neutral-400">
+            <p className="mt-2.5 text-[13px] leading-relaxed text-foreground/55 dark:text-foreground/55">
               {t('research.deleteWarning')}
             </p>
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setConfirmDelete(false)}
-                className="rounded-md border border-neutral-300 px-3 py-1.5 text-[13px] transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                className="rounded-md border border-border px-3 py-1.5 text-[13px] transition-colors hover:bg-surface-hover dark:border-border dark:hover:bg-neutral-800"
               >
                 {t('common.cancel')}
               </button>

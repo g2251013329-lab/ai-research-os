@@ -11,8 +11,8 @@ export default function PlaceholderPage({ titleKey, phase }: Props) {
   return (
     <div className="mx-auto max-w-5xl p-6">
       <h1 className="text-lg font-semibold">{t(titleKey)}</h1>
-      <div className="mt-6 rounded-lg border border-dashed border-neutral-300 bg-white p-10 text-center dark:border-neutral-700 dark:bg-neutral-900">
-        <p className="text-[13px] text-neutral-400 dark:text-neutral-500">
+      <div className="mt-6 rounded-lg border border-dashed border-border bg-surface p-10 text-center dark:border-border dark:bg-surface">
+        <p className="text-[13px] text-foreground/45 dark:text-foreground/55">
           {t('spaces.placeholder', { phase })}
         </p>
       </div>

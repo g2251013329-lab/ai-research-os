@@ -32,7 +32,7 @@ export interface Hypothesis {
 }
 
 const HYP_STATUS: Record<string, string> = {
-  proposed: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
+  proposed: 'bg-surface-hover text-foreground/65 dark:bg-neutral-800 dark:text-foreground/75',
   testing: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300',
   supported: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
   weakly_supported: 'bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300',
@@ -113,7 +113,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
   })
 
   const field =
-    'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
+    'rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface'
 
   const modal = (
     inner: React.ReactNode,
@@ -125,7 +125,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="w-[480px] max-w-[92vw] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="w-[480px] max-w-[92vw] rounded-xl border border-border bg-surface p-4 shadow-2xl dark:border-border dark:bg-surface">
         {inner}
       </div>
     </div>
@@ -134,7 +134,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-[12px] text-neutral-400">{t('research.question.hint')}</p>
+        <p className="text-[12px] text-foreground/45">{t('research.question.hint')}</p>
         <button
           type="button"
           onClick={() => setRqModal(true)}
@@ -145,7 +145,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
       </div>
 
       {(rqs ?? []).length === 0 && (
-        <p className="rounded-lg border border-dashed border-neutral-300 py-10 text-center text-[12.5px] text-neutral-400 dark:border-neutral-700">
+        <p className="rounded-lg border border-dashed border-border py-10 text-center text-[12.5px] text-foreground/45 dark:border-border">
           {t('research.question.empty')}
         </p>
       )}
@@ -156,7 +156,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
         return (
           <div
             key={rq.id}
-            className="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+            className="rounded-lg border border-border bg-surface dark:border-border dark:bg-surface"
           >
             <div className="flex items-center gap-2.5 px-3.5 py-3">
               <button
@@ -169,7 +169,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
                     return next
                   })
                 }
-                className="rounded p-0.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+                className="rounded p-0.5 text-foreground/45 hover:text-foreground/65 dark:hover:text-neutral-200"
               >
                 {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </button>
@@ -179,7 +179,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
                   {rq.title}
                 </div>
                 {rq.description && (
-                  <div className="mt-0.5 line-clamp-2 text-[12px] text-neutral-400" data-tip={rq.description}>
+                  <div className="mt-0.5 line-clamp-2 text-[12px] text-foreground/45" data-tip={rq.description}>
                     {rq.description}
                   </div>
                 )}
@@ -187,7 +187,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
               <select
                 value={rq.status}
                 onChange={(e) => statusMutation.mutate({ id: rq.id, status: e.target.value, kind: 'rq' })}
-                className="rounded-md border border-neutral-200 bg-white px-1.5 py-1 text-[11.5px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
+                className="rounded-md border border-border bg-surface px-1.5 py-1 text-[11.5px] outline-none dark:border-border dark:bg-surface"
               >
                 {RQ_STATUSES.map((s) => (
                   <option key={s} value={s}>
@@ -198,21 +198,21 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
               <button
                 type="button"
                 onClick={() => deleteMutation.mutate({ id: rq.id, kind: 'rq' })}
-                className="rounded p-1 text-neutral-300 hover:text-red-500 dark:text-neutral-600"
+                className="rounded p-1 text-foreground/35 hover:text-red-500 dark:text-foreground/65"
               >
                 <Trash2 size={13} />
               </button>
             </div>
 
             {isOpen && (
-              <div className="space-y-2 border-t border-neutral-100 px-3.5 py-3 dark:border-neutral-800">
+              <div className="space-y-2 border-t border-neutral-100 px-3.5 py-3 dark:border-border">
                 {rqHyps.length === 0 && (
-                  <p className="text-[12px] text-neutral-400">{t('research.hypothesis.empty')}</p>
+                  <p className="text-[12px] text-foreground/45">{t('research.hypothesis.empty')}</p>
                 )}
                 {rqHyps.map((h) => (
                   <div
                     key={h.id}
-                    className="rounded-md bg-neutral-50 p-2.5 dark:bg-neutral-800/60"
+                    className="rounded-md bg-surface-hover p-2.5 dark:bg-neutral-800/60"
                   >
                     <div className="flex items-center gap-2">
                       <Lightbulb size={13} className="shrink-0 text-amber-500" />
@@ -226,7 +226,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
                         onChange={(e) =>
                           statusMutation.mutate({ id: h.id, status: e.target.value, kind: 'hyp' })
                         }
-                        className="ml-auto rounded border border-neutral-200 bg-white px-1 py-0.5 text-[11px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
+                        className="ml-auto rounded border border-border bg-surface px-1 py-0.5 text-[11px] outline-none dark:border-border dark:bg-surface"
                       >
                         {HYP_STATUSES.map((s) => (
                           <option key={s} value={s}>
@@ -237,7 +237,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
                       <button
                         type="button"
                         onClick={() => deleteMutation.mutate({ id: h.id, kind: 'hyp' })}
-                        className="rounded p-0.5 text-neutral-300 hover:text-red-500 dark:text-neutral-600"
+                        className="rounded p-0.5 text-foreground/35 hover:text-red-500 dark:text-foreground/65"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -246,7 +246,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
                       {h.description}
                     </div>
                     {h.evidence && (
-                      <div className="mt-1 text-[11.5px] text-neutral-400" data-tip={h.evidence}>
+                      <div className="mt-1 text-[11.5px] text-foreground/45" data-tip={h.evidence}>
                         <span className="font-medium">{t('research.hypothesis.evidence')}：</span>
                         {h.evidence}
                       </div>
@@ -266,7 +266,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
                 <button
                   type="button"
                   onClick={() => setHypModalFor(rq.id)}
-                  className="flex items-center gap-1 rounded-md border border-dashed border-neutral-300 px-2.5 py-1.5 text-[12px] text-neutral-400 transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+                  className="flex items-center gap-1 rounded-md border border-dashed border-border px-2.5 py-1.5 text-[12px] text-foreground/45 transition-colors hover:border-accent hover:text-accent dark:border-border"
                 >
                   <Plus size={12} /> {t('research.hypothesis.new')}
                 </button>
@@ -284,7 +284,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
               <button
                 type="button"
                 onClick={() => setRqModal(false)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
               >
                 <X size={15} />
               </button>
@@ -307,7 +307,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
               <button
                 type="button"
                 onClick={() => setRqModal(false)}
-                className="rounded-md border border-neutral-300 px-3 py-1.5 text-[13px] transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                className="rounded-md border border-border px-3 py-1.5 text-[13px] transition-colors hover:bg-surface-hover dark:border-border dark:hover:bg-neutral-800"
               >
                 {t('common.cancel')}
               </button>
@@ -335,7 +335,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
               <button
                 type="button"
                 onClick={() => setHypModalFor(null)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
               >
                 <X size={15} />
               </button>
@@ -359,7 +359,7 @@ export default function QuestionsView({ projectId }: { projectId: number }) {
               <button
                 type="button"
                 onClick={() => setHypModalFor(null)}
-                className="rounded-md border border-neutral-300 px-3 py-1.5 text-[13px] transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                className="rounded-md border border-border px-3 py-1.5 text-[13px] transition-colors hover:bg-surface-hover dark:border-border dark:hover:bg-neutral-800"
               >
                 {t('common.cancel')}
               </button>

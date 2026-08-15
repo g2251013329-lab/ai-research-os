@@ -180,9 +180,9 @@ export default function CommandPalette({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="mt-[14vh] flex h-fit w-[560px] max-w-[92vw] flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="flex items-center gap-2.5 border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
-          <CommandIcon size={16} className="shrink-0 text-neutral-400" />
+      <div className="mt-[14vh] flex h-fit w-[560px] max-w-[92vw] flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-2xl dark:border-border dark:bg-surface">
+        <div className="flex items-center gap-2.5 border-b border-border px-4 py-3 dark:border-border">
+          <CommandIcon size={16} className="shrink-0 text-foreground/45" />
           <input
             ref={inputRef}
             value={query}
@@ -192,29 +192,29 @@ export default function CommandPalette({
             }}
             onKeyDown={onKeyDown}
             placeholder={t('palette.placeholder')}
-            className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-neutral-400"
+            className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-foreground/45"
           />
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-0.5 text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded p-0.5 text-foreground/45 transition-colors hover:bg-surface-hover dark:hover:bg-neutral-800"
           >
             <X size={15} />
           </button>
-          <kbd className="rounded border border-neutral-200 px-1.5 py-0.5 text-[10px] text-neutral-400 dark:border-neutral-700">
+          <kbd className="rounded border border-border px-1.5 py-0.5 text-[10px] text-foreground/45 dark:border-border">
             ⌘⇧L
           </kbd>
         </div>
 
         <div ref={listRef} className="max-h-[52vh] overflow-y-auto p-1.5">
           {filtered.length === 0 && (
-            <p className="px-3 py-6 text-center text-[12.5px] text-neutral-400">
+            <p className="px-3 py-6 text-center text-[12.5px] text-foreground/45">
               {t('search.noResults')}
             </p>
           )}
           {grouped.map((g) => (
             <div key={g.group} className="mb-1">
-              <div className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+              <div className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/45">
                 {t(`palette.groups.${g.group}`)}
               </div>
               {g.items.map((c) => {
@@ -232,7 +232,7 @@ export default function CommandPalette({
                         ? 'opacity-55'
                         : idx === active
                           ? 'bg-accent-soft'
-                          : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
+                          : 'hover:bg-surface-hover dark:hover:bg-neutral-800/60'
                     }`}
                   >
                     <Icon
@@ -240,14 +240,14 @@ export default function CommandPalette({
                       className={`shrink-0 ${
                         idx === active && c.available
                           ? 'text-accent'
-                          : 'text-neutral-400'
+                          : 'text-foreground/45'
                       }`}
                     />
                     <span data-tip={t(c.titleKey)} className="flex-1 truncate text-[13px]">
                       {t(c.titleKey)}
                     </span>
                     {!c.available && c.phase && (
-                      <span className="shrink-0 text-[10.5px] text-neutral-400">
+                      <span className="shrink-0 text-[10.5px] text-foreground/45">
                         {c.phase}
                       </span>
                     )}
@@ -267,18 +267,18 @@ export default function CommandPalette({
             if (e.target === e.currentTarget) setShowInfo(false)
           }}
         >
-          <div className="w-[340px] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="w-[340px] rounded-xl border border-border bg-surface p-4 shadow-2xl dark:border-border dark:bg-surface">
             <div className="flex items-center justify-between">
               <h3 className="text-[13.5px] font-semibold">{t('palette.info.title')}</h3>
               <button
                 type="button"
                 onClick={() => setShowInfo(false)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
               >
                 <X size={14} />
               </button>
             </div>
-            <div className="mt-2 divide-y divide-neutral-100 dark:divide-neutral-800">
+            <div className="mt-2 divide-y divide-border-subtle dark:divide-border-subtle">
               {(
                 [
                   ['⌘K', t('palette.info.search')],
@@ -287,8 +287,8 @@ export default function CommandPalette({
                 ] as const
               ).map(([key, label]) => (
                 <div key={key} className="flex items-center justify-between py-2 text-[12.5px]">
-                  <span className="text-neutral-500 dark:text-neutral-400">{label}</span>
-                  <kbd className="rounded border border-neutral-200 px-1.5 py-0.5 font-mono text-[11px] text-neutral-600 dark:border-neutral-700 dark:text-neutral-300">
+                  <span className="text-foreground/55 dark:text-foreground/55">{label}</span>
+                  <kbd className="rounded border border-border px-1.5 py-0.5 font-mono text-[11px] text-foreground/65 dark:border-border dark:text-foreground/75">
                     {key}
                   </kbd>
                 </div>

@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Circle,
+  Flame,
   FlaskConical,
   FolderKanban,
   HelpCircle,
@@ -23,6 +24,7 @@ import {
 import { api } from '../api/client'
 import { useUiStore } from '../store/useUiStore'
 import { relativeTime, parseApiTime, todayLabel, tzOffsetMinutes } from '../utils/time'
+import Tag from '../components/ui/Tag'
 
 interface Task {
   id: number
@@ -55,11 +57,11 @@ interface DashboardData {
   recent_activity: { event_type: string; title: string; detail: string; created_at: string }[]
 }
 
-const KIND_STYLES: Record<string, string> = {
-  learning: 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300',
-  research: 'bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300',
-  experiment: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300',
-  general: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
+const KIND_TONES: Record<string, string> = {
+  learning: 'learning',
+  research: 'research',
+  experiment: 'experiment',
+  general: 'neutral',
 }
 
 const EVENT_ICONS: Record<string, typeof ListTodo> = {
@@ -144,7 +146,7 @@ export default function Dashboard() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">{t('dashboard.title')}</h1>
-          <p className="mt-0.5 text-[13px] text-neutral-500 dark:text-neutral-400">
+          <p className="mt-0.5 text-[13px] text-foreground/55 dark:text-foreground/55">
             {todayLabel()}
           </p>
         </div>
@@ -164,41 +166,37 @@ export default function Dashboard() {
           {showDone && (
             <div
               ref={doneRef}
-              className="absolute right-0 top-8 z-50 w-72 rounded-lg border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+              className="absolute right-0 top-8 z-50 w-72 rounded-lg border border-border bg-surface shadow-xl dark:border-border dark:bg-surface"
             >
-              <header className="flex items-center justify-between border-b border-neutral-100 px-3 py-2 dark:border-neutral-800">
+              <header className="flex items-center justify-between border-b border-neutral-100 px-3 py-2 dark:border-border">
                 <h3 className="text-[12px] font-semibold">
                   {t('dashboard.doneTodayTitle')}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setShowDone(false)}
-                  className="rounded p-0.5 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded p-0.5 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
                 >
                   <X size={12} />
                 </button>
               </header>
               <div className="max-h-72 overflow-y-auto py-1">
                 {(data?.done_today_tasks ?? []).length === 0 && (
-                  <p className="px-3 py-5 text-center text-[12px] text-neutral-400">
+                  <p className="px-3 py-5 text-center text-[12px] text-foreground/45">
                     {t('dashboard.emptyDoneToday')}
                   </p>
                 )}
                 {(data?.done_today_tasks ?? []).map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-center gap-2 px-3 py-1.5 hover:bg-neutral-50 dark:hover:bg-neutral-800/60"
+                    className="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-hover dark:hover:bg-neutral-800/60"
                   >
                     <CheckCircle2 size={13} className="shrink-0 text-emerald-500" />
                     <div className="min-w-0 flex-1 truncate text-[12.5px]" data-tip={task.title}>
                       {task.title}
                     </div>
-                    <span
-                      className={`shrink-0 rounded px-1.5 py-px text-[10px] ${KIND_STYLES[task.kind] ?? KIND_STYLES.general}`}
-                    >
-                      {t(`task.kinds.${task.kind}`)}
-                    </span>
-                    <span className="shrink-0 font-mono text-[10.5px] text-neutral-400">
+                    <Tag tone={KIND_TONES[task.kind] ?? 'neutral'}>{t(`task.kinds.${task.kind}`)}</Tag>
+                    <span className="shrink-0 font-mono text-[10.5px] text-foreground/45">
                       {task.completed_at
                         ? parseApiTime(task.completed_at).toLocaleTimeString('zh-CN', {
                             hour: '2-digit',
@@ -221,7 +219,7 @@ export default function Dashboard() {
             key={key}
             type="button"
             onClick={run}
-            className="flex flex-col items-center gap-1.5 rounded-lg border border-neutral-200 bg-white py-3 text-[12px] text-neutral-600 transition-colors hover:border-accent hover:text-accent dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300"
+            className="flex flex-col items-center gap-1.5 rounded-lg border border-border bg-surface py-3 text-[12px] text-foreground/65 transition-colors hover:border-accent hover:text-accent dark:border-border dark:bg-surface dark:text-foreground/75"
           >
             <Icon size={16} className="text-accent" />
             {t(`dashboard.actions.${key}`)}
@@ -229,10 +227,62 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* stat strip — personal command center numbers */}
+      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[
+          {
+            label: t('dashboard.doneToday', { n: data?.today_done ?? 0 }),
+            value: String(data?.today_done ?? 0),
+            icon: CheckCircle2,
+            tone: 'text-success',
+            tip: t('dashboard.doneTodayTip'),
+          },
+          {
+            label: t('dashboard.weeklyFocus'),
+            value: `${data?.focus_minutes_today ?? 0}′`,
+            icon: Timer,
+            tone: 'text-accent',
+          },
+          {
+            label: t('dashboard.streakDays'),
+            value: `${learning?.streak_days ?? 0}`,
+            icon: Flame,
+            tone: 'text-warning',
+          },
+          {
+            label: t('dashboard.conceptProgress'),
+            value: learning?.concepts?.total
+              ? `${Math.round(((learning?.concepts?.mastered ?? 0) / learning.concepts.total) * 100)}%`
+              : '—',
+            icon: SquarePen,
+            tone: 'text-info',
+          },
+        ].map((s) => {
+          const Icon = s.icon
+          return (
+            <div
+              key={s.label}
+              className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 shadow-card"
+              data-tip={s.tip}
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-hover">
+                <Icon size={16} className={s.tone} />
+              </span>
+              <div className="min-w-0">
+                <div className="font-display text-[22px] font-semibold leading-none tracking-tight">
+                  {s.value}
+                </div>
+                <div className="mt-1 truncate text-[11px] text-foreground/45">{s.label}</div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
       <div className="mt-4 grid grid-cols-3 gap-4">
         {/* Today */}
-        <section className="col-span-3 rounded-lg border border-neutral-200 bg-white shadow-card dark:border-neutral-800 dark:bg-neutral-900 lg:col-span-2">
-          <header className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5 dark:border-neutral-800">
+        <section className="col-span-3 rounded-lg border border-border bg-surface shadow-card dark:border-border dark:bg-surface lg:col-span-2">
+          <header className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5 dark:border-border">
             <h2 className="flex items-center gap-1.5 text-[13px] font-semibold">
               <ListTodo size={14} className="text-accent" />
               {t('dashboard.today')}
@@ -245,9 +295,9 @@ export default function Dashboard() {
               <Plus size={12} /> {t('task.new')}
             </button>
           </header>
-          <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+          <div className="divide-y divide-border-subtle dark:divide-border-subtle">
             {(data?.today_tasks ?? []).length === 0 && (
-              <p className="px-4 py-8 text-center text-[12.5px] text-neutral-400">
+              <p className="px-4 py-8 text-center text-[12.5px] text-foreground/45">
                 {t('dashboard.emptyToday')}
               </p>
             )}
@@ -259,7 +309,7 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => toggleMutation.mutate(task)}
-                    className="text-neutral-300 transition-colors hover:text-accent dark:text-neutral-600"
+                    className="text-foreground/35 transition-colors hover:text-accent dark:text-foreground/65"
                     data-tip={t('task.toggleDone')}
                   >
                     <Circle size={17} />
@@ -269,18 +319,14 @@ export default function Dashboard() {
                       data-tip={task.title}
                       className={`truncate text-[13.5px] ${
                         task.status === 'done'
-                          ? 'text-neutral-400 line-through'
+                          ? 'text-foreground/45 line-through'
                           : ''
                       }`}
                     >
                       {task.title}
                     </div>
-                    <div className="mt-0.5 flex items-center gap-2 text-[11px] text-neutral-400">
-                      <span
-                        className={`rounded px-1.5 py-px ${KIND_STYLES[task.kind] ?? KIND_STYLES.general}`}
-                      >
-                        {t(`task.kinds.${task.kind}`)}
-                      </span>
+                    <div className="mt-0.5 flex items-center gap-2 text-[11px] text-foreground/45">
+                      <Tag tone={KIND_TONES[task.kind] ?? 'neutral'}>{t(`task.kinds.${task.kind}`)}</Tag>
                       {task.due_date && (
                         <span className={overdue ? 'flex items-center gap-0.5 text-red-500' : ''}>
                           {overdue && <TriangleAlert size={10} />}
@@ -289,7 +335,7 @@ export default function Dashboard() {
                       )}
                     </div>
                   </div>
-                  <ChevronRight size={14} className="text-neutral-300 dark:text-neutral-600" />
+                  <ChevronRight size={14} className="text-foreground/35 dark:text-foreground/65" />
                 </div>
               )
             })}
@@ -299,7 +345,7 @@ export default function Dashboard() {
         {/* right column */}
         <div className="col-span-3 space-y-4 lg:col-span-1">
           {/* research overview */}
-          <section className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+          <section className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
             <button
               type="button"
               onClick={() => navigate('/research')}
@@ -307,7 +353,7 @@ export default function Dashboard() {
             >
               <FlaskConical size={14} className="text-accent" />
               {t('dashboard.researchOverview')}
-              <ChevronRight size={12} className="text-neutral-300" />
+              <ChevronRight size={12} className="text-foreground/35" />
             </button>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {[
@@ -319,12 +365,12 @@ export default function Dashboard() {
               ].map(([key, Icon]) => (
                 <div
                   key={key as string}
-                  className="rounded-md bg-neutral-50 p-2.5 dark:bg-neutral-800/60"
+                  className="rounded-md bg-surface-hover p-2.5 dark:bg-neutral-800/60"
                 >
                   <div className="text-[18px] font-semibold leading-none">
                     {counts?.[key as keyof typeof counts] ?? 0}
                   </div>
-                  <div className="mt-1 flex items-center gap-1 text-[11px] text-neutral-400">
+                  <div className="mt-1 flex items-center gap-1 text-[11px] text-foreground/45">
                     <Icon size={11} /> {t(`dashboard.counts.${key as string}`)}
                   </div>
                 </div>
@@ -340,38 +386,38 @@ export default function Dashboard() {
           </section>
 
           {/* learning overview */}
-          <section className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+          <section className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
             <h2 className="flex items-center gap-1.5 text-[13px] font-semibold">
               <SquarePen size={14} className="text-accent" />
               {t('dashboard.learningOverview')}
             </h2>
             <div className="mt-3 flex gap-2">
-              <div className="flex-1 rounded-md bg-neutral-50 p-2.5 text-center dark:bg-neutral-800/60">
+              <div className="flex-1 rounded-md bg-surface-hover p-2.5 text-center dark:bg-neutral-800/60">
                 <div className="text-[18px] font-semibold leading-none">
                   🔥 {learning?.streak_days ?? 0}
                 </div>
-                <div className="mt-1 text-[11px] text-neutral-400">
+                <div className="mt-1 text-[11px] text-foreground/45">
                   {t('dashboard.streakDays')}
                 </div>
               </div>
-              <div className="flex-1 rounded-md bg-neutral-50 p-2.5 text-center dark:bg-neutral-800/60">
+              <div className="flex-1 rounded-md bg-surface-hover p-2.5 text-center dark:bg-neutral-800/60">
                 <div className="text-[18px] font-semibold leading-none">
                   {learning?.weekly_focus_minutes ?? 0}′
                 </div>
-                <div className="mt-1 text-[11px] text-neutral-400">
+                <div className="mt-1 text-[11px] text-foreground/45">
                   {t('dashboard.weeklyFocus')}
                 </div>
               </div>
             </div>
             {learning?.concepts && learning.concepts.total > 0 && (
               <div className="mt-3">
-                <div className="flex items-center justify-between text-[11px] text-neutral-400">
+                <div className="flex items-center justify-between text-[11px] text-foreground/45">
                   <span>{t('dashboard.conceptProgress')}</span>
                   <span>
                     {learning.concepts.mastered ?? 0}/{learning.concepts.total}
                   </span>
                 </div>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-hover dark:bg-neutral-800">
                   <div
                     className="h-full rounded-full bg-accent transition-all"
                     style={{
@@ -386,13 +432,13 @@ export default function Dashboard() {
       </div>
 
       {/* recent activity */}
-      <section className="mt-4 rounded-lg border border-neutral-200 bg-white shadow-card dark:border-neutral-800 dark:bg-neutral-900">
-        <header className="border-b border-neutral-100 px-4 py-2.5 dark:border-neutral-800">
+      <section className="mt-4 rounded-lg border border-border bg-surface shadow-card dark:border-border dark:bg-surface">
+        <header className="border-b border-neutral-100 px-4 py-2.5 dark:border-border">
           <h2 className="text-[13px] font-semibold">{t('dashboard.recentActivity')}</h2>
         </header>
-        <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+        <div className="divide-y divide-border-subtle dark:divide-border-subtle">
           {activity.length === 0 && (
-            <p className="px-4 py-6 text-center text-[12.5px] text-neutral-400">
+            <p className="px-4 py-6 text-center text-[12.5px] text-foreground/45">
               {t('dashboard.emptyActivity')}
             </p>
           )}
@@ -400,11 +446,11 @@ export default function Dashboard() {
             const Icon = EVENT_ICONS[ev.event_type] ?? ListTodo
             return (
               <div key={ev.created_at + ev.title} className="flex items-center gap-3 px-4 py-2.5">
-                <Icon size={14} className="shrink-0 text-neutral-400" />
+                <Icon size={14} className="shrink-0 text-foreground/45" />
                 <div className="min-w-0 flex-1 truncate text-[13px]" data-tip={ev.title}>
                   {ev.title}
                 </div>
-                <span className="shrink-0 text-[11px] text-neutral-400">
+                <span className="shrink-0 text-[11px] text-foreground/45">
                   {relativeTime(ev.created_at)}
                 </span>
               </div>

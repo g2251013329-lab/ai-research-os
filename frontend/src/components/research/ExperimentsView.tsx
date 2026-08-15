@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, FlaskConical, Loader2, Plus, Sparkles, Trash2, X } from 'lucide-react'
 import { api } from '../../api/client'
+import Tag from '../ui/Tag'
 import AiModal from '../ai/AiModal'
 
 export interface Experiment {
@@ -23,14 +24,13 @@ export interface Experiment {
   status: string
 }
 
-const STATUS_STYLES: Record<string, string> = {
-  planned: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
-  running: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300',
-  completed: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
-  abandoned: 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300',
-}
-
 const STATUSES = ['planned', 'running', 'completed', 'abandoned']
+const STATUS_TONES: Record<string, string> = {
+  planned: 'neutral',
+  running: 'info',
+  completed: 'success',
+  abandoned: 'danger',
+}
 
 /** PRD §13 13-field structure; key = Experiment field, label = i18n key. */
 const FIELDS: { key: string; label: string; rows?: number }[] = [
@@ -94,12 +94,12 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
   })
 
   const field =
-    'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
+    'rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface'
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-[12px] text-neutral-400">{t('research.experiment.hint')}</p>
+        <p className="text-[12px] text-foreground/45">{t('research.experiment.hint')}</p>
         <button
           type="button"
           onClick={() => setCreating(true)}
@@ -110,7 +110,7 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
       </div>
 
       {(experiments ?? []).length === 0 && (
-        <p className="rounded-lg border border-dashed border-neutral-300 py-10 text-center text-[12.5px] text-neutral-400 dark:border-neutral-700">
+        <p className="rounded-lg border border-dashed border-border py-10 text-center text-[12.5px] text-foreground/45 dark:border-border">
           {t('research.experiment.empty')}
         </p>
       )}
@@ -121,7 +121,7 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
           return (
             <div
               key={exp.id}
-              className="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+              className="rounded-lg border border-border bg-surface dark:border-border dark:bg-surface"
             >
               <div className="flex items-center gap-2.5 px-3.5 py-2.5">
                 <button
@@ -134,21 +134,24 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
                       return next
                     })
                   }
-                  className="rounded p-0.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+                  className="rounded p-0.5 text-foreground/45 hover:text-foreground/65 dark:hover:text-neutral-200"
                 >
                   {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 </button>
                 <FlaskConical size={14} className="shrink-0 text-accent" />
+                <span className="shrink-0 font-mono text-[10.5px] text-foreground/40">
+                  #{String(exp.id).padStart(3, '0')}
+                </span>
                 <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium" data-tip={exp.title}>
                   {exp.title}
                 </span>
-                <span className={`rounded-full px-2 py-0.5 text-[10.5px] ${STATUS_STYLES[exp.status] ?? ''}`}>
+                <Tag tone={STATUS_TONES[exp.status] ?? 'neutral'}>
                   {t(`research.experiment.statuses.${exp.status}`)}
-                </span>
+                </Tag>
                 <select
                   value={exp.status}
                   onChange={(e) => statusMutation.mutate({ id: exp.id, status: e.target.value })}
-                  className="rounded border border-neutral-200 bg-white px-1 py-0.5 text-[11px] outline-none dark:border-neutral-700 dark:bg-neutral-950"
+                  className="rounded border border-border bg-surface px-1 py-0.5 text-[11px] outline-none dark:border-border dark:bg-surface"
                 >
                   {STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -159,7 +162,7 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
                 <button
                   type="button"
                   onClick={() => setAiExp(exp)}
-                  className="flex shrink-0 items-center gap-1 rounded-md border border-neutral-200 px-2 py-1 text-[11.5px] text-neutral-500 transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-border px-2 py-1 text-[11.5px] text-foreground/55 transition-colors hover:border-accent hover:text-accent dark:border-border"
                   data-tip={t('ai.experimentNext')}
                 >
                   <Sparkles size={11} />
@@ -168,17 +171,17 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
                 <button
                   type="button"
                   onClick={() => deleteMutation.mutate(exp.id)}
-                  className="rounded p-1 text-neutral-300 hover:text-red-500 dark:text-neutral-600"
+                  className="rounded p-1 text-foreground/35 hover:text-red-500 dark:text-foreground/65"
                 >
                   <Trash2 size={13} />
                 </button>
               </div>
               {isOpen && (
-                <div className="space-y-2.5 border-t border-neutral-100 px-4 py-3 dark:border-neutral-800">
+                <div className="space-y-2.5 border-t border-neutral-100 px-4 py-3 dark:border-border">
                   {FIELDS.map(({ key, label }) =>
                     exp[key as keyof Experiment] ? (
                       <div key={key}>
-                        <div className="text-[11px] font-medium uppercase tracking-wide text-neutral-400">
+                        <div className="border-l-2 border-accent/60 pl-2 text-[11px] font-semibold uppercase tracking-wider text-foreground/55">
                           {t(`research.experiment.fields.${label}`)}
                         </div>
                         <div
@@ -191,7 +194,7 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
                     ) : null,
                   )}
                   {FIELDS.every(({ key }) => !exp[key as keyof Experiment]) && (
-                    <p className="text-[12px] text-neutral-400">{t('research.experiment.noFields')}</p>
+                    <p className="text-[12px] text-foreground/45">{t('research.experiment.noFields')}</p>
                   )}
                 </div>
               )}
@@ -221,13 +224,13 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
             if (e.target === e.currentTarget) setCreating(false)
           }}
         >
-          <div className="max-h-[86vh] w-[560px] max-w-[94vw] overflow-y-auto rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="max-h-[86vh] w-[560px] max-w-[94vw] overflow-y-auto rounded-xl border border-border bg-surface p-4 shadow-2xl dark:border-border dark:bg-surface">
             <div className="flex items-center justify-between">
               <h2 className="text-[14px] font-semibold">{t('research.experiment.new')}</h2>
               <button
                 type="button"
                 onClick={() => setCreating(false)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
               >
                 <X size={15} />
               </button>
@@ -241,7 +244,7 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
             />
             {FIELDS.map(({ key, label, rows }) => (
               <div key={key} className="mt-2.5">
-                <div className="text-[11px] font-medium uppercase tracking-wide text-neutral-400">
+                <div className="text-[11px] font-medium uppercase tracking-wide text-foreground/45">
                   {t(`research.experiment.fields.${label}`)}
                 </div>
                 <textarea
@@ -256,7 +259,7 @@ export default function ExperimentsView({ projectId }: { projectId: number }) {
               <button
                 type="button"
                 onClick={() => setCreating(false)}
-                className="rounded-md border border-neutral-300 px-3 py-1.5 text-[13px] transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                className="rounded-md border border-border px-3 py-1.5 text-[13px] transition-colors hover:bg-surface-hover dark:border-border dark:hover:bg-neutral-800"
               >
                 {t('common.cancel')}
               </button>

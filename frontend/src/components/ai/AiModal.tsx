@@ -45,8 +45,8 @@ export default function AiModal({ title, fetcher, onApply, children, onClose }: 
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="flex max-h-[80vh] w-[640px] max-w-[94vw] flex-col rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3 dark:border-neutral-800">
+      <div className="flex max-h-[80vh] w-[640px] max-w-[94vw] flex-col rounded-xl border border-border bg-surface shadow-2xl dark:border-border dark:bg-surface">
+        <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3 dark:border-border">
           <span className="flex items-center gap-1.5 text-[13.5px] font-semibold">
             <Sparkles size={14} className="text-accent" />
             {title}
@@ -54,7 +54,7 @@ export default function AiModal({ title, fetcher, onApply, children, onClose }: 
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
           >
             <X size={15} />
           </button>
@@ -62,7 +62,7 @@ export default function AiModal({ title, fetcher, onApply, children, onClose }: 
 
         <div className="min-h-[180px] flex-1 overflow-y-auto whitespace-pre-wrap p-4 text-[13px] leading-relaxed">
           {loading && (
-            <div className="flex h-full items-center justify-center gap-2 text-neutral-400">
+            <div className="flex h-full items-center justify-center gap-2 text-foreground/45">
               <Loader2 size={16} className="animate-spin" /> {t('ai.thinking')}
             </div>
           )}
@@ -72,7 +72,7 @@ export default function AiModal({ title, fetcher, onApply, children, onClose }: 
         </div>
 
         {(onApply || children) && !loading && !error && (
-          <div className="flex justify-end gap-2 border-t border-neutral-100 px-4 py-3 dark:border-neutral-800">
+          <div className="flex justify-end gap-2 border-t border-neutral-100 px-4 py-3 dark:border-border">
             {onApply && (
               <button
                 type="button"

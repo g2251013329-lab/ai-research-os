@@ -43,17 +43,17 @@ export default function GitPanel() {
   }
 
   const btn =
-    'rounded-md border border-neutral-300 px-2.5 py-1.5 text-[12px] transition-colors hover:border-accent hover:text-accent disabled:opacity-50 dark:border-neutral-700'
+    'rounded-md border border-border px-2.5 py-1.5 text-[12px] transition-colors hover:border-accent hover:text-accent disabled:opacity-50 dark:border-border'
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="rounded-lg border border-border bg-surface p-4 dark:border-border dark:bg-surface">
       <div className="flex items-center gap-2">
-        <GitBranch size={14} className="text-neutral-400" />
+        <GitBranch size={14} className="text-foreground/45" />
         <span className="text-[13px] font-medium">{t('git.title')}</span>
         <button
           type="button"
           onClick={() => void refetch()}
-          className="ml-auto rounded p-1 text-neutral-400 hover:text-accent"
+          className="ml-auto rounded p-1 text-foreground/45 hover:text-accent"
           title={t('git.refresh')}
         >
           <RefreshCw size={13} />
@@ -73,32 +73,32 @@ export default function GitPanel() {
       {status?.repo && (
         <>
           <div className="mt-3 grid grid-cols-2 gap-2 text-center text-[11.5px] sm:grid-cols-4">
-            <div className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
+            <div className="rounded-md bg-surface-hover p-2 dark:bg-neutral-800/60">
               <div className="font-mono text-[13px] font-semibold">{status.branch}</div>
-              <div className="text-neutral-400">{t('git.branch')}</div>
+              <div className="text-foreground/45">{t('git.branch')}</div>
             </div>
-            <div className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
+            <div className="rounded-md bg-surface-hover p-2 dark:bg-neutral-800/60">
               <div className="text-[13px] font-semibold">{status.ahead ?? 0}</div>
-              <div className="text-neutral-400">{t('git.ahead')}</div>
+              <div className="text-foreground/45">{t('git.ahead')}</div>
             </div>
-            <div className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
+            <div className="rounded-md bg-surface-hover p-2 dark:bg-neutral-800/60">
               <div className="text-[13px] font-semibold">{status.behind ?? 0}</div>
-              <div className="text-neutral-400">{t('git.behind')}</div>
+              <div className="text-foreground/45">{t('git.behind')}</div>
             </div>
-            <div className="rounded-md bg-neutral-50 p-2 dark:bg-neutral-800/60">
+            <div className="rounded-md bg-surface-hover p-2 dark:bg-neutral-800/60">
               <div className="text-[13px] font-semibold">{status.dirty_count ?? 0}</div>
-              <div className="text-neutral-400">{t('git.dirty')}</div>
+              <div className="text-foreground/45">{t('git.dirty')}</div>
             </div>
           </div>
           {status.last_commit && (
-            <p className="mt-2 truncate font-mono text-[11px] text-neutral-400" data-tip={status.last_commit}>
+            <p className="mt-2 truncate font-mono text-[11px] text-foreground/45" data-tip={status.last_commit}>
               {status.last_commit}
             </p>
           )}
           {status.dirty_count ? (
             <div className="mt-2">
               <div
-                className={`space-y-0.5 overflow-y-auto rounded-md bg-neutral-50 p-2 text-[11px] font-mono text-neutral-500 dark:bg-neutral-800/60 ${
+                className={`space-y-0.5 overflow-y-auto rounded-md bg-surface-hover p-2 text-[11px] font-mono text-foreground/55 dark:bg-neutral-800/60 ${
                   showAll ? 'max-h-80' : 'max-h-24'
                 }`}
               >
@@ -131,7 +131,7 @@ export default function GitPanel() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder={t('git.commitPlaceholder')}
-              className="min-w-40 flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[12px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="min-w-40 flex-1 rounded-md border border-border bg-surface px-2.5 py-1.5 text-[12px] outline-none focus:border-accent dark:border-border dark:bg-surface"
             />
             <button
               type="button"

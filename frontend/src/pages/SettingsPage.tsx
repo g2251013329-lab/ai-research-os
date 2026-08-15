@@ -121,16 +121,16 @@ export default function SettingsPage() {
 
       <section className="mt-6 space-y-4">
         {/* Vault */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
           <label className="block text-[13px] font-medium">{t('settings.vault.label')}</label>
-          <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
+          <p className="mt-0.5 text-[12px] text-foreground/45 dark:text-foreground/55">
             {t('settings.vault.desc')}
           </p>
           <div className="mt-2 flex gap-2">
             <input
               value={vaultPath}
               onChange={(e) => setVaultPath(e.target.value)}
-              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="flex-1 rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               placeholder="/Users/mathew/ai-research-vault"
             />
             <button
@@ -144,16 +144,16 @@ export default function SettingsPage() {
         </div>
 
         {/* Zotero path */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
           <label className="block text-[13px] font-medium">{t('settings.zotero.label')}</label>
-          <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
+          <p className="mt-0.5 text-[12px] text-foreground/45 dark:text-foreground/55">
             {t('settings.zotero.desc')}
           </p>
           <div className="mt-2 flex gap-2">
             <input
               value={zoteroPath}
               onChange={(e) => setZoteroPath(e.target.value)}
-              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="flex-1 rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               placeholder="~/Zotero"
             />
             <button
@@ -167,11 +167,11 @@ export default function SettingsPage() {
         </div>
 
         {/* Extra search vaults */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
           <label className="block text-[13px] font-medium">
             {t('settings.vaults.extra')}
           </label>
-          <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
+          <p className="mt-0.5 text-[12px] text-foreground/45 dark:text-foreground/55">
             {t('settings.vaults.extraDesc')}
           </p>
           <div className="mt-2 flex gap-2">
@@ -179,7 +179,7 @@ export default function SettingsPage() {
               value={extraVaults}
               onChange={(e) => setExtraVaults(e.target.value)}
               rows={3}
-              className="flex-1 resize-y rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="flex-1 resize-y rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               placeholder="/Users/mathew/knowledge-base"
             />
             <button
@@ -193,16 +193,16 @@ export default function SettingsPage() {
         </div>
 
         {/* Brand subtitle */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
           <label className="block text-[13px] font-medium">{t('settings.brand.label')}</label>
-          <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
+          <p className="mt-0.5 text-[12px] text-foreground/45 dark:text-foreground/55">
             {t('settings.brand.desc')}
           </p>
           <div className="mt-2 flex gap-2">
             <input
               value={brandSubtitle}
               onChange={(e) => setBrandSubtitle(e.target.value)}
-              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="flex-1 rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               placeholder="LLPS"
             />
             <button
@@ -215,7 +215,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Script font choice */}
-          <label className="mt-3 block text-[12px] font-medium text-neutral-500 dark:text-neutral-400">
+          <label className="mt-3 block text-[12px] font-medium text-foreground/55 dark:text-foreground/55">
             {t('settings.brand.font')}
           </label>
           <div className="mt-1.5 grid grid-cols-3 gap-1.5">
@@ -229,7 +229,7 @@ export default function SettingsPage() {
                   className={`rounded-md border px-2 py-2 text-[15px] leading-none transition-colors ${
                     active
                       ? 'border-accent bg-accent-soft text-accent'
-                      : 'border-neutral-200 text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-600'
+                      : 'border-border text-foreground/65 hover:border-border dark:border-border dark:text-foreground/75 dark:hover:border-neutral-600'
                   }`}
                   style={{ fontFamily: f.family }}
                 >
@@ -240,7 +240,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Subtitle color choice */}
-          <label className="mt-3 block text-[12px] font-medium text-neutral-500 dark:text-neutral-400">
+          <label className="mt-3 block text-[12px] font-medium text-foreground/55 dark:text-foreground/55">
             {t('settings.brand.color')}
           </label>
           <div className="mt-1.5 flex flex-wrap gap-2">
@@ -254,7 +254,7 @@ export default function SettingsPage() {
                   className={`flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-[12px] transition-colors ${
                     active
                       ? 'border-accent bg-accent-soft'
-                      : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600'
+                      : 'border-border hover:border-border dark:border-border dark:hover:border-neutral-600'
                   }`}
                 >
                   <span
@@ -270,7 +270,7 @@ export default function SettingsPage() {
                     className={
                       active
                         ? 'font-medium text-accent'
-                        : 'text-neutral-500 dark:text-neutral-400'
+                        : 'text-foreground/55 dark:text-foreground/55'
                     }
                   >
                     {t(c.nameKey)}
@@ -283,7 +283,7 @@ export default function SettingsPage() {
 
         {/* Language, theme & appearance */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
             <label className="block text-[13px] font-medium">
               {t('settings.language.label')}
             </label>
@@ -292,20 +292,20 @@ export default function SettingsPage() {
               onChange={(e) =>
                 void update({ language: e.target.value as 'zh' | 'en' })
               }
-              className="mt-2 w-full rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="mt-2 w-full rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
             >
               <option value="zh">{t('language.zh')}</option>
               <option value="en">{t('language.en')}</option>
             </select>
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
             <label className="block text-[13px] font-medium">{t('settings.theme.label')}</label>
             <select
               value={settings?.theme ?? 'dark'}
               onChange={(e) =>
                 void update({ theme: e.target.value as 'light' | 'dark' })
               }
-              className="mt-2 w-full rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="mt-2 w-full rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
             >
               <option value="light">{t('theme.light')}</option>
               <option value="dark">{t('theme.dark')}</option>
@@ -314,9 +314,9 @@ export default function SettingsPage() {
         </div>
 
         {/* UI theme presets */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
           <label className="block text-[13px] font-medium">{t('settings.uiTheme.label')}</label>
-          <p className="mt-0.5 text-[11.5px] text-neutral-400">{t('settings.uiTheme.hint')}</p>
+          <p className="mt-0.5 text-[11.5px] text-foreground/45">{t('settings.uiTheme.hint')}</p>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {UI_THEMES.map((th) => {
               const active = (settings?.ui_theme ?? 'laboratory') === th.id
@@ -328,7 +328,7 @@ export default function SettingsPage() {
                   className={`flex items-center gap-2.5 rounded-lg border p-2.5 text-left transition-colors ${
                     active
                       ? 'border-accent bg-accent-soft'
-                      : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600'
+                      : 'border-border hover:border-border dark:border-border dark:hover:border-neutral-600'
                   }`}
                 >
                   <span
@@ -338,12 +338,12 @@ export default function SettingsPage() {
                   <span className="min-w-0">
                     <span
                       className={`block truncate text-[12px] ${
-                        active ? 'font-medium text-accent' : 'text-neutral-700 dark:text-neutral-200'
+                        active ? 'font-medium text-accent' : 'text-foreground/75 dark:text-foreground/85'
                       }`}
                     >
                       {t(`settings.uiTheme.${th.id}`)}
                     </span>
-                    <span className="block truncate text-[10.5px] text-neutral-400">
+                    <span className="block truncate text-[10.5px] text-foreground/45">
                       {th.desc}
                     </span>
                   </span>
@@ -354,7 +354,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Accent themes */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
           <label className="block text-[13px] font-medium">{t('themes.label')}</label>
           <div className="mt-3 grid grid-cols-4 gap-2">
             {ACCENT_THEMES.map((th) => {
@@ -367,7 +367,7 @@ export default function SettingsPage() {
                   className={`flex flex-col items-center gap-1.5 rounded-lg border p-2.5 transition-colors ${
                     active
                       ? 'border-accent bg-accent-soft'
-                      : 'border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600'
+                      : 'border-border hover:border-border dark:border-border dark:hover:border-neutral-600'
                   }`}
                 >
                   <span
@@ -380,7 +380,7 @@ export default function SettingsPage() {
                     className={`text-[11px] ${
                       active
                         ? 'font-medium text-accent'
-                        : 'text-neutral-500 dark:text-neutral-400'
+                        : 'text-foreground/55 dark:text-foreground/55'
                     }`}
                   >
                     {t(th.nameKey)}
@@ -392,19 +392,19 @@ export default function SettingsPage() {
         </div>
 
         {/* AI model */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
           <label className="block text-[13px] font-medium">{t('settings.ai.label')}</label>
           <div className="mt-2 grid grid-cols-[1fr_1.5fr_auto] gap-2">
             <input
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
-              className="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               placeholder={t('settings.ai.baseUrl')}
             />
             <input
               value={model}
               onChange={(e) => setModel(e.target.value)}
-              className="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               placeholder={t('settings.ai.model')}
             />
             <button
@@ -418,15 +418,15 @@ export default function SettingsPage() {
         </div>
 
         {/* DeepSeek key */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
           <div className="flex items-center gap-2">
-            <KeyRound size={14} className="text-neutral-400" />
+            <KeyRound size={14} className="text-foreground/45" />
             <label className="text-[13px] font-medium">{t('settings.key.label')}</label>
             <span
               className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-medium ${
                 keyConfigured
                   ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                  : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800'
+                  : 'bg-surface-hover text-foreground/55 dark:bg-neutral-800'
               }`}
             >
               {keyConfigured ? t('settings.key.configured') : t('settings.key.notConfigured')}
@@ -437,7 +437,7 @@ export default function SettingsPage() {
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="flex-1 rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               placeholder={t('settings.key.placeholder')}
             />
             <button
@@ -452,7 +452,7 @@ export default function SettingsPage() {
               type="button"
               onClick={() => void testKey()}
               disabled={testing || !keyConfigured}
-              className="rounded-md border border-neutral-300 px-3 py-1.5 text-[13px] transition-colors hover:bg-neutral-100 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+              className="rounded-md border border-border px-3 py-1.5 text-[13px] transition-colors hover:bg-surface-hover disabled:opacity-50 dark:border-border dark:hover:bg-neutral-800"
             >
               {testing ? (
                 <Loader2 size={13} className="animate-spin" />
@@ -474,16 +474,16 @@ export default function SettingsPage() {
         </div>
 
         {/* One Scholar */}
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="rounded-lg border border-border bg-surface p-4 shadow-card dark:border-border dark:bg-surface">
           <label className="block text-[13px] font-medium">{t('settings.onescholar.label')}</label>
-          <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
+          <p className="mt-0.5 text-[12px] text-foreground/45 dark:text-foreground/55">
             {t('settings.onescholar.desc')}
           </p>
           <div className="mt-2 flex gap-2">
             <input
               value={osBase}
               onChange={(e) => setOsBase(e.target.value)}
-              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="flex-1 rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               placeholder="https://api.sssam.com"
             />
             <button
@@ -502,7 +502,7 @@ export default function SettingsPage() {
               type="password"
               value={osKey}
               onChange={(e) => setOsKey(e.target.value)}
-              className="flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950"
+              className="flex-1 rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface"
               placeholder={t('settings.onescholar.keyPlaceholder')}
             />
             <button
@@ -528,7 +528,7 @@ export default function SettingsPage() {
               className={`flex items-center rounded-full px-2 py-1 text-[11px] ${
                 osConfigured
                   ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                  : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800'
+                  : 'bg-surface-hover text-foreground/55 dark:bg-neutral-800'
               }`}
             >
               {osConfigured

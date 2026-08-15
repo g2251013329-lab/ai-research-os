@@ -660,6 +660,11 @@ export default {
       mine: 'My Papers',
     },
     mineEmpty: 'No papers yet — drop a PDF above to add one',
+    mineSearchPlaceholder: 'Search title / authors / journal / DOI',
+    filterAll: 'All',
+    colPaper: 'Paper',
+    colStatus: 'Status',
+    colActions: 'Actions',
     compare: 'Compare papers',
     comparePick: 'Pick the second paper to compare',
     related: {

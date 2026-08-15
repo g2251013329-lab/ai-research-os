@@ -27,7 +27,7 @@ const KIND_STYLES: Record<string, string> = {
   project: 'bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300',
   experiment: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300',
   question: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
-  note: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
+  note: 'bg-surface-hover text-foreground/65 dark:bg-neutral-800 dark:text-foreground/75',
 }
 
 export default function ConceptLinksModal({
@@ -101,7 +101,7 @@ export default function ConceptLinksModal({
   })
 
   const field =
-    'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
+    'rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface'
 
   const candidatesForKind = (candidates ?? {})[kind] ?? []
 
@@ -112,7 +112,7 @@ export default function ConceptLinksModal({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="w-[520px] max-w-[92vw] overflow-hidden rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="w-[520px] max-w-[92vw] overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-2xl dark:border-border dark:bg-surface">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-1.5 text-[14px] font-semibold">
             <Link2 size={14} className="text-accent" />
@@ -121,12 +121,12 @@ export default function ConceptLinksModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
           >
             <X size={15} />
           </button>
         </div>
-        <p className="mt-1 text-[11.5px] text-neutral-400">{t('learning.links.hint')}</p>
+        <p className="mt-1 text-[11.5px] text-foreground/45">{t('learning.links.hint')}</p>
 
         {/* add form */}
         <div className="mt-3 flex items-center gap-1.5">
@@ -169,9 +169,9 @@ export default function ConceptLinksModal({
         </div>
 
         {/* link list */}
-        <div className="mt-3 max-h-72 divide-y divide-neutral-100 overflow-y-auto rounded-lg border border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800">
+        <div className="mt-3 max-h-72 divide-y divide-border-subtle overflow-y-auto rounded-lg border border-border dark:divide-border-subtle dark:border-border">
           {(links ?? []).length === 0 && (
-            <p className="px-4 py-8 text-center text-[12.5px] text-neutral-400">
+            <p className="px-4 py-8 text-center text-[12.5px] text-foreground/45">
               {t('learning.links.empty')}
             </p>
           )}
@@ -187,7 +187,7 @@ export default function ConceptLinksModal({
                   {link.title}
                 </div>
                 {link.subtitle && (
-                  <div className="truncate text-[10.5px] text-neutral-400">{link.subtitle}</div>
+                  <div className="truncate text-[10.5px] text-foreground/45">{link.subtitle}</div>
                 )}
               </div>
               {link.url && (
@@ -197,7 +197,7 @@ export default function ConceptLinksModal({
                     onClose()
                     navigate(link.url!)
                   }}
-                  className="shrink-0 rounded p-1 text-neutral-300 transition-colors hover:text-accent dark:text-neutral-600"
+                  className="shrink-0 rounded p-1 text-foreground/35 transition-colors hover:text-accent dark:text-foreground/65"
                   data-tip={t('learning.links.open')}
                 >
                   <ArrowUpRight size={13} />
@@ -206,7 +206,7 @@ export default function ConceptLinksModal({
               <button
                 type="button"
                 onClick={() => deleteLink.mutate(link.id)}
-                className="shrink-0 rounded p-1 text-neutral-300 transition-colors hover:text-red-500 dark:text-neutral-600"
+                className="shrink-0 rounded p-1 text-foreground/35 transition-colors hover:text-red-500 dark:text-foreground/65"
                 data-tip={t('inbox.delete')}
               >
                 <X size={13} />

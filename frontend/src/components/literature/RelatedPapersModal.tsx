@@ -66,7 +66,7 @@ export default function RelatedPapersModal({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="flex max-h-[85vh] w-[560px] max-w-[92vw] flex-col rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="flex max-h-[85vh] w-[560px] max-w-[92vw] flex-col rounded-xl border border-border bg-surface p-4 shadow-2xl dark:border-border dark:bg-surface">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-1.5 text-[14px] font-semibold">
             <GitBranch size={14} className="text-accent" />
@@ -75,37 +75,37 @@ export default function RelatedPapersModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
           >
             <X size={15} />
           </button>
         </div>
-        <p className="mt-1 truncate text-[11.5px] text-neutral-400" data-tip={paper.title}>
+        <p className="mt-1 truncate text-[11.5px] text-foreground/45" data-tip={paper.title}>
           {paper.title}
         </p>
 
         <div className="mt-3 flex-1 overflow-y-auto pr-1">
           {isFetching && !recs.length && (
-            <div className="flex items-center justify-center gap-2 py-10 text-neutral-400">
+            <div className="flex items-center justify-center gap-2 py-10 text-foreground/45">
               <Loader2 size={16} className="animate-spin" /> {t('ai.thinking')}
             </div>
           )}
           {!isFetching && recs.length === 0 && (
-            <p className="py-10 text-center text-[12.5px] text-neutral-400">
+            <p className="py-10 text-center text-[12.5px] text-foreground/45">
               {data?.note || t('literature.related.empty')}
             </p>
           )}
           {recs.map((r, i) => (
             <div
               key={r.doi || r.title + i}
-              className="mb-2 rounded-lg border border-neutral-100 p-3 dark:border-neutral-800"
+              className="mb-2 rounded-lg border border-neutral-100 p-3 dark:border-border"
             >
               <div className="flex items-start gap-2">
                 <div className="min-w-0 flex-1">
                   <div data-tip={r.title} className="text-[13px] font-medium leading-snug">
                     {r.title}
                   </div>
-                  <div className="mt-0.5 truncate text-[11px] text-neutral-400">
+                  <div className="mt-0.5 truncate text-[11px] text-foreground/45">
                     {[r.authors, r.year, r.journal].filter(Boolean).join(' · ')}
                   </div>
                 </div>
@@ -128,7 +128,7 @@ export default function RelatedPapersModal({
                     href={r.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="shrink-0 rounded-md border border-neutral-200 px-2 py-1 text-[11px] transition-colors hover:border-accent hover:text-accent dark:border-neutral-700"
+                    className="shrink-0 rounded-md border border-border px-2 py-1 text-[11px] transition-colors hover:border-accent hover:text-accent dark:border-border"
                   >
                     <ExternalLink size={11} />
                   </a>
@@ -137,7 +137,7 @@ export default function RelatedPapersModal({
               {r.abstract && (
                 <p
                   data-tip={r.abstract}
-                  className="mt-1.5 line-clamp-3 text-[11.5px] leading-relaxed text-neutral-500 dark:text-neutral-400"
+                  className="mt-1.5 line-clamp-3 text-[11.5px] leading-relaxed text-foreground/55 dark:text-foreground/55"
                 >
                   {r.abstract}
                 </p>

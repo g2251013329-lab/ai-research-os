@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 /** Semantic tag tones — map to design tokens, never hard-coded page colors. */
 const TONES: Record<string, string> = {
-  neutral: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
+  neutral: 'bg-surface-hover text-foreground/65 dark:bg-neutral-800 dark:text-foreground/75',
   accent: 'bg-accent-soft text-accent',
   success: 'bg-success-soft text-success',
   warning: 'bg-warning-soft text-warning',

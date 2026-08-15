@@ -22,11 +22,11 @@ const KIND_STYLES: Record<string, string> = {
   question: 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300',
   experiment: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
   url: 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300',
-  github: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
+  github: 'bg-surface-hover text-foreground/75 dark:bg-neutral-800 dark:text-foreground/75',
   note: 'bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300',
   reference: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300',
   image: 'bg-pink-50 text-pink-700 dark:bg-pink-950/60 dark:text-pink-300',
-  other: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
+  other: 'bg-surface-hover text-foreground/65 dark:bg-neutral-800 dark:text-foreground/75',
 }
 
 export default function InboxPage() {
@@ -124,12 +124,12 @@ export default function InboxPage() {
   }
 
   const field =
-    'rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-neutral-700 dark:bg-neutral-950'
+    'rounded-md border border-border bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-accent dark:border-border dark:bg-surface'
 
   return (
     <div className="mx-auto max-w-4xl p-6">
       <h1 className="text-xl font-semibold tracking-tight">{t('inbox.title')}</h1>
-      <p className="mt-0.5 text-[13px] text-neutral-500 dark:text-neutral-400">
+      <p className="mt-0.5 text-[13px] text-foreground/55 dark:text-foreground/55">
         {t('inbox.subtitle')}
       </p>
 
@@ -190,7 +190,7 @@ export default function InboxPage() {
             className={`rounded-md px-2.5 py-1 text-[12px] transition-colors ${
               filter === f
                 ? 'bg-accent-soft font-medium text-accent'
-                : 'text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                : 'text-foreground/55 hover:bg-surface-hover dark:text-foreground/55 dark:hover:bg-neutral-800'
             }`}
           >
             {t(`inbox.filters.${f}`)}
@@ -199,9 +199,9 @@ export default function InboxPage() {
       </div>
 
       {/* list */}
-      <div className="mt-3 divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white shadow-card dark:divide-neutral-800 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="mt-3 divide-y divide-border-subtle rounded-lg border border-border bg-surface shadow-card dark:divide-border-subtle dark:border-border dark:bg-surface">
         {(items ?? []).length === 0 && (
-          <p className="px-4 py-10 text-center text-[12.5px] text-neutral-400">
+          <p className="px-4 py-10 text-center text-[12.5px] text-foreground/45">
             {t('inbox.empty')}
           </p>
         )}
@@ -213,7 +213,7 @@ export default function InboxPage() {
               className={`mt-0.5 transition-colors hover:text-accent ${
                 item.status === 'done'
                   ? 'text-accent'
-                  : 'text-neutral-300 dark:text-neutral-600'
+                  : 'text-foreground/35 dark:text-foreground/65'
               }`}
               data-tip={t('inbox.toggleDone')}
             >
@@ -223,12 +223,12 @@ export default function InboxPage() {
               <div
                 data-tip={item.text}
                 className={`text-[13.5px] leading-snug ${
-                  item.status === 'done' ? 'text-neutral-400 line-through' : ''
+                  item.status === 'done' ? 'text-foreground/45 line-through' : ''
                 }`}
               >
                 {item.text}
               </div>
-              <div className="mt-1 flex items-center gap-2 text-[11px] text-neutral-400">
+              <div className="mt-1 flex items-center gap-2 text-[11px] text-foreground/45">
                 <span
                   className={`rounded px-1.5 py-px ${KIND_STYLES[item.kind] ?? KIND_STYLES.other}`}
                 >
@@ -241,7 +241,7 @@ export default function InboxPage() {
             <button
               type="button"
               onClick={() => void classify(item)}
-              className="mt-0.5 rounded p-1 text-neutral-300 transition-colors hover:text-accent dark:text-neutral-600"
+              className="mt-0.5 rounded p-1 text-foreground/35 transition-colors hover:text-accent dark:text-foreground/65"
               data-tip={t('ai.inboxClassify')}
             >
               <Sparkles size={14} />
@@ -249,7 +249,7 @@ export default function InboxPage() {
             <button
               type="button"
               onClick={() => deleteMutation.mutate(item.id)}
-              className="mt-0.5 rounded p-1 text-neutral-300 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-neutral-600 dark:hover:bg-red-950/40"
+              className="mt-0.5 rounded p-1 text-foreground/35 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-foreground/65 dark:hover:bg-red-950/40"
               data-tip={t('inbox.delete')}
             >
               <Trash2 size={14} />
@@ -266,7 +266,7 @@ export default function InboxPage() {
             if (e.target === e.currentTarget) setAiItem(null)
           }}
         >
-          <div className="w-[480px] max-w-[92vw] rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="w-[480px] max-w-[92vw] rounded-xl border border-border bg-surface p-4 shadow-2xl dark:border-border dark:bg-surface">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-[13.5px] font-semibold">
                 <Sparkles size={14} className="text-accent" />
@@ -275,25 +275,25 @@ export default function InboxPage() {
               <button
                 type="button"
                 onClick={() => setAiItem(null)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-foreground/45 hover:bg-surface-hover dark:hover:bg-neutral-800"
               >
                 <X size={15} />
               </button>
             </div>
-            <p className="mt-2 line-clamp-2 text-[12px] text-neutral-500 dark:text-neutral-400" data-tip={aiItem.text}>
+            <p className="mt-2 line-clamp-2 text-[12px] text-foreground/55 dark:text-foreground/55" data-tip={aiItem.text}>
               {aiItem.text}
             </p>
 
             {aiLoading && (
-              <div className="flex items-center justify-center gap-2 py-8 text-neutral-400">
+              <div className="flex items-center justify-center gap-2 py-8 text-foreground/45">
                 <Loader2 size={16} className="animate-spin" /> {t('ai.thinking')}
               </div>
             )}
 
             {aiSuggestion && (
-              <div className="mt-3 space-y-2 rounded-lg bg-neutral-50 p-3 text-[12.5px] dark:bg-neutral-800/60">
+              <div className="mt-3 space-y-2 rounded-lg bg-surface-hover p-3 text-[12.5px] dark:bg-neutral-800/60">
                 <div className="flex items-center gap-2">
-                  <span className="text-neutral-400">{t('ai.suggestKind')}</span>
+                  <span className="text-foreground/45">{t('ai.suggestKind')}</span>
                   <span
                     className={`rounded px-1.5 py-px ${KIND_STYLES[aiSuggestion.kind ?? 'other'] ?? KIND_STYLES.other}`}
                   >
@@ -301,22 +301,22 @@ export default function InboxPage() {
                   </span>
                 </div>
                 {aiSuggestion.project && (
-                  <div className="text-neutral-500 dark:text-neutral-400">
+                  <div className="text-foreground/55 dark:text-foreground/55">
                     {t('ai.suggestProject')}: {aiSuggestion.project}
                   </div>
                 )}
                 {aiSuggestion.tags && aiSuggestion.tags.length > 0 && (
-                  <div className="text-neutral-500 dark:text-neutral-400">
+                  <div className="text-foreground/55 dark:text-foreground/55">
                     {t('ai.suggestTags')}: {aiSuggestion.tags.join(', ')}
                   </div>
                 )}
                 {aiSuggestion.next_action && (
-                  <div className="text-neutral-500 dark:text-neutral-400">
+                  <div className="text-foreground/55 dark:text-foreground/55">
                     {t('ai.suggestAction')}: {aiSuggestion.next_action}
                   </div>
                 )}
                 {aiSuggestion.reason && (
-                  <div className="text-[11.5px] text-neutral-400">💡 {aiSuggestion.reason}</div>
+                  <div className="text-[11.5px] text-foreground/45">💡 {aiSuggestion.reason}</div>
                 )}
               </div>
             )}
@@ -326,7 +326,7 @@ export default function InboxPage() {
                 <button
                   type="button"
                   onClick={() => setAiItem(null)}
-                  className="rounded-md border border-neutral-300 px-3 py-1.5 text-[13px] transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                  className="rounded-md border border-border px-3 py-1.5 text-[13px] transition-colors hover:bg-surface-hover dark:border-border dark:hover:bg-neutral-800"
                 >
                   {t('common.cancel')}
                 </button>

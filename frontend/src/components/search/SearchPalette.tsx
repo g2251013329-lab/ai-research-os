@@ -162,22 +162,22 @@ export default function SearchPalette({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="mt-[14vh] flex h-fit w-[620px] max-w-[92vw] flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="flex items-center gap-2.5 border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
-          <Search size={16} className="shrink-0 text-neutral-400" />
+      <div className="mt-[14vh] flex h-fit w-[620px] max-w-[92vw] flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-2xl dark:border-border dark:bg-surface">
+        <div className="flex items-center gap-2.5 border-b border-border px-4 py-3 dark:border-border">
+          <Search size={16} className="shrink-0 text-foreground/45" />
           <input
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder={t('search.placeholder')}
-            className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-neutral-400"
+            className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-foreground/45"
           />
-          {loading && <Loader2 size={14} className="animate-spin text-neutral-400" />}
+          {loading && <Loader2 size={14} className="animate-spin text-foreground/45" />}
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-0.5 text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded p-0.5 text-foreground/45 transition-colors hover:bg-surface-hover dark:hover:bg-neutral-800"
           >
             <X size={15} />
           </button>
@@ -185,18 +185,18 @@ export default function SearchPalette({
 
         <div ref={listRef} className="max-h-[46vh] overflow-y-auto p-1.5">
           {!q.trim() && (
-            <p className="px-3 py-6 text-center text-[12.5px] text-neutral-400">
+            <p className="px-3 py-6 text-center text-[12.5px] text-foreground/45">
               {t('search.empty')}
             </p>
           )}
           {q.trim() && !loading && results.length === 0 && (
-            <p className="px-3 py-6 text-center text-[12.5px] text-neutral-400">
+            <p className="px-3 py-6 text-center text-[12.5px] text-foreground/45">
               {t('search.noResults')}
             </p>
           )}
           {grouped.map((g) => (
             <div key={g.type} className="mb-1">
-              <div className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+              <div className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/45">
                 {t(`search.types.${g.type}`)}
               </div>
               {g.items.map((r) => {
@@ -212,20 +212,20 @@ export default function SearchPalette({
                     className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition-colors ${
                       idx === active
                         ? 'bg-accent-soft'
-                        : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
+                        : 'hover:bg-surface-hover dark:hover:bg-neutral-800/60'
                     }`}
                   >
                     <Icon
                       size={14}
                       className={`shrink-0 ${
-                        idx === active ? 'text-accent' : 'text-neutral-400'
+                        idx === active ? 'text-accent' : 'text-foreground/45'
                       }`}
                     />
                     <div className="min-w-0 flex-1">
                       <div data-tip={r.title} className="truncate text-[13px] font-medium">
                         {r.title}
                       </div>
-                      <div data-tip={r.subtitle} className="truncate text-[11.5px] text-neutral-400">
+                      <div data-tip={r.subtitle} className="truncate text-[11.5px] text-foreground/45">
                         {r.subtitle}
                       </div>
                     </div>

@@ -31,7 +31,7 @@ export default function LiteraturePage() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">{t('literature.title')}</h1>
-          <p className="mt-0.5 text-[13px] text-neutral-500 dark:text-neutral-400">
+          <p className="mt-0.5 text-[13px] text-foreground/55 dark:text-foreground/55">
             {t('literature.subtitle')}
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function LiteraturePage() {
               ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
               : lockedNoApi
                 ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
-                : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800'
+                : 'bg-surface-hover text-foreground/55 dark:bg-neutral-800'
           }`}
         >
           <Sparkles size={11} />
@@ -62,8 +62,8 @@ export default function LiteraturePage() {
       )}
 
       {!status?.db_exists && (
-        <div className="mt-6 rounded-lg border border-dashed border-neutral-300 p-10 text-center dark:border-neutral-700">
-          <p className="text-[13px] text-neutral-400">{t('literature.zoteroMissingDesc')}</p>
+        <div className="mt-6 rounded-lg border border-dashed border-border p-10 text-center dark:border-border">
+          <p className="text-[13px] text-foreground/45">{t('literature.zoteroMissingDesc')}</p>
           <a
             href="/settings"
             className="mt-2 inline-block text-[13px] text-accent hover:underline"

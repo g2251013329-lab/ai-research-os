@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 /** Status indicator: color + icon + text (never color alone — DS §30). */
 const DOT_TONES: Record<string, string> = {
-  neutral: 'bg-neutral-400 dark:bg-neutral-500',
+  neutral: 'bg-neutral-400 dark:bg-surface-hover0',
   success: 'bg-success',
   warning: 'bg-warning',
   danger: 'bg-danger',
