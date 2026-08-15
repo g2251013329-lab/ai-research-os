@@ -1,13 +1,22 @@
-"""Experiments API (PRD §13): structured 13-field records."""
+"""Experiments API (PRD §13): structured 13-field records.
+
+Each experiment is also mirrored to the Obsidian vault as a Markdown note
+(vault/experiments/) so it is readable in Obsidian — but that folder is
+excluded from the vault's GitHub sync via a .gitignore entry, because
+experiment records are local-only by design.
+"""
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from ..core.db import get_session
+from ..core.user_settings import get_user_setting
 from ..models import (
     EXPERIMENT_STATUSES,
     Experiment,
@@ -33,6 +42,93 @@ EXPERIMENT_FIELDS = (
     "problems",
     "next_step",
 )
+
+FIELD_LABELS = {
+    "objective": "Objective 目标",
+    "hypothesis_text": "Hypothesis 假设",
+    "materials": "Materials 材料",
+    "protocol": "Protocol 方案",
+    "variables": "Variables 变量",
+    "procedure": "Procedure 步骤",
+    "raw_data": "Raw Data 原始数据",
+    "results": "Results 结果",
+    "figures": "Figures 图表",
+    "interpretation": "Interpretation 解读",
+    "problems": "Problems 问题",
+    "next_step": "Next Step 下一步",
+}
+
+
+def _vault() -> Path:
+    return Path(get_user_setting("vault_path", "") or "")
+
+
+def _ensure_gitignore(vault: Path) -> None:
+    """Keep experiments/ out of the vault's GitHub sync (user requirement)."""
+    gi = vault / ".gitignore"
+    line = "experiments/"
+    try:
+        if gi.exists():
+            text = gi.read_text("utf-8", errors="ignore")
+            if line in text.splitlines():
+                return
+            text = text.rstrip() + "\n" + line + "\n"
+        else:
+            text = line + "\n"
+        gi.write_text(text, "utf-8")
+    except Exception:
+        pass
+
+
+def _sync_to_vault(exp: Experiment) -> None:
+    vault = _vault()
+    if not vault.exists():
+        return
+    try:
+        folder = vault / "experiments"
+        folder.mkdir(parents=True, exist_ok=True)
+        _ensure_gitignore(vault)
+        slug = re.sub(r"[^\w\u4e00-\u9fff-]+", "-", exp.title).strip("-") or "note"
+        path = folder / f"exp-{exp.id}-{slug}.md"
+        created = exp.created_at.isoformat() if exp.created_at else ""
+        updated = exp.updated_at.isoformat() if exp.updated_at else ""
+        meta = [
+            f"title: {exp.title}",
+            "type: experiment",
+            f"status: {exp.status}",
+            f"created: {created}",
+            f"updated: {updated}",
+        ]
+        if exp.project_id is not None:
+            meta.append(f"project: {exp.project_id}")
+        if exp.question_id is not None:
+            meta.append(f"question: {exp.question_id}")
+        if exp.hypothesis_id is not None:
+            meta.append(f"hypothesis: {exp.hypothesis_id}")
+        sections = [
+            f"## {FIELD_LABELS[f]}\n\n{getattr(exp, f, '')}"
+            for f in EXPERIMENT_FIELDS
+            if getattr(exp, f, "")
+        ]
+        body = "\n\n".join(sections) or "_（暂无内容）_"
+        path.write_text(
+            f"---\n{chr(10).join(meta)}\n---\n\n# {exp.title}\n\n{body}\n",
+            "utf-8",
+        )
+    except Exception:
+        pass  # vault sync is best-effort; DB remains the source of truth
+
+
+def _remove_vault_file(exp: Experiment) -> None:
+    vault = _vault()
+    if not vault.exists():
+        return
+    slug = re.sub(r"[^\w\u4e00-\u9fff-]+", "-", exp.title).strip("-") or "note"
+    path = vault / "experiments" / f"exp-{exp.id}-{slug}.md"
+    try:
+        path.unlink(missing_ok=True)
+    except Exception:
+        pass
 
 
 class ExperimentCreate(BaseModel):
@@ -107,6 +203,7 @@ def create_experiment(
     add_timeline_event(
         session, "experiment.created", f"实验：{title}", project_id=body.project_id
     )
+    _sync_to_vault(exp)
     return exp
 
 
@@ -135,6 +232,7 @@ def update_experiment(
     session.add(exp)
     session.commit()
     session.refresh(exp)
+    _sync_to_vault(exp)
     return exp
 
 
@@ -147,4 +245,5 @@ def delete_experiment(
         raise HTTPException(status_code=404, detail="Experiment not found")
     session.delete(exp)
     session.commit()
+    _remove_vault_file(exp)
     return {"ok": True}

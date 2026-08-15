@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from sqlalchemy import text
 from fastapi.testclient import TestClient
 
@@ -5,6 +7,9 @@ from app.core.db import engine
 from app.main import app
 
 client = TestClient(app)
+
+TEST_VAULT = Path(__file__).resolve().parents[1] / ".test-data" / "research-vault"
+OLD_VAULT = client.get("/api/settings").json().get("vault_path")
 
 
 def _cleanup():
@@ -159,3 +164,48 @@ def test_project_delete_cascades():
     # deleted project gone
     assert all(x["id"] != p["id"] for x in client.get("/api/projects").json())
     _cleanup()
+
+
+def test_experiment_vault_sync_and_gitignore():
+    """Experiments mirror to vault/experiments/ but stay out of git sync."""
+    _cleanup()
+    try:
+        TEST_VAULT.mkdir(parents=True, exist_ok=True)
+        client.put("/api/settings", json={"vault_path": str(TEST_VAULT)})
+        proj = client.post("/api/projects", json={"title": "vault-sync"}).json()
+
+        exp = client.post(
+            "/api/experiments",
+            json={
+                "project_id": proj["id"],
+                "title": "FRAP 定量",
+                "objective": "测量恢复曲线",
+                "results": "t1/2 = 2.3s",
+            },
+        ).json()
+        client.patch(f"/api/experiments/{exp['id']}", json={"status": "running"})
+
+        files = list((TEST_VAULT / "experiments").glob("*.md"))
+        assert len(files) == 1, "experiment markdown should be mirrored to vault"
+        content = files[0].read_text("utf-8")
+        assert "type: experiment" in content
+        assert "status: running" in content
+        assert "测量恢复曲线" in content
+        assert "t1/2 = 2.3s" in content
+
+        # .gitignore excludes experiments/ from vault git sync
+        gi = TEST_VAULT / ".gitignore"
+        assert gi.exists()
+        assert "experiments/" in gi.read_text("utf-8")
+
+        # update rewrites the mirror
+        client.patch(f"/api/experiments/{exp['id']}", json={"results": "t1/2 = 4.1s"})
+        assert "t1/2 = 4.1s" in files[0].read_text("utf-8")
+        assert "t1/2 = 2.3s" not in files[0].read_text("utf-8")
+
+        # delete removes the mirror
+        client.delete(f"/api/experiments/{exp['id']}")
+        assert not list((TEST_VAULT / "experiments").glob("*.md"))
+    finally:
+        _cleanup()
+        client.put("/api/settings", json={"vault_path": OLD_VAULT})
