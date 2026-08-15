@@ -44,7 +44,7 @@ DEFAULTS: dict[str, Any] = {
     "deepseek_base_url": app_settings.deepseek_base_url,
     "onescholar_base_url": "https://api.sssam.com",
     "ai_gpt_url": "https://chatgpt.com",
-    "ai_claude_science_url": "https://claude.com/product/claude-science",
+    "ai_claude_science_url": "http://localhost:8990",
 }
 
 
