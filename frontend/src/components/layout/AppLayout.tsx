@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -46,19 +46,8 @@ const navGroups: {
   },
 ]
 
-const SPACE_LABELS: Record<string, string> = {
-  '/': 'dashboard.title',
-  '/learning': 'learning.title',
-  '/research': 'research.title',
-  '/literature': 'literature.title',
-  '/leisure': 'leisure.title',
-  '/inbox': 'inbox.title',
-  '/settings': 'settings.title',
-}
-
 export default function AppLayout() {
   const { t } = useTranslation()
-  const location = useLocation()
   const openTaskModal = useUiStore((s) => s.openTaskModal)
   const openFocus = useUiStore((s) => s.openFocus)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -102,10 +91,6 @@ export default function AppLayout() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [openTaskModal])
-
-  const currentSpaceKey =
-    SPACE_LABELS[Object.keys(SPACE_LABELS).find((p) => location.pathname.startsWith(p)) ?? '/'] ??
-    'dashboard.title'
 
   const recentTitle = dash?.recent_activity?.[0]?.title
 
@@ -153,10 +138,7 @@ export default function AppLayout() {
 
       {/* Workspace */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar
-          onOpenSearch={() => setSearchOpen(true)}
-          breadcrumb={t(currentSpaceKey)}
-        />
+        <TopBar onOpenSearch={() => setSearchOpen(true)} />
         <main className="min-h-0 flex-1 overflow-y-auto">
           <Outlet />
         </main>

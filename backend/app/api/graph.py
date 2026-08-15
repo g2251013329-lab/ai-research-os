@@ -7,6 +7,7 @@ from sqlmodel import Session, select
 
 from ..core.db import get_session
 from ..models import (
+    ConceptLink,
     Experiment,
     Hypothesis,
     LearningConcept,
@@ -52,5 +53,17 @@ def graph(session: Session = Depends(get_session)) -> dict:
         node(f"c{c.id}", "concept", c.title)
         if c.parent_id:
             edge(f"c{c.parent_id}", f"c{c.id}", "part_of")
+    # Learning ↔ Research connections (PRD §5.6): concept links become edges
+    for link in session.exec(select(ConceptLink)).all():
+        if not link.ref_id:
+            continue
+        target = {
+            "paper": f"a{link.ref_id}",
+            "project": f"p{link.ref_id}",
+            "experiment": f"e{link.ref_id}",
+            "question": f"q{link.ref_id}",
+        }.get(link.kind)
+        if target:
+            edge(f"c{link.concept_id}", target, "linked_to")
 
     return {"nodes": nodes, "edges": edges}

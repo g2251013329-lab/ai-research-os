@@ -1,15 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { ChevronRight, Moon, Search, Sun, Timer } from 'lucide-react'
+import { Moon, Search, Sun, Timer } from 'lucide-react'
 import { useSettingsStore } from '../../store/useSettingsStore'
 import { useUiStore } from '../../store/useUiStore'
 
-export default function TopBar({
-  onOpenSearch,
-  breadcrumb,
-}: {
-  onOpenSearch: () => void
-  breadcrumb: string
-}) {
+export default function TopBar({ onOpenSearch }: { onOpenSearch: () => void }) {
   const { t } = useTranslation()
   const settings = useSettingsStore((s) => s.settings)
   const update = useSettingsStore((s) => s.update)
@@ -17,17 +11,10 @@ export default function TopBar({
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border bg-surface/70 px-3 backdrop-blur">
-      {/* breadcrumb */}
-      <div className="flex min-w-0 items-center gap-1 text-[12.5px]">
-        <span className="text-foreground/40">{t('app.title')}</span>
-        <ChevronRight size={12} className="shrink-0 text-foreground/25" />
-        <span className="truncate font-medium text-foreground">{breadcrumb}</span>
-      </div>
-
       <button
         type="button"
         onClick={onOpenSearch}
-        className="ml-2 flex w-64 items-center gap-2 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-[12px] text-foreground/45 shadow-subtle transition-all hover:border-accent hover:text-foreground/70"
+        className="flex w-64 items-center gap-2 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-[12px] text-foreground/45 shadow-subtle transition-all hover:border-accent hover:text-foreground/70"
         title="⌘K 搜索 · ⌘⇧P 命令面板"
       >
         <Search size={13} />

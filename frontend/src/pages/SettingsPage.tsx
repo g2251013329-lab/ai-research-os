@@ -7,11 +7,11 @@ import { ACCENT_THEMES } from '../theme/themes'
 import { SUBTITLE_COLORS, SUBTITLE_FONTS } from '../theme/subtitle'
 
 const UI_THEMES = [
-  { id: 'laboratory', bg: '#f5f6f7', surface: '#ffffff', desc: '亮 · 实验室' },
-  { id: 'midnight', bg: '#0b1220', surface: '#182236', desc: '暗 · 午夜实验室' },
-  { id: 'graphite', bg: '#e9ebee', surface: '#f4f5f7', desc: '石墨 · 研究' },
-  { id: 'paper', bg: '#f4efe6', surface: '#faf6ee', desc: '纸感 · 编辑' },
-  { id: 'botanical', bg: '#eef1ec', surface: '#f7f9f5', desc: '植物 · 生命科学' },
+  { id: 'laboratory', bg: '#f5f6f7', surface: '#ffffff' },
+  { id: 'midnight', bg: '#0b1220', surface: '#182236' },
+  { id: 'graphite', bg: '#e9ebee', surface: '#f4f5f7' },
+  { id: 'paper', bg: '#f4efe6', surface: '#faf6ee' },
+  { id: 'botanical', bg: '#eef1ec', surface: '#f7f9f5' },
 ]
 import GitPanel from '../components/settings/GitPanel'
 
@@ -343,9 +343,7 @@ export default function SettingsPage() {
                     >
                       {t(`settings.uiTheme.${th.id}`)}
                     </span>
-                    <span className="block truncate text-[10.5px] text-foreground/45">
-                      {th.desc}
-                    </span>
+
                   </span>
                 </button>
               )
