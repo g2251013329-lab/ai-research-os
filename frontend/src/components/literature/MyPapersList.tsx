@@ -184,7 +184,7 @@ export default function MyPapersList() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('literature.mineSearchPlaceholder')}
-          className="w-52 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-[12.5px] outline-none transition-colors focus:border-accent"
+          className="w-72 max-w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-[12.5px] outline-none transition-colors focus:border-accent"
         />
         {['all', 'unread', 'reading', 'read'].map((s) => (
           <button

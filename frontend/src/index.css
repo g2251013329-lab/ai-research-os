@@ -554,6 +554,10 @@ h3 {
 }
 
 /* ---------- Scrollbars (WebKit/Safari) ---------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--border-strong) 60%, transparent) transparent;
+}
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -571,6 +575,24 @@ h3 {
   background: color-mix(in srgb, var(--border-strong) 90%, transparent);
   border: 2.5px solid transparent;
   background-clip: padding-box;
+}
+/* The white square artifacts: theme the corner and resizer, not just the bar. */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-resizer {
+  background: transparent;
+}
+/* Native textarea resize grip still renders a white square in dark mode;
+   draw a subtle themed triangle instead. */
+textarea::-webkit-resizer {
+  background: transparent;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent
+    color-mix(in srgb, var(--border-strong) 65%, transparent)
+    color-mix(in srgb, var(--border-strong) 65%, transparent)
+    transparent;
 }
 
 /* ---------- Selection & focus ---------- */

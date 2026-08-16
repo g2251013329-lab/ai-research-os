@@ -140,7 +140,9 @@ export default function AppLayout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar onOpenSearch={() => setSearchOpen(true)} />
         <main className="min-h-0 flex-1 overflow-y-auto">
-          <Outlet />
+          <div className="pb-6">
+            <Outlet />
+          </div>
         </main>
 
         {/* Status / Activity bar */}
