@@ -144,7 +144,7 @@ export default function LearningPage() {
                     </div>
                     <div className="text-[11px] text-foreground/45">{s.session_date}</div>
                   </div>
-                  <span className="shrink-0 text-[12px] text-foreground/45">{s.duration_min}′</span>
+                  <span className="shrink-0 text-[12px] text-foreground/45">{s.duration_min}m</span>
                 </div>
               ))}
             </div>

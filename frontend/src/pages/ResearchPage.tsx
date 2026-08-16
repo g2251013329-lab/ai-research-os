@@ -123,7 +123,7 @@ export default function ResearchPage() {
             ['questions', `${stats.questions.resolved}/${stats.questions.total}`],
             ['hypotheses', `${stats.hypotheses.supported}/${stats.hypotheses.total}`],
             ['tasks', `${stats.tasks.done_7d}`],
-            ['focus', `${stats.focus.minutes_7d}′`],
+            ['focus', `${stats.focus.minutes_7d}m`],
             ['concepts', `${stats.concepts.mastered}/${stats.concepts.total}`],
           ].map(([key, value]) => (
             <div key={key} className="rounded-md border border-border bg-surface px-2.5 py-2 text-center dark:border-border dark:bg-surface">

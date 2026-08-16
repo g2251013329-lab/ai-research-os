@@ -304,10 +304,10 @@ export default function CalendarView() {
         {ev?.focus.map((f) => (
           <span
             key={`f${f.id}`}
-            data-tip={`${t('learning.calendar.focus')} ${f.duration_min}′`}
+            data-tip={`${t('learning.calendar.focus')} ${f.duration_min}m`}
             className="mt-0.5 flex w-full items-center gap-0.5 truncate rounded bg-amber-50 px-1 text-[10px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
           >
-            <Timer size={9} /> {f.duration_min}′
+            <Timer size={9} /> {f.duration_min}m
           </span>
         ))}
       </>
@@ -523,10 +523,10 @@ export default function CalendarView() {
                 {dayEvents?.focus.map((f) => (
                   <span
                     key={`cf${f.id}`}
-                    data-tip={`${t('learning.calendar.focus')} ${f.duration_min}′`}
+                    data-tip={`${t('learning.calendar.focus')} ${f.duration_min}m`}
                     className="flex items-center gap-1 truncate rounded bg-amber-50 px-2 py-1 text-[11px] text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
                   >
-                    <Timer size={10} /> {f.duration_min}′
+                    <Timer size={10} /> {f.duration_min}m
                   </span>
                 ))}
                 {!dayEvents?.tasks.length &&
@@ -680,7 +680,7 @@ export default function CalendarView() {
               >
                 <CheckCircle2 size={12} />
                 <span className="truncate">{s.topic}</span>
-                <span className="ml-auto shrink-0 text-[11px]">{s.duration_min}′</span>
+                <span className="ml-auto shrink-0 text-[11px]">{s.duration_min}m</span>
               </div>
             ))}
             {(view === 'day' ? dayEvents : selected)?.focus.map((f) => (
@@ -690,7 +690,7 @@ export default function CalendarView() {
               >
                 <Timer size={12} />
                 <span className="truncate">{t('learning.calendar.focus')}</span>
-                <span className="ml-auto shrink-0 text-[11px]">{f.duration_min}′</span>
+                <span className="ml-auto shrink-0 text-[11px]">{f.duration_min}m</span>
               </div>
             ))}
 

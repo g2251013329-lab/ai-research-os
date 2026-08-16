@@ -153,7 +153,7 @@ export default function FocusOverlay() {
                     : 'border-border hover:border-border dark:border-border dark:hover:border-neutral-600'
                 }`}
               >
-                {p}′
+                {p}m
               </button>
             ))}
             <input

@@ -151,7 +151,7 @@ export default function AppLayout() {
             <Timer size={11} className="text-accent" />
             <span>
               {t('dashboard.doneToday', { n: dash?.today_done ?? 0 })} ·{' '}
-              {t('dashboard.weeklyFocus')} {dash?.focus_minutes_today ?? 0}′
+              {t('dashboard.weeklyFocus')} {dash?.focus_minutes_today ?? 0}m
             </span>
             {recentTitle && (
               <>

@@ -162,7 +162,7 @@ export default function Dashboard() {
           </button>
           <span className="rounded-full bg-accent-soft px-2.5 py-1 text-accent">
             <Timer size={11} className="mr-1 inline" />
-            {data?.focus_minutes_today ?? 0}′
+            {data?.focus_minutes_today ?? 0}m
           </span>
           {showDone && (
             <div
@@ -240,7 +240,7 @@ export default function Dashboard() {
           },
           {
             label: t('dashboard.weeklyFocus'),
-            value: `${data?.focus_minutes_today ?? 0}′`,
+            value: `${data?.focus_minutes_today ?? 0}m`,
             icon: Timer,
             tone: 'text-accent',
           },
@@ -403,7 +403,7 @@ export default function Dashboard() {
               </div>
               <div className="flex-1 rounded-md bg-surface-hover p-2.5 text-center dark:bg-neutral-800/60">
                 <div className="text-[18px] font-semibold leading-none">
-                  {learning?.weekly_focus_minutes ?? 0}′
+                  {learning?.weekly_focus_minutes ?? 0}m
                 </div>
                 <div className="mt-1 text-[11px] text-foreground/45">
                   {t('dashboard.weeklyFocus')}
